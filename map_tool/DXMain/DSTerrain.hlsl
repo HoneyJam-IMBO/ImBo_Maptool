@@ -7,10 +7,10 @@ cbuffer ViewProjectionConstantBuffer : register(b0)
 	matrix gmtxViewProjection;
 };
 
-#define TEXTURE_SIZE 256
-cbuffer HightMapBuffer:register(b1) {
-	uint gHightValue[TEXTURE_SIZE * TEXTURE_SIZE];
-}
+//#define TEXTURE_SIZE 256
+//cbuffer HightMapBuffer:register(b1) {
+//	uint gHightValue[TEXTURE_SIZE * TEXTURE_SIZE];
+//}
 
 cbuffer GlobalTerrainInfo : register(b10)
 {

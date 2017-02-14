@@ -545,10 +545,6 @@ bool CRenderer::ResizeBuffer() {
 	return true;
 }
 
-void CRenderer::SetTerrainContainer(CTerrainContainer * pTerrainContainer){
-
-}
-
 CRenderer::CRenderer() :CSingleTonBase<CRenderer>("rendereringleton") {
 
 }
