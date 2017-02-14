@@ -107,6 +107,7 @@ void CRenderer::Render(shared_ptr<CCamera> pCamera) {
 	GLOBALVALUEMGR->GetDeviceContext()->OMSetDepthStencilState(m_pd3dDepthStencilState, 1);
 
 	//object render
+	if(m_pTerrainContainer) m_pTerrainContainer->Render(pCamera);
 	m_pObjectRenderer->Excute(pCamera);
 	//debuge
 	if (INPUTMGR->GetDebugMode()) {
@@ -132,20 +133,20 @@ void CRenderer::Render(shared_ptr<CCamera> pCamera) {
 
 	//진짜 rtv set! rtv만 set하구 dsv는 set하지 않는다. 
 
-	//sslr
-	D3D11_VIEWPORT oldvp;
-	UINT num = 1;
-	GLOBALVALUEMGR->GetDeviceContext()->RSGetViewports(&num, &oldvp);
-	ID3D11RasterizerState* pPrevRSState;
-	GLOBALVALUEMGR->GetDeviceContext()->RSGetState(&pPrevRSState);
-
-	m_pSSLR->Excute(pCamera, m_pd3drtvLight, pAmbientOcclution, XMVectorSet(-1,-1,-1,0), XMFLOAT3(0.1f, 0.1f, 0.1f));
-
-	// Restore the states
-	GLOBALVALUEMGR->GetDeviceContext()->RSSetViewports(num, &oldvp);
-	GLOBALVALUEMGR->GetDeviceContext()->RSSetState(pPrevRSState);
-	if(pPrevRSState)pPrevRSState->Release();
-
+	////sslr
+	//D3D11_VIEWPORT oldvp;
+	//UINT num = 1;
+	//GLOBALVALUEMGR->GetDeviceContext()->RSGetViewports(&num, &oldvp);
+	//ID3D11RasterizerState* pPrevRSState;
+	//GLOBALVALUEMGR->GetDeviceContext()->RSGetState(&pPrevRSState);
+	//
+	//m_pSSLR->Excute(pCamera, m_pd3drtvLight, pAmbientOcclution, XMVectorSet(-1,-1,-1,0), XMFLOAT3(0.1f, 0.1f, 0.1f));
+	//
+	//// Restore the states
+	//GLOBALVALUEMGR->GetDeviceContext()->RSSetViewports(num, &oldvp);
+	//GLOBALVALUEMGR->GetDeviceContext()->RSSetState(pPrevRSState);
+	//if(pPrevRSState)pPrevRSState->Release();
+	//SSLR
 
 	SetMainRenderTargetView();
 	m_vLightLayerResultTexture[0]->SetShaderState();
@@ -542,6 +543,10 @@ bool CRenderer::ResizeBuffer() {
 	CreateRenderTargetView();
 
 	return true;
+}
+
+void CRenderer::SetTerrainContainer(CTerrainContainer * pTerrainContainer){
+
 }
 
 CRenderer::CRenderer() :CSingleTonBase<CRenderer>("rendereringleton") {

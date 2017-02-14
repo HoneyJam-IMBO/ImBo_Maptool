@@ -2,7 +2,7 @@
 #include "TerrainContainer.h"
 #include "SpaceContainer.h"
 
-
+#define TEXTURE_SIZE 257
 void CTerrainContainer::Begin(LPCTSTR pHeightmapFileName, int nWidth, int nLength, float fHeightScale, CSpaceContainer* pSpaceContainer) {
 	m_pSpaceContainer = pSpaceContainer;
 
@@ -13,6 +13,7 @@ void CTerrainContainer::Begin(LPCTSTR pHeightmapFileName, int nWidth, int nLengt
 	//global object set, Update
 	m_pGlobalTerrain->Begin(fOneSpaceSize, fOneSideSpaceNum, fHeightScale);
 
+	m_pHeightMapBuffer = CBuffer::CreateConstantBuffer(TEXTURE_SIZE*TEXTURE_SIZE, sizeof(UINT), 1, BIND_DS);
 
 	//터레인 제작
 	//terrain
@@ -51,6 +52,31 @@ void CTerrainContainer::Begin(LPCTSTR pHeightmapFileName, int nWidth, int nLengt
 	}
 
 	if (pHeightMapImage) delete[] pHeightMapImage;
+
+	//skybox depth stencil
+	D3D11_DEPTH_STENCIL_DESC descDepth;
+	descDepth.DepthEnable = FALSE;
+	descDepth.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+	descDepth.DepthFunc = D3D11_COMPARISON_LESS;
+	descDepth.StencilEnable = TRUE;
+	descDepth.StencilReadMask = D3D11_DEFAULT_STENCIL_READ_MASK;
+	descDepth.StencilWriteMask = D3D11_DEFAULT_STENCIL_WRITE_MASK;
+	const D3D11_DEPTH_STENCILOP_DESC noSkyStencilOp = { D3D11_STENCIL_OP_KEEP, D3D11_STENCIL_OP_KEEP, D3D11_STENCIL_OP_KEEP, D3D11_COMPARISON_EQUAL };
+	descDepth.FrontFace = noSkyStencilOp;
+	descDepth.BackFace = noSkyStencilOp;
+	GLOBALVALUEMGR->GetDevice()->CreateDepthStencilState(&descDepth, &m_pd3dDepthStencilState);
+
+	//RS
+	D3D11_RASTERIZER_DESC descRasterizer;
+	ZeroMemory(&descRasterizer, sizeof(D3D11_RASTERIZER_DESC));
+	//descRasterizer.FillMode = D3D11_FILL_SOLID;
+	descRasterizer.FillMode = D3D11_FILL_WIREFRAME;
+	descRasterizer.CullMode = D3D11_CULL_NONE;
+	GLOBALVALUEMGR->GetDevice()->CreateRasterizerState(&descRasterizer, &m_pd3dSpaceRSState);
+	//RS
+
+	m_pSkyboxContainer = RCSELLER->GetRenderContainer(object_id::OBJECT_SKYBOX);
+	m_pTerrainRenderContainer = RCSELLER->GetRenderContainer(object_id::OBJECT_TERRAIN);
 	//height map data init
 }
 
@@ -58,6 +84,19 @@ bool CTerrainContainer::End() {
 	if (m_pGlobalTerrain) delete m_pGlobalTerrain;
 
 	return false;
+}
+
+void CTerrainContainer::Render(shared_ptr<CCamera> pCamera){
+	//skybox
+	GLOBALVALUEMGR->GetDeviceContext()->OMGetDepthStencilState(&m_pd3dTempDepthStencilState, &m_TempStencil);
+	GLOBALVALUEMGR->GetDeviceContext()->OMSetDepthStencilState(m_pd3dDepthStencilState, 0);
+	m_pSkyboxContainer->Render(pCamera);
+	GLOBALVALUEMGR->GetDeviceContext()->OMSetDepthStencilState(m_pd3dTempDepthStencilState, m_TempStencil);
+	//skybox
+
+	//terrain
+	m_pTerrainRenderContainer->Render(pCamera);
+	//terrain
 }
 
 float CTerrainContainer::GetHeight(XMVECTOR xmvPos){

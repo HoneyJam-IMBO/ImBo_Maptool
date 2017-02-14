@@ -36,7 +36,9 @@ void CResourceManager::CreateTextures() {
 	_TCHAR pstrTextureNames[128];
 	_stprintf_s(pstrTextureNames, _T("../../Assets/SkyBox_%d.dds"), nIndex);
 	//make sampler
-	CreateSampler("CLAMPSAMPLER", 0, BIND_PS, D3D11_TEXTURE_ADDRESS_CLAMP);
+	
+	CreateSampler("CLAMPSAMPLER", 0, BIND_PS, D3D11_TEXTURE_ADDRESS_WRAP, D3D11_FILTER_MIN_MAG_MIP_LINEAR,
+		D3D11_COMPARISON_ALWAYS, 0, D3D11_FLOAT32_MAX);
 
 	pSampler = CreateSampler("DEFAULT", PS_TEXTURE_SAMPLER, BIND_PS);
 	CreateTexture("SkyBox", pstrTextureNames, pSampler, PS_SLOT_SKYBOX, BIND_PS);

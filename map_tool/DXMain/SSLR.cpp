@@ -228,7 +228,7 @@ void CSSLR::ResizeBuffer() {
 	GLOBALVALUEMGR->GetDevice()->CreateRenderTargetView(m_pLightRaysTex, &rtsvd, &m_pLightRaysRTV);
 
 	GLOBALVALUEMGR->GetDevice()->CreateShaderResourceView(m_pLightRaysTex, &dsrvd, &m_pLightRaysSRV);
-	m_pLightRaysTexture = CTexture::CreateTexture(m_pLightRaysSRV, RESOURCEMGR->GetSampler("DEFAULT"), 0, BIND_PS);
+	m_pLightRaysTexture = CTexture::CreateTexture(m_pLightRaysSRV, RESOURCEMGR->GetSampler("CLAMPSAMPLER"), 0, BIND_PS);
 }
 
 void CSSLR::ReleaseBuffer() {

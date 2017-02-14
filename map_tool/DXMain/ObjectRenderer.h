@@ -17,15 +17,6 @@ public:
 private:
 	//rendercontainer map!
 	mapRenderContainer m_mRenderContainer;
-	
-	ID3D11DepthStencilState* m_pd3dDepthStencilState{ nullptr };
-	ID3D11DepthStencilState* m_pd3dTempDepthStencilState{ nullptr };
-	UINT m_TempStencil{ 0 };
-
-	ID3D11RasterizerState* m_pd3dSpaceRSState{ nullptr };
-	ID3D11RasterizerState* m_pd3dTempRSState{ nullptr };
-
-
 
 public:
 	CObjectRenderer();

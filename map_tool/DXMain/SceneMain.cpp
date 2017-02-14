@@ -75,7 +75,8 @@ bool CSceneMain::Begin() {
 	//terrain
 	m_pTerrainContainer = new CTerrainContainer();
 	m_pTerrainContainer->Begin(L"../../Assets/HeightMap.raw", 257, 257, 0.5, m_pSpaceContainer);
-	//--------------------------------------space-------------------------------------
+	RENDERER->SetTerrainContainer(m_pTerrainContainer);
+	//-------------------------------------space-------------------------------------
 
 	//--------------------------------∞¥√º ¡¶¿€------------------------
 	int nMaxObjects = 1;

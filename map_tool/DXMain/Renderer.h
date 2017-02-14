@@ -3,6 +3,7 @@
 #include "SingleTon.h"
 
 //
+#include "TerrainContainer.h"
 #include "ObjectRenderer.h"
 #include "AORenderer.h"
 #include "LightRenderer.h"
@@ -32,6 +33,7 @@ public:
 	void ClearDepthStencilView(ID3D11DepthStencilView* pDepthStencilView);
 
 	bool ResizeBuffer();
+	void SetTerrainContainer(CTerrainContainer* pTerrainContainer) { m_pTerrainContainer = pTerrainContainer; }
 private:
 	IDXGISwapChain			*	m_pdxgiSwapChain{ nullptr };
 	ID3D11RenderTargetView	*	m_pd3dRenderTargetView{ nullptr };
@@ -65,6 +67,7 @@ private:
 	ID3D11RenderTargetView   *m_pd3drtvLight{ nullptr };
 	//--------------------------light render target----------------
 	//-------------------------layer-------------------------
+	CTerrainContainer* m_pTerrainContainer{ nullptr };
 	CObjectRenderer* m_pObjectRenderer{ nullptr };
 	CAORenderer* m_pAORenderer{ nullptr };
 	CLightRenderer* m_pLightRenderer{ nullptr };
