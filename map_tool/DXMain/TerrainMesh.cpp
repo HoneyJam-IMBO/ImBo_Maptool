@@ -54,7 +54,7 @@ bool CTerrainMesh::CreateVertexBuffer() {
 
 	//create space mesh aabb
 	BoundingBox boundingBox;
-	BoundingBox::CreateFromPoints(boundingBox, XMVectorSet(0.f, 0.f, 0.f, 0.f), XMVectorSet(ONESPACE_SIZE, ONESPACE_SIZE, ONESPACE_SIZE, 0.f));
+	BoundingBox::CreateFromPoints(boundingBox, XMVectorSet(0.f, 0.f, 0.f, 0.f), XMVectorSet(ONESPACE_SIZE, 5, ONESPACE_SIZE, 0.f));
 	m_AABB.SetBoundingBoxInfo(boundingBox);
 	
 

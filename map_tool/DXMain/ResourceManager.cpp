@@ -43,11 +43,12 @@ void CResourceManager::CreateTextures() {
 	pSampler = CreateSampler("DEFAULT", PS_TEXTURE_SAMPLER, BIND_PS);
 	CreateTexture("SkyBox", pstrTextureNames, pSampler, PS_SLOT_SKYBOX, BIND_PS);
 	CreateTexture("DEFAULT", _T("../../Assets/default.jpg"), pSampler, PS_TEXTURE, BIND_PS);
+	CreateTexture("PICPOS", _T("../../Assets/default.jpg"), pSampler, 2, BIND_PS);
 
 	//terrain heightmap
 	//make sampler;
 	pSampler = CreateSampler("TerrainHeightMap", PS_TEXTURE_SAMPLER, BIND_DS, D3D11_TEXTURE_ADDRESS_CLAMP);
-	CreateTexture("TerrainHeightMap", _T("../../Assets/HeightMap.jpg"), pSampler, DS_SLOT_HEIGHTMAP, BIND_DS);
+	CreateTexture("TerrainHeightMap", _T("../../Assets/HeightMap.bmp"), pSampler, DS_SLOT_HEIGHTMAP, BIND_DS);
 	//terrain base texture
 	pSampler = CreateSampler("Terrain", PS_TEXTURE_SAMPLER, BIND_PS);
 	CreateTexture("TerrainBase", _T("../../Assets/Base_Texture.jpg"), pSampler, PS_SLOT_TERRAIN_BASE, BIND_PS);

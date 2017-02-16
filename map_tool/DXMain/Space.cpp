@@ -120,7 +120,7 @@ void CSpace::PrepareRender(shared_ptr<CCamera> pCamera){
 		if (nullptr == m_ppChildSpace) {//내 자식이 없으면 나는 leaf node
 			//나는 그리는 space다.
 			SetbRender(true);
-
+			this->RegistToDebuger();
 			//RegistToContainer();
 //			DEBUGER->RegistToDebugRenderContainer(this);
 			for (auto mlp : m_mlpObject) {//모든 객체에 대해서
@@ -180,7 +180,14 @@ CGameObject * CSpace::PickObject(XMVECTOR xmvWorldCameraStartPos, XMVECTOR xmvRa
 			}
 		}
 	}
-
+	for (auto pObject : m_mlpObject[tag::TAG_STATIC_OBJECT]) {
+		if (pObject->CheckPickObject(xmvWorldCameraStartPos, xmvRayDir, fHitDistance)) {//ray와 충돌했다면
+			if (fNearHitDistance > fHitDistance) {//이전의 가장 가까운 녀석과 비교
+				distance = fHitDistance;//더 가까우면 가장 가까운 객체 변경
+				pObj = pObject;
+			}
+		}
+	}
 	return pObj;//해당 객체 return
 }
 

@@ -41,7 +41,6 @@ void TW_CALL WriteNowButtonCallback(void * clientData) {
 	EXPORTER->End();
 }
 bool CSceneMain::Begin() {
-
 	//main button ui추가 
 	//추가될 버튼
 	//fbx mesh 변경 버튼 -> 기존 객체 mesh animation 정보 전부 삭제
@@ -82,19 +81,19 @@ bool CSceneMain::Begin() {
 	int nMaxObjects = 1;
 	int space_size = static_cast<int>(SPACE_SIZE);
 
-	for (int i = 0; i < 15; ++i) {
-		CTestCube* pCube = new CTestCube();
-		pCube->Begin();
-		pCube->SetTerrainContainer(m_pTerrainContainer);
-		pCube->SetPosition(XMVectorSet(rand() % space_size, 100, rand() % space_size, 0.f));
-		m_pSpaceContainer->AddObject(pCube);
-	}
+	//for (int i = 0; i < 15; ++i) {
+	//	CTestCube* pCube = new CTestCube();
+	//	pCube->Begin();
+	//	pCube->SetTerrainContainer(m_pTerrainContainer);
+	//	pCube->SetPosition(XMVectorSet(rand() % space_size, 100, rand() % space_size, 0.f));
+	//	m_pSpaceContainer->AddObject(pCube);
+	//}
 
-	m_pRotationTestObject = new CTestCube();
-	m_pRotationTestObject->Begin();
-	m_pRotationTestObject->SetTerrainContainer(m_pTerrainContainer);
-	m_pRotationTestObject->SetPosition(XMLoadFloat3(&XMFLOAT3(0, 0, 0)));
-	m_pSpaceContainer->AddObject(m_pRotationTestObject);
+	//m_pRotationTestObject = new CTestCube();
+	//m_pRotationTestObject->Begin();
+	//m_pRotationTestObject->SetTerrainContainer(m_pTerrainContainer);
+	//m_pRotationTestObject->SetPosition(XMLoadFloat3(&XMFLOAT3(0, 0, 0)));
+	//m_pSpaceContainer->AddObject(m_pRotationTestObject);
 
 	//fbx mesh
 	//CTestObject* pObject = nullptr;
@@ -106,53 +105,53 @@ bool CSceneMain::Begin() {
 	//m_pSpaceContainer->AddObject(pBunny);
 	//fbx mesh
 
-	CPointLight* pPointLight = nullptr;
-	int nPointLight = 10;
-	//int nPointLight = 0;
-	float fStartX = 0;
-	float fStartZ = 0;
-	pPointLight = new CPointLight;
-	pPointLight->Begin(POINT_LIGHT{ 100.f, XMFLOAT3(rand() % 5, rand() % 5, rand() % 5) });
-	pPointLight->SetTerrainContainer(m_pTerrainContainer);
-	pPointLight->SetPosition(XMVectorSet(0, 100, 0, 0.f));
-	m_pSpaceContainer->AddObject(pPointLight);
-
-	for (int i = 0; i < nPointLight; ++i) {
-			pPointLight = new CPointLight;
-			pPointLight->Begin(POINT_LIGHT{ 100.f, XMFLOAT3(rand() % 5, rand() % 5, rand() % 5) });
-			pPointLight->SetTerrainContainer(m_pTerrainContainer);
-	
-			pPointLight->SetPosition(XMVectorSet(rand() % space_size, 100, rand() % space_size, 0.f));
-			m_pSpaceContainer->AddObject(pPointLight);
-	}
-	
-	fStartX += 500;
-	fStartZ += 500;
-	CCapsuleLight* pCapsuleLight = nullptr;
-	int nCapsuleLight = 10;
-	
-	for (int i = 0; i < nCapsuleLight; ++i) {
-		pCapsuleLight = new CCapsuleLight;
-		pCapsuleLight->Begin(CAPSULE_LIGHT{ 100.f, XMFLOAT3(rand() % 5, rand() % 5, rand() % 5), 50.f});
-		pCapsuleLight->SetTerrainContainer(m_pTerrainContainer);
-	
-		pCapsuleLight->SetPosition(XMVectorSet(rand() % space_size, rand() % 50 + 100, rand() % space_size, 0.f));
-		m_pSpaceContainer->AddObject(pCapsuleLight);
-	}
-	
-	fStartX += 500;
-	fStartZ += 500;
-	
-	int nSpotLight = 10;
-	CSpotLight* pSpotLight = nullptr;
-	for (int i = 0; i < nSpotLight; ++i) {
-			pSpotLight = new CSpotLight;
-			pSpotLight->Begin(SPOT_LIGHT{ 100.f, XMFLOAT3(rand() % 100, rand() % 100, rand() % 100), 50.f, 50.f });
-			pSpotLight->SetTerrainContainer(m_pTerrainContainer);
-	
-			pSpotLight->SetPosition(XMVectorSet(rand() % space_size, rand()%50+100, rand() % space_size, 0.f));
-			m_pSpaceContainer->AddObject(pSpotLight);
-	}
+	//CPointLight* pPointLight = nullptr;
+	//int nPointLight = 10;
+	////int nPointLight = 0;
+	//float fStartX = 0;
+	//float fStartZ = 0;
+	//pPointLight = new CPointLight;
+	//pPointLight->Begin(POINT_LIGHT{ 100.f, XMFLOAT3(rand() % 5, rand() % 5, rand() % 5) });
+	//pPointLight->SetTerrainContainer(m_pTerrainContainer);
+	//pPointLight->SetPosition(XMVectorSet(0, 100, 0, 0.f));
+	//m_pSpaceContainer->AddObject(pPointLight);
+	//
+	//for (int i = 0; i < nPointLight; ++i) {
+	//		pPointLight = new CPointLight;
+	//		pPointLight->Begin(POINT_LIGHT{ 100.f, XMFLOAT3(rand() % 5, rand() % 5, rand() % 5) });
+	//		pPointLight->SetTerrainContainer(m_pTerrainContainer);
+	//
+	//		pPointLight->SetPosition(XMVectorSet(rand() % space_size, 100, rand() % space_size, 0.f));
+	//		m_pSpaceContainer->AddObject(pPointLight);
+	//}
+	//
+	//fStartX += 500;
+	//fStartZ += 500;
+	//CCapsuleLight* pCapsuleLight = nullptr;
+	//int nCapsuleLight = 10;
+	//
+	//for (int i = 0; i < nCapsuleLight; ++i) {
+	//	pCapsuleLight = new CCapsuleLight;
+	//	pCapsuleLight->Begin(CAPSULE_LIGHT{ 100.f, XMFLOAT3(rand() % 5, rand() % 5, rand() % 5), 50.f});
+	//	pCapsuleLight->SetTerrainContainer(m_pTerrainContainer);
+	//
+	//	pCapsuleLight->SetPosition(XMVectorSet(rand() % space_size, rand() % 50 + 100, rand() % space_size, 0.f));
+	//	m_pSpaceContainer->AddObject(pCapsuleLight);
+	//}
+	//
+	//fStartX += 500;
+	//fStartZ += 500;
+	//
+	//int nSpotLight = 10;
+	//CSpotLight* pSpotLight = nullptr;
+	//for (int i = 0; i < nSpotLight; ++i) {
+	//		pSpotLight = new CSpotLight;
+	//		pSpotLight->Begin(SPOT_LIGHT{ 100.f, XMFLOAT3(rand() % 100, rand() % 100, rand() % 100), 50.f, 50.f });
+	//		pSpotLight->SetTerrainContainer(m_pTerrainContainer);
+	//
+	//		pSpotLight->SetPosition(XMVectorSet(rand() % space_size, rand()%50+100, rand() % space_size, 0.f));
+	//		m_pSpaceContainer->AddObject(pSpotLight);
+	//}
 
 	//--------------------------전역 객체 제작-------------------------
 	//skybox
@@ -232,6 +231,7 @@ void CSceneMain::Animate(float fTimeElapsed) {
 	//-----------------------------------space------------------------------
 	m_pSpaceContainer->Animate(fTimeElapsed);
 	m_pSpaceContainer->PrepareRender(m_pCamera);
+	m_pTerrainContainer->Update(m_pCamera);
 	//-----------------------------------space------------------------------
 
 	//--------------------------전역 객체 animate / regist-------------------------

@@ -159,12 +159,6 @@
     <Filter Include="소스 파일\44.GameObject\Space\SpaceContainer">
       <UniqueIdentifier>{0113d118-c949-4aa7-ae5c-36fc90cb02dd}</UniqueIdentifier>
     </Filter>
-    <Filter Include="소스 파일\GlobalObject">
-      <UniqueIdentifier>{e5f8e418-6194-4f7b-b04b-6b9117080fce}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="소스 파일\GlobalObject\GlobalTerrain">
-      <UniqueIdentifier>{3d7eebfb-515e-4f58-b414-10987bb3d3fb}</UniqueIdentifier>
-    </Filter>
     <Filter Include="소스 파일\44.GameObject\Terrain\TerrainContainer">
       <UniqueIdentifier>{996ab590-b82d-4095-bc48-fe1f3fd69005}</UniqueIdentifier>
     </Filter>
@@ -527,12 +521,6 @@
     <ClInclude Include="Terrain.h">
       <Filter>소스 파일\44.GameObject\Terrain</Filter>
     </ClInclude>
-    <ClInclude Include="GlobalObject.h">
-      <Filter>소스 파일\GlobalObject</Filter>
-    </ClInclude>
-    <ClInclude Include="GlobalTerrain.h">
-      <Filter>소스 파일\GlobalObject\GlobalTerrain</Filter>
-    </ClInclude>
     <ClInclude Include="TerrainContainer.h">
       <Filter>소스 파일\44.GameObject\Terrain\TerrainContainer</Filter>
     </ClInclude>
@@ -813,12 +801,6 @@
     </ClCompile>
     <ClCompile Include="Terrain.cpp">
       <Filter>소스 파일\44.GameObject\Terrain</Filter>
-    </ClCompile>
-    <ClCompile Include="GlobalObject.cpp">
-      <Filter>소스 파일\GlobalObject</Filter>
-    </ClCompile>
-    <ClCompile Include="GlobalTerrain.cpp">
-      <Filter>소스 파일\GlobalObject\GlobalTerrain</Filter>
     </ClCompile>
     <ClCompile Include="TerrainContainer.cpp">
       <Filter>소스 파일\44.GameObject\Terrain\TerrainContainer</Filter>

@@ -5,6 +5,17 @@
 #include "TxtExporter.h"
 #include <fstream>
 
+//bitmap
+//#define _AFXDLL
+//#include <afx.h>
+//bitmap
+
+struct Pixel {
+	byte r;
+	byte g;
+	byte b;
+};
+
 class CExporter : public CSingleTonBase<CExporter> {
 public:
 	bool Begin(wstring outputPath);//file open하구
@@ -27,10 +38,13 @@ public:
 	//txt file 사용할 경우 각 인자의 경계
 	void WriteSpace();
 	void WriteEnter();
+
+	void MakeBitmap(WCHAR* fileName, Pixel* pData, UINT nWidth, UINT nHeight);
 private:
 	wstring m_outputPath;
 	wofstream m_out;
 
+	ofstream m_bitOut;
 	CFileExporter* m_pFilrExporter{ nullptr };
 public:
 	CExporter() : CSingleTonBase<CExporter>("exportersingleton") {}

@@ -291,3 +291,44 @@ void CExporter::WriteSpace() {
 void CExporter::WriteEnter() {
 	m_pFilrExporter->WriteEnter(m_out);
 }
+
+void CExporter::MakeBitmap(WCHAR* fileName, Pixel * pData, UINT nWidth, UINT nHeight){
+	BITMAPFILEHEADER bmFileHeader;
+	BITMAPINFOHEADER bmInfoHeader;
+
+	UINT BUFSIZE = nWidth * nHeight;
+	//BMP 헤더
+	bmFileHeader.bfSize = sizeof(BITMAPINFOHEADER);
+	bmFileHeader.bfType = 0x4D42;
+	bmFileHeader.bfOffBits = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
+
+	bmInfoHeader.biSize = sizeof(BITMAPINFOHEADER);
+	bmInfoHeader.biWidth = nWidth;
+	bmInfoHeader.biHeight = nHeight;
+	bmInfoHeader.biPlanes = 1;
+	bmInfoHeader.biBitCount = 24;
+	bmInfoHeader.biCompression = 0;
+	bmInfoHeader.biSizeImage = bmInfoHeader.biWidth * bmInfoHeader.biHeight * (bmInfoHeader.biBitCount / 8);
+
+	bmInfoHeader.biXPelsPerMeter = 0;
+	bmInfoHeader.biYPelsPerMeter = 0;
+	bmInfoHeader.biClrUsed = 0;
+	bmInfoHeader.biClrImportant = 0;
+
+	//bMP는 아래에서 위로 저장되는 형식이기 떄문에 순서대로 저장하면 뒤딥히므로 파일로 저장할 데이터를 뒤집는다.
+	Pixel* rgbTemp = new Pixel[BUFSIZE];
+	for (int i = 0; i < BUFSIZE; ++i) {
+		rgbTemp[i].r = pData[BUFSIZE - 1 - i].r;
+		rgbTemp[i].g = pData[BUFSIZE - 1 - i].g;
+		rgbTemp[i].b = pData[BUFSIZE - 1 - i].b;
+	}
+
+	//파일로 저장
+	m_bitOut.open(fileName, std::ios::binary);
+	m_bitOut.write(reinterpret_cast<const char*>(&bmFileHeader), sizeof(BITMAPFILEHEADER));
+	m_bitOut.write(reinterpret_cast<const char*>(&bmInfoHeader), sizeof(BITMAPINFOHEADER));
+	m_bitOut.write(reinterpret_cast<const char*>(rgbTemp), bmInfoHeader.biSizeImage);
+	m_bitOut.close();
+
+	delete rgbTemp;
+}

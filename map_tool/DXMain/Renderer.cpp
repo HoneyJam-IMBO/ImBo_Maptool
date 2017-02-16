@@ -174,7 +174,7 @@ void CRenderer::Render(shared_ptr<CCamera> pCamera) {
 
 		DEBUGER->RenderTexture();
 		DEBUGER->RenderText();
-		DEBUGER->ClearDebuger();
+		//DEBUGER->ClearDebuger();
 	}
 	else {
 		DEBUGER->ClearDebuger();

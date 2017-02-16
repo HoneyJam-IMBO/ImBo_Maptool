@@ -1,9 +1,9 @@
 
 texture2D gtxtHeightMap : register(t0);
+texture2D gtxtControllHeightMap : register(t1);
 sampler gssHeightMap : register(s0);
 
-cbuffer ViewProjectionConstantBuffer : register(b0)
-{
+cbuffer ViewProjectionConstantBuffer : register(b0){
 	matrix gmtxViewProjection;
 };
 
@@ -12,8 +12,7 @@ cbuffer ViewProjectionConstantBuffer : register(b0)
 //	uint gHightValue[TEXTURE_SIZE * TEXTURE_SIZE];
 //}
 
-cbuffer GlobalTerrainInfo : register(b10)
-{
+cbuffer GlobalTerrainInfo : register(b10){
 	float gOneSpaceSizeRcp;//하나의 공간의 크기
 	float gOneSideSpaceNumRcp;//1 / 한의 사이드에 있는 공간 수
 	float gOneSideSpaceNum;//한의 사이드에 있는 공간 수
@@ -59,7 +58,7 @@ DS_OUT main(TERRAIN_HS_CONSTANT input, float2 uv : SV_DomainLocation, OutputPatc
 	output.tangentW = lerp(lerp(quad[0].tangentW, quad[1].tangentW, uv.x), lerp(quad[2].tangentW, quad[3].tangentW, uv.x), uv.y);
 	output.bitangentW = lerp(lerp(quad[0].bitangentW, quad[1].bitangentW, uv.x), lerp(quad[2].bitangentW, quad[3].bitangentW, uv.x), uv.y);
 
-	output.positionW.y = gtxtHeightMap.SampleLevel(gssHeightMap, output.texCoord, 0).r * 256 *gHeightScale;//get height 
+	output.positionW.y = gtxtControllHeightMap.SampleLevel(gssHeightMap, output.texCoord, 0).r * 256 *gHeightScale;//get height 
 
 	//calc _view projection
 	output.position = mul(float4(output.positionW, 1.0f), gmtxViewProjection);

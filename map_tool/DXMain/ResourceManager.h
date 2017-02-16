@@ -33,11 +33,6 @@
 #include "Terrain.h"//terrain
 #include "DebugTexture.h"//debug texture
 
-//global buffer
-#include "GlobalObject.h"
-#include "GlobalTerrain.h"
-
-
 #include "Material.h"
 
 #include "Texture.h"

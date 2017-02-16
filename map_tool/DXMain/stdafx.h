@@ -159,6 +159,7 @@ enum object_id {
 
 enum tag {
 	TAG_DEFAULT,
+	TAG_TERRAIN,
 	TAG_STATIC_OBJECT,
 	TAG_DYNAMIC_OBJECT,
 	TAG_END

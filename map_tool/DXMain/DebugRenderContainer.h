@@ -10,8 +10,6 @@ public:
 	//---------------------------dxobject---------------------------------
 
 	//--------------------------container---------------------------------
-	virtual void UpdateGlobalBuffer();
-
 
 public:
 	CDebugRenderContainer();

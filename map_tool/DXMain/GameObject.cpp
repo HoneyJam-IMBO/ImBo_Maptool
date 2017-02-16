@@ -373,9 +373,9 @@ bool CGameObject::CheckPickObject(XMVECTOR xmvWorldCameraStartPos, XMVECTOR xmvR
 }
 
 void CGameObject::PickingProc(){
-	//CreateObjectUI();
-	//
-	//CreateMeshUI();
+	CreateObjectUI();
+	
+	CreateMeshUI();
 
 	if (m_pAnimater) {
 		m_pAnimater->CreateAnimationUI();

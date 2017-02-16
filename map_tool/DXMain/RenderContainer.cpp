@@ -8,10 +8,7 @@ bool CRenderContainer::Begin() {
 	if(false == m_vpBuffer.empty()){
 		m_ppBufferData = new void*[m_vpBuffer.size()];
 	}
-	if (false == m_vpGlobalBuffer.empty()) {
-		m_ppGlobalBufferData = new void*[m_vpGlobalBuffer.size()];
-	}
-
+	
 	return true;
 }
 bool CRenderContainer::End() {
@@ -21,8 +18,7 @@ bool CRenderContainer::End() {
 	m_vpMesh.clear();
 	
 	delete[] m_ppBufferData;
-	delete[] m_ppGlobalBufferData;
-
+	
 	return true;
 }
 //---------------------------dxobject---------------------------------
@@ -83,10 +79,6 @@ void CRenderContainer::SetShaderState() {
 	for (auto p : m_vpBuffer) {
 		p->SetShaderState();
 	}
-	for (auto p : m_vpGlobalBuffer) {
-		p->SetShaderState();
-	}
-	//if (m_pGlobalBuffer) m_pGlobalBuffer->SetShaderState();
 	if (m_pAnimater)m_pAnimater->SetShaderState();
 
 }
@@ -111,9 +103,6 @@ void CRenderContainer::CleanShaderState() {
 		p->CleanShaderState();
 	}
 	for (auto p : m_vpBuffer) {
-		p->CleanShaderState();
-	}
-	for (auto p : m_vpGlobalBuffer) {
 		p->CleanShaderState();
 	}
 
@@ -217,34 +206,6 @@ void CRenderContainer::AddInstanceBuffer(shared_ptr<CBuffer> pBuffer){
 	
 }
 //-----------------------------------------buffer-----------------------------------------
-
-//-----------------------------------------global buffer-----------------------------------------
-void CRenderContainer::AddGlobalBuffer(shared_ptr<CBuffer> pGlobalBuffer) {
-	if (!pGlobalBuffer) return;
-
-	m_vpGlobalBuffer.emplace_back(pGlobalBuffer);
-}
-void CRenderContainer::UpdateGlobalBuffer() {
-	if (m_vpGlobalBuffer.empty()) return;
-
-	int nBuffer = 0;
-	//map
-	for (auto p : m_vpGlobalBuffer) {
-		m_ppGlobalBufferData[nBuffer++] = p->Map();
-	}
-	//set data
-	m_pGlobalObject->SetGlobalBufferInfo(m_ppGlobalBufferData);
-	//unmap
-	for (auto p : m_vpGlobalBuffer) {
-		p->Unmap();
-	}
-
-}
-//global buffer data는 globalObject에서 관리한다.
-//void CRenderContainer::SetGlobalBufferData(void * pData){
-//	m_pGlobalBuffer->SetData(pData);
-//}
-//-----------------------------------------global buffer-----------------------------------------
 
 void CRenderContainer::AddMaterial(shared_ptr<CMaterial> pMaterial) {
 	if (!pMaterial)return;

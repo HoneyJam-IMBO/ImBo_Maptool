@@ -223,8 +223,6 @@
     <ClInclude Include="FileBasedMesh.h" />
     <ClInclude Include="FreeCamera.h" />
     <ClInclude Include="GameObject.h" />
-    <ClInclude Include="GlobalObject.h" />
-    <ClInclude Include="GlobalTerrain.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="PointLight.h" />
     <ClInclude Include="PointLightMesh.h" />
@@ -323,8 +321,6 @@
     <ClCompile Include="FileBasedMesh.cpp" />
     <ClCompile Include="FreeCamera.cpp" />
     <ClCompile Include="GameObject.cpp" />
-    <ClCompile Include="GlobalObject.cpp" />
-    <ClCompile Include="GlobalTerrain.cpp" />
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="PointLight.cpp" />
     <ClCompile Include="PointLightMesh.cpp" />

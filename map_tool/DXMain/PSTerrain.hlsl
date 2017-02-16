@@ -3,7 +3,9 @@
 
 texture2D gtxtBase : register(t0);
 texture2D gtxtDetail : register(t1);
+texture2D gtxtPicpos : register(t2);
 sampler gssTerrain : register(s0);
+sampler gssPicpos : register(s2);
 
 struct Material {
 	float3 normal;
@@ -16,6 +18,10 @@ cbuffer gMaterialInfo : register(b3) {
 	float4 gMaterialColor : packoffset(c0);
 	float gSpecExp : packoffset(c1.x);
 	float gSpecIntensity : packoffset(c1.y);
+}
+cbuffer gPicposRenderInfo : register(b4) {
+	float2 gPickpos : packoffset(c0);
+	float gRenderRadius : packoffset(c0.z);
 }
 
 struct DS_OUT {
@@ -35,6 +41,16 @@ PS_GBUFFER_OUT main(DS_OUT input)
 float4 cColor = gtxtBase.Sample(gssTerrain, input.texCoord);
 float4 cDetailColor = gtxtDetail.Sample(gssTerrain, input.detailTexCoord);
 cColor = cColor + cDetailColor;
+
+//picpos render
+float2 minPos = gPickpos - float2(gRenderRadius, gRenderRadius);
+float2 maxPos = gPickpos + float2(gRenderRadius, gRenderRadius);
+bool x = ((input.texCoord.x > minPos.x) & (input.texCoord.x < maxPos.x));
+bool y = ((input.texCoord.y > minPos.y) & (input.texCoord.y < maxPos.y));
+if (x & y) {//나의 uv 좌표가 원의 범위 내에 있다면
+	cColor = gtxtPicpos.Sample(gssPicpos, input.texCoord);
+}
+//picpos render
 
 //calc depth
 float Depth = input.position.z / input.position.w;

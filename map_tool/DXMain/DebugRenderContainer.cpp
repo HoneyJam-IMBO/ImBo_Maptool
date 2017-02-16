@@ -42,23 +42,6 @@ void CDebugRenderContainer::UpdateShaderState(shared_ptr<CCamera> pCamera) {
 
 
 }
-void CDebugRenderContainer::UpdateGlobalBuffer() {
-	if (m_vpGlobalBuffer.empty()) return;
-
-	int nBuffer = 0;
-	//map
-	for (auto p : m_vpGlobalBuffer) {
-		m_ppGlobalBufferData[nBuffer++] = p->Map();
-	}
-	//set data
-	//m_pGlobalObject->SetDebugGlobalBufferInfo(m_ppGlobalBufferData);
-	m_pGlobalObject->SetGlobalBufferInfo(m_ppGlobalBufferData);
-	//unmap
-	for (auto p : m_vpGlobalBuffer) {
-		p->Unmap();
-	}
-
-}
 
 CDebugRenderContainer::CDebugRenderContainer() : CRenderContainer() {
 	
