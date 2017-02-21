@@ -4,6 +4,7 @@
 texture2D gtxtBase : register(t0);
 texture2D gtxtDetail : register(t1);
 texture2D gtxtPicpos : register(t2);
+texture2D gtxtBlendInfo : register(t3);
 sampler gssTerrain : register(s0);
 sampler gssPicpos : register(s2);
 
@@ -32,7 +33,21 @@ struct DS_OUT {
 	float3 tangentW : TANGENT;
 	float3 bitangentW : BITANGET;
 };
+float4 RenderPickPos(float2 texCoord) {
+	//picpos render
+	float2 minPos = gPickpos - float2(gRenderRadius, gRenderRadius);
+	float2 maxPos = gPickpos + float2(gRenderRadius, gRenderRadius);
+	bool x = ((texCoord.x > minPos.x) & (texCoord.x < maxPos.x));
+	bool y = ((texCoord.y > minPos.y) & (texCoord.y < maxPos.y));
 
+	float4 cColor = float4(0.f, 0.f, 0.f, 0.f);
+	if (x & y) {//나의 uv 좌표가 원의 범위 내에 있다면
+		float2 PickPosUV = float2(1 - ((texCoord.x - minPos.x) / (gRenderRadius * 2)), 1 - ((texCoord.y - minPos.y) / (gRenderRadius * 2)));
+		cColor = gtxtPicpos.Sample(gssPicpos, PickPosUV);
+	}
+	//picpos render
+	return cColor;
+}
 PS_GBUFFER_OUT main(DS_OUT input)
 {
 	PS_GBUFFER_OUT output = (PS_GBUFFER_OUT)0;
@@ -41,23 +56,15 @@ PS_GBUFFER_OUT main(DS_OUT input)
 float4 cColor = gtxtBase.Sample(gssTerrain, input.texCoord);
 float4 cDetailColor = gtxtDetail.Sample(gssTerrain, input.detailTexCoord);
 cColor = cColor + cDetailColor;
+//get blend info
+float4 cBlendData = gtxtBlendInfo.Sample(gssTerrain, input.texCoord);//blend info
+cColor.w = cBlendData.r;
+//if (cColor.w == 0) discard;//이 코드가 ds에 있어야 한다.
+//get color
 
-//picpos render
-float2 minPos = gPickpos - float2(gRenderRadius, gRenderRadius);
-float2 maxPos = gPickpos + float2(gRenderRadius, gRenderRadius);
-bool x = ((input.texCoord.x > minPos.x) & (input.texCoord.x < maxPos.x));
-bool y = ((input.texCoord.y > minPos.y) & (input.texCoord.y < maxPos.y));
-if (x & y) {//나의 uv 좌표가 원의 범위 내에 있다면
-	cColor = gtxtPicpos.Sample(gssPicpos, input.texCoord);
-}
-//picpos render
-
-//calc depth
-float Depth = input.position.z / input.position.w;
+cColor += RenderPickPos(input.texCoord);
 
 //get world normal
 float3 normalW = GetWorldNormal(input.tangentW, input.bitangentW, input.texCoord);
-//float3 BaseColor, float3 Normal, float3 PositionW, float SpecIntensity, float SpecPower, float Depth
-//return (PackGBuffer(cColor, float3(0, 1, 0), input.positionW, gSpecIntensity, gSpecExp, Depth));
 return (PackGBuffer((float3)cColor, normalW, gSpecIntensity, gSpecExp));
 }

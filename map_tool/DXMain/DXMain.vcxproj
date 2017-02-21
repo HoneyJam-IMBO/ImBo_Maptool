@@ -215,7 +215,10 @@
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="ResourceManager.h" />
     <ClInclude Include="SpaceMesh.h" />
+    <ClInclude Include="SplattingInfo.h" />
     <ClInclude Include="SSLR.h" />
+    <ClInclude Include="Stemp.h" />
+    <ClInclude Include="StempManager.h" />
     <ClInclude Include="TestCube.h" />
     <ClInclude Include="TwBarManager.h" />
     <ClInclude Include="TxtExporter.h" />
@@ -313,7 +316,10 @@
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="ResourceManager.cpp" />
     <ClCompile Include="SpaceMesh.cpp" />
+    <ClCompile Include="SplattingInfo.cpp" />
     <ClCompile Include="SSLR.cpp" />
+    <ClCompile Include="Stemp.cpp" />
+    <ClCompile Include="StempManager.cpp" />
     <ClCompile Include="TestCube.cpp" />
     <ClCompile Include="TwBarManager.cpp" />
     <ClCompile Include="TxtExporter.cpp" />

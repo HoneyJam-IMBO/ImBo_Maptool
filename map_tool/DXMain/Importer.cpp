@@ -77,3 +77,33 @@ void CImporter::ReadSpace() {
 void CImporter::ReadEnter() {
 	m_pFileImporter->ReadEnter(m_in);
 }
+
+Pixel24 * CImporter::ReadBitmap24(const WCHAR * fileName){
+	BITMAPFILEHEADER    bf;
+	BITMAPINFOHEADER    bi;
+
+	m_in.open(fileName, ios_base::in | ios_base::binary);
+	m_in.read((char*)&bf, sizeof(BITMAPFILEHEADER));
+	m_in.read((char*)&bi, sizeof(BITMAPINFOHEADER));
+	char* pData = new char[bi.biSizeImage];
+	Pixel24* pPixel = new Pixel24[bi.biWidth*bi.biHeight];
+	m_in.read((char*)pPixel, bi.biSizeImage);
+	m_in.close();
+
+	return pPixel;
+}
+
+Pixel32 * CImporter::ReadBitmap32(const WCHAR * fileName){
+	BITMAPFILEHEADER    bf;
+	BITMAPINFOHEADER    bi;
+
+	m_in.open(fileName, ios_base::in | ios_base::binary);
+	m_in.read((char*)&bf, sizeof(BITMAPFILEHEADER));
+	m_in.read((char*)&bi, sizeof(BITMAPINFOHEADER));
+	char* pData = new char[bi.biSizeImage];
+	Pixel32* pPixel = new Pixel32[bi.biWidth*bi.biHeight];
+	m_in.read((char*)pPixel, bi.biSizeImage);
+	m_in.close();
+
+	return nullptr;
+}

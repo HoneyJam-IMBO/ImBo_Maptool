@@ -4,16 +4,35 @@
 
 #define TEXTURE_SIZE 257
 void CTerrainContainer::Begin(LPCTSTR pHeightmapFileName, int nWidth, int nLength, float fHeightScale, CSpaceContainer* pSpaceContainer) {
+	m_pSplattingInfo = CSplattingInfo::CreateSplattingInfo(L"", L"");
+
+	//blend state
+	D3D11_BLEND_DESC descBlend;
+	ZeroMemory(&descBlend, sizeof(D3D11_BLEND_DESC));
+	descBlend.RenderTarget[0].BlendEnable = true;
+	descBlend.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+	descBlend.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
+	descBlend.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
+
+	descBlend.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+	descBlend.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
+	descBlend.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+	descBlend.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+	//blend state
+	GLOBALVALUEMGR->GetDevice()->CreateBlendState(&descBlend, &m_pSplattingBlendState);
+
+
+	m_pStempManager = new CStempManager();
+	m_pStempManager->Begin();
+	m_pStempManager->CreateStemp(L"../slide.bmp");
 	m_pSpaceContainer = pSpaceContainer;
 
 	//global object 제작
 	//m_pGlobalTerrain = new CGlobalTerrain();
 	////global object set, Update
 	//m_pGlobalTerrain->Begin(fOneSpaceSize, fOneSideSpaceNum, fHeightScale);
-	m_pPicposTexture = RESOURCEMGR->GetTexture("PICPOS");
 	m_pGlobalTerrainBuffer = RESOURCEMGR->GetGlobalBuffer("TerrainGB");
-	m_pPicposRenderInfoBuffer = CBuffer::CreateConstantBuffer(1, sizeof(TERRAIN_PICPOS_RENDER_INFO), 4, BIND_PS);
-
+	
 	float fOneSpaceSize = (float)m_pSpaceContainer->GetOneSpaceSize();
 	float fOneSideSpaceNum = (float)m_pSpaceContainer->GetOneSideSpaceNum();
 	m_pGlobalTerrainData = new TERRAIN_GLOBAL_VALUE;
@@ -21,13 +40,13 @@ void CTerrainContainer::Begin(LPCTSTR pHeightmapFileName, int nWidth, int nLengt
 	m_pGlobalTerrainData->OneSideSpaceNumRcp = 1.0f / fOneSideSpaceNum;
 	m_pGlobalTerrainData->OneSpaceSizeRcp = 1.0f / fOneSpaceSize;
 	m_pGlobalTerrainData->HeightScale = fHeightScale;
-	m_pHeightData = new Pixel[(nWidth - 1) * (nLength - 1)];
-	ZeroMemory(m_pHeightData, sizeof(Pixel) * (nWidth - 1) * (nLength - 1));
-	//height map data init
-	EXPORTER->MakeBitmap(L"../bitmap.bmp", m_pHeightData, nWidth-1, nLength-1);
-	m_pHeightMapTexture = CTexture::CreateTexture(L"../bitmap.bmp", RESOURCEMGR->GetSampler("TerrainHeightMap"), 1, BIND_DS);
 
-	m_pPicposRenderInfo = new TERRAIN_PICPOS_RENDER_INFO;
+	m_pHeightData = new Pixel24[(nWidth - 1) * (nLength - 1)];
+	ZeroMemory(m_pHeightData, sizeof(Pixel24) * (nWidth - 1) * (nLength - 1));
+	//height map data init
+	EXPORTER->MakeBitmap24(L"../TempHeightmap.bmp", m_pHeightData, nWidth-1, nLength-1);
+	m_pHeightMapTexture = CTexture::CreateTexture(L"../TempHeightmap.bmp", RESOURCEMGR->GetSampler("TerrainHeightMap"), 1, BIND_DS);
+
 	//터레인 제작
 	//terrain
 	CTerrain* pTerrain = nullptr;
@@ -96,8 +115,10 @@ void CTerrainContainer::Begin(LPCTSTR pHeightmapFileName, int nWidth, int nLengt
 bool CTerrainContainer::End() {
 	//if (m_pGlobalTerrain) delete m_pGlobalTerrain;
 	if (m_pGlobalTerrainData) delete m_pGlobalTerrainData;
-	if (m_pPicposRenderInfo) delete m_pPicposRenderInfo;
-	if (m_pPicposRenderInfo) m_pPicposRenderInfoBuffer->End();
+	if (m_pStempManager) m_pStempManager->End();
+	if (m_pSplattingInfo) m_pSplattingInfo->End();
+	m_vpTerrain.clear();
+
 	return false;
 }
 
@@ -114,15 +135,21 @@ void CTerrainContainer::Render(shared_ptr<CCamera> pCamera){
 	SetBufferInfo();
 	//map tool ready
 
+	GLOBALVALUEMGR->GetDeviceContext()->OMGetBlendState(&m_pPreBlendState, m_pPreBlendFactor, &m_PreSampleMask);
+
+	m_pHeightMapTexture->SetShaderState();
+	m_pStempManager->SetShaderState();
 	m_pGlobalTerrainBuffer->SetShaderState();
-	m_pPicposRenderInfoBuffer->SetShaderState();
-	m_pPicposTexture->SetShaderState();
-	m_pTerrainRenderContainer->Render(pCamera);
+	GLOBALVALUEMGR->GetDeviceContext()->OMSetBlendState(m_pSplattingBlendState, nullptr, 0xffffffff);
+	/////////////////////////////////////////이부분을 루프돌것임
+	m_pSplattingInfo->SetShaderState();//splatting
+	m_pTerrainRenderContainer->Render(pCamera);//render
+	m_pSplattingInfo->CleanShaderState();//splatting
+	/////////////////////////////////////////
+	m_pStempManager->CleanShaderState();
 	m_pGlobalTerrainBuffer->CleanShaderState();
-	m_pPicposRenderInfoBuffer->CleanShaderState();
-	m_pPicposTexture->SetShaderState();
-	//terrain
 	m_pHeightMapTexture->CleanShaderState();
+	GLOBALVALUEMGR->GetDeviceContext()->OMSetBlendState(m_pPreBlendState, m_pPreBlendFactor, m_PreSampleMask);
 }
 
 float CTerrainContainer::GetHeight(XMVECTOR xmvPos){
@@ -175,20 +202,17 @@ float CTerrainContainer::GetHeight(XMVECTOR xmvPos){
 	float fHeight = fBottomHeight * (1 - fzPercent) + fTopHeight * fzPercent;
 
 	return(fHeight * m_xmf3Scale.y);
-	
 }
 
 void CTerrainContainer::SetPicpos(float x, float y){
-	float posX = x / SPACE_SIZE;
-	float posY = (y / SPACE_SIZE);
-	m_pPicposRenderInfo->PickPos = XMFLOAT2(posX, posY);
+	m_pStempManager->SetPickPos(XMFLOAT2(x / SPACE_SIZE, y / SPACE_SIZE));
 }
 
 void CTerrainContainer::SetRenderRadius(float r){
-	m_pPicposRenderInfo->RenderSize = r / SPACE_SIZE;
+	m_pStempManager->SetExtent(r / SPACE_SIZE);
 }
 
-void CTerrainContainer::Update(shared_ptr<CCamera> pCamera){
+void CTerrainContainer::Update(shared_ptr<CCamera> pCamera) {
 
 	if (!pCamera) return;
 	POINT p = INPUTMGR->GetMousePoint();
@@ -217,10 +241,21 @@ void CTerrainContainer::Update(shared_ptr<CCamera> pCamera){
 	float fNearDistance = FLT_MAX;
 	pNearestObject = PickObjects(pCamera->GetPosition(), XMVector3Normalize(xmvRayDir), fHitDistance);
 	fNearDistance = fHitDistance;
-
-	if (INPUTMGR->MouseLeftDown()) {
-		RisedByPickPos();
+	static bool g_SetTerrain = true;
+	if (g_SetTerrain) {
+		if (INPUTMGR->MouseLeftDown() || INPUTMGR->MouseRightDown()) {
+			SetPickPosHeight();
+		}
 	}
+	else {
+		if (INPUTMGR->MouseLeftDown()) {
+			IncreasePickPosHeight();
+		}
+		else if (INPUTMGR->MouseRightDown()) {
+			DecreasePickPosHeight();
+		}
+	}
+
 	return;
 }
 
@@ -245,10 +280,8 @@ void CTerrainContainer::ReadyHeightMap(){
 	m_pHeightMapTexture->End();
 	
 	//height map data init
-	EXPORTER->MakeBitmap(L"../bitmap.bmp", m_pHeightData, m_nWidth - 1, m_nLength - 1);
-	m_pHeightMapTexture = CTexture::CreateTexture(L"../bitmap.bmp", RESOURCEMGR->GetSampler("TerrainHeightMap"), 1, BIND_DS);
-
-	m_pHeightMapTexture->SetShaderState();
+	EXPORTER->MakeBitmap24(L"../TempHeightmap.bmp", m_pHeightData, m_nWidth - 1, m_nLength - 1);
+	m_pHeightMapTexture = CTexture::CreateTexture(L"../TempHeightmap.bmp", RESOURCEMGR->GetSampler("TerrainHeightMap"), 1, BIND_DS);
 }
 
 void CTerrainContainer::SetBufferInfo(){
@@ -260,30 +293,19 @@ void CTerrainContainer::SetBufferInfo(){
 	pData->HeightScale = m_pGlobalTerrainData->HeightScale;
 	m_pGlobalTerrainBuffer->Unmap();
 
-	
-	TERRAIN_PICPOS_RENDER_INFO* pPicposRenderInfo = (TERRAIN_PICPOS_RENDER_INFO*)m_pPicposRenderInfoBuffer->Map();
-	pPicposRenderInfo->PickPos.x = m_pPicposRenderInfo->PickPos.x;
-	pPicposRenderInfo->PickPos.y = 1 - m_pPicposRenderInfo->PickPos.y;
-	pPicposRenderInfo->RenderSize = m_pPicposRenderInfo->RenderSize;
-	m_pPicposRenderInfoBuffer->Unmap();
+	m_pStempManager->UpdateShaderState();
 }
 
-void CTerrainContainer::RisedByPickPos(){
-	XMFLOAT2 pickPos = m_pPicposRenderInfo->PickPos;
-	int x = (1 - pickPos.x) * (m_nWidth - 2);
-	int y = (1 - pickPos.y) * (m_nLength - 2);
+void CTerrainContainer::IncreasePickPosHeight(){
+	m_pStempManager->IncreaseTerrain(m_pHeightData);
+}
 
-	//ZeroMemory(m_pHeightData, sizeof(Pixel) * (m_nWidth - 1) * (m_nLength - 1));
-	for (int i = -5; i < 5; ++i) {
-		for (int j = -5; j < 5; ++j) {
-			int index = ((x + i) + (y + j)*(m_nLength - 1));
-			if (index < 0) continue;
-			if (index >(m_nWidth - 1) * (m_nLength - 1)) continue;
-			//m_pHeightData[index].r = m_pHeightData[index].r + 1;
-			m_pHeightData[index].g = m_pHeightData[index].g + 1;
-			m_pHeightData[index].b = m_pHeightData[index].b + 1;
-		}
-	}
+void CTerrainContainer::DecreasePickPosHeight(){
+	m_pStempManager->DecreaseTerrain(m_pHeightData);
+}
+
+void CTerrainContainer::SetPickPosHeight(){
+	m_pStempManager->SetTerrain(m_pHeightData);
 }
 
 CTerrainContainer::CTerrainContainer() : CObject("terraincontainer") {

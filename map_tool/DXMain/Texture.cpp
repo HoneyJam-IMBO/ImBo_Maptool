@@ -281,6 +281,26 @@ shared_ptr<CTexture> CTexture::CreateTexture(_TCHAR(pstrFilePath)[128], shared_p
 	return pTexture;
 }
 
+shared_ptr<CTexture> CTexture::CreateTexture(wstring pstrFilePath, shared_ptr<CSampler> pSampler, UINT Slot, UINT BindFlag, shared_ptr<CBuffer> pConstantBuffer){
+	wstring wpath{ pstrFilePath };
+	string path; path.assign(wpath.cbegin(), wpath.cend());
+
+	shared_ptr<CTexture> pTexture = make_shared<CTexture>();
+	pTexture->SetsPath(path);
+	//sampler
+	pTexture->SetSampler(pSampler);
+	//constant buffer
+	pTexture->SetConstantBuffer(pConstantBuffer);
+	//texture
+	pTexture->SetTextureSlot(Slot);
+	ID3D11ShaderResourceView* pd3dsrvTexture{ nullptr };
+	D3DX11CreateShaderResourceViewFromFile(GLOBALVALUEMGR->GetDevice(), pstrFilePath.c_str(), NULL, NULL, &pd3dsrvTexture, NULL);
+	pTexture->SetpTextureSRV(pd3dsrvTexture);
+	pTexture->SetBindFlag(BindFlag);
+
+	return pTexture;
+}
+
 shared_ptr<CTexture> CTexture::CreateTexture(ID3D11ShaderResourceView * pShaderResourceView, shared_ptr<CSampler> pSampler, UINT Slot, UINT BindFlag, shared_ptr<CBuffer> pConstantBuffer){
 	shared_ptr<CTexture> pTexture = make_shared<CTexture>();
 	//sampler

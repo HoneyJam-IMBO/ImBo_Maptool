@@ -10,12 +10,18 @@
 //#include <afx.h>
 //bitmap
 
-struct Pixel {
-	byte r;
-	byte g;
+struct Pixel24 {
 	byte b;
+	byte g;
+	byte r;
 };
 
+struct Pixel32 {
+	byte a;
+	byte b;
+	byte g;
+	byte r;
+};
 class CExporter : public CSingleTonBase<CExporter> {
 public:
 	bool Begin(wstring outputPath);//file open«œ±∏
@@ -39,7 +45,8 @@ public:
 	void WriteSpace();
 	void WriteEnter();
 
-	void MakeBitmap(WCHAR* fileName, Pixel* pData, UINT nWidth, UINT nHeight);
+	void MakeBitmap24(const WCHAR* fileName, Pixel24* pData, UINT nWidth, UINT nHeight);
+	void MakeBitmap32(const WCHAR* fileName, Pixel32* pData, UINT nWidth, UINT nHeight);
 private:
 	wstring m_outputPath;
 	wofstream m_out;

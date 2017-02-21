@@ -23,6 +23,9 @@ public:
 	//txt file 사용할 경우 각 인자의 경계
 	void ReadSpace();
 	void ReadEnter();
+
+	Pixel24* ReadBitmap24(const WCHAR* fileName);
+	Pixel32* ReadBitmap32(const WCHAR* fileName);
 private:
 	string m_inputPath;
 	ifstream m_in;

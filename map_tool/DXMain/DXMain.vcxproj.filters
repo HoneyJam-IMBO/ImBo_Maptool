@@ -378,6 +378,15 @@
     <Filter Include="HLSL\SSLR\Combine">
       <UniqueIdentifier>{1f5a0c16-77cc-444b-a285-f34976150580}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\44.GameObject\Terrain\Stemp">
+      <UniqueIdentifier>{716a10d8-0910-4ee3-b917-229bb8925ccc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\44.GameObject\Terrain\Stemp\StempManager">
+      <UniqueIdentifier>{bfd3d70d-0944-476e-8c51-6c2cb5a6d8f3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\44.GameObject\Terrain\SplattingInfo">
+      <UniqueIdentifier>{984e3699-5c4d-4393-877b-7105d13bd93f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -671,6 +680,15 @@
     <ClInclude Include="SSLR.h">
       <Filter>소스 파일\SingleTon\Renderer\88.SSLR</Filter>
     </ClInclude>
+    <ClInclude Include="Stemp.h">
+      <Filter>소스 파일\44.GameObject\Terrain\Stemp</Filter>
+    </ClInclude>
+    <ClInclude Include="StempManager.h">
+      <Filter>소스 파일\44.GameObject\Terrain\Stemp\StempManager</Filter>
+    </ClInclude>
+    <ClInclude Include="SplattingInfo.h">
+      <Filter>소스 파일\44.GameObject\Terrain\SplattingInfo</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -951,6 +969,15 @@
     </ClCompile>
     <ClCompile Include="SSLR.cpp">
       <Filter>소스 파일\SingleTon\Renderer\88.SSLR</Filter>
+    </ClCompile>
+    <ClCompile Include="Stemp.cpp">
+      <Filter>소스 파일\44.GameObject\Terrain\Stemp</Filter>
+    </ClCompile>
+    <ClCompile Include="StempManager.cpp">
+      <Filter>소스 파일\44.GameObject\Terrain\Stemp\StempManager</Filter>
+    </ClCompile>
+    <ClCompile Include="SplattingInfo.cpp">
+      <Filter>소스 파일\44.GameObject\Terrain\SplattingInfo</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
