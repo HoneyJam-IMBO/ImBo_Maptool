@@ -3,23 +3,11 @@
 #include "SpaceContainer.h"
 
 #define TEXTURE_SIZE 257
+
 void CTerrainContainer::Begin(LPCTSTR pHeightmapFileName, int nWidth, int nLength, float fHeightScale, CSpaceContainer* pSpaceContainer) {
-	m_pSplattingInfo = CSplattingInfo::CreateSplattingInfo(L"", L"");
-
-	//blend state
-	D3D11_BLEND_DESC descBlend;
-	ZeroMemory(&descBlend, sizeof(D3D11_BLEND_DESC));
-	descBlend.RenderTarget[0].BlendEnable = true;
-	descBlend.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
-	descBlend.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
-	descBlend.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
-
-	descBlend.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
-	descBlend.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
-	descBlend.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
-	descBlend.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-	//blend state
-	GLOBALVALUEMGR->GetDevice()->CreateBlendState(&descBlend, &m_pSplattingBlendState);
+	m_pSplattingInfoManager = new CSplattingInfoManager();
+	m_pSplattingInfoManager->Begin();
+	m_pSplattingInfoManager->CreateSplattingInfo(L"../slide.bmp", L"../../Assets/Detail_Texture_9.jpg");
 
 
 	m_pStempManager = new CStempManager();
@@ -116,7 +104,7 @@ bool CTerrainContainer::End() {
 	//if (m_pGlobalTerrain) delete m_pGlobalTerrain;
 	if (m_pGlobalTerrainData) delete m_pGlobalTerrainData;
 	if (m_pStempManager) m_pStempManager->End();
-	if (m_pSplattingInfo) m_pSplattingInfo->End();
+	if (m_pSplattingInfoManager) m_pSplattingInfoManager->End();
 	m_vpTerrain.clear();
 
 	return false;
@@ -135,21 +123,17 @@ void CTerrainContainer::Render(shared_ptr<CCamera> pCamera){
 	SetBufferInfo();
 	//map tool ready
 
-	GLOBALVALUEMGR->GetDeviceContext()->OMGetBlendState(&m_pPreBlendState, m_pPreBlendFactor, &m_PreSampleMask);
-
 	m_pHeightMapTexture->SetShaderState();
 	m_pStempManager->SetShaderState();
 	m_pGlobalTerrainBuffer->SetShaderState();
-	GLOBALVALUEMGR->GetDeviceContext()->OMSetBlendState(m_pSplattingBlendState, nullptr, 0xffffffff);
 	/////////////////////////////////////////이부분을 루프돌것임
-	m_pSplattingInfo->SetShaderState();//splatting
+	m_pSplattingInfoManager->SetShaderState();//splatting
 	m_pTerrainRenderContainer->Render(pCamera);//render
-	m_pSplattingInfo->CleanShaderState();//splatting
+	m_pSplattingInfoManager->CleanShaderState();//splatting
 	/////////////////////////////////////////
 	m_pStempManager->CleanShaderState();
 	m_pGlobalTerrainBuffer->CleanShaderState();
 	m_pHeightMapTexture->CleanShaderState();
-	GLOBALVALUEMGR->GetDeviceContext()->OMSetBlendState(m_pPreBlendState, m_pPreBlendFactor, m_PreSampleMask);
 }
 
 float CTerrainContainer::GetHeight(XMVECTOR xmvPos){
@@ -241,7 +225,10 @@ void CTerrainContainer::Update(shared_ptr<CCamera> pCamera) {
 	float fNearDistance = FLT_MAX;
 	pNearestObject = PickObjects(pCamera->GetPosition(), XMVector3Normalize(xmvRayDir), fHitDistance);
 	fNearDistance = fHitDistance;
+	
 	static bool g_SetTerrain = true;
+	
+	
 	if (g_SetTerrain) {
 		if (INPUTMGR->MouseLeftDown() || INPUTMGR->MouseRightDown()) {
 			SetPickPosHeight();
@@ -256,6 +243,8 @@ void CTerrainContainer::Update(shared_ptr<CCamera> pCamera) {
 		}
 	}
 
+	m_pStempManager->UpdateShaderState();
+	m_pSplattingInfoManager->UpdateShaderState();
 	return;
 }
 
@@ -292,20 +281,33 @@ void CTerrainContainer::SetBufferInfo(){
 	pData->OneSpaceSizeRcp = m_pGlobalTerrainData->OneSpaceSizeRcp;
 	pData->HeightScale = m_pGlobalTerrainData->HeightScale;
 	m_pGlobalTerrainBuffer->Unmap();
-
-	m_pStempManager->UpdateShaderState();
 }
 
 void CTerrainContainer::IncreasePickPosHeight(){
-	m_pStempManager->IncreaseTerrain(m_pHeightData);
+	if (GLOBALVALUEMGR->GetToolMode() == TOOL_MODE_TERRAIN) {
+		m_pStempManager->IncreaseTerrain(m_pHeightData);
+	}
+	else if (GLOBALVALUEMGR->GetToolMode() == TOOL_MODE_SPLATTING) {
+		m_pSplattingInfoManager->IncreaseBlendinginfo(m_pStempManager);
+	}
 }
 
 void CTerrainContainer::DecreasePickPosHeight(){
-	m_pStempManager->DecreaseTerrain(m_pHeightData);
+	if (GLOBALVALUEMGR->GetToolMode() == TOOL_MODE_TERRAIN) {
+		m_pStempManager->DecreaseTerrain(m_pHeightData);
+	}
+	else if (GLOBALVALUEMGR->GetToolMode() == TOOL_MODE_SPLATTING) {
+		m_pSplattingInfoManager->DecreaseBlendinginfo(m_pStempManager);
+	}
 }
 
 void CTerrainContainer::SetPickPosHeight(){
-	m_pStempManager->SetTerrain(m_pHeightData);
+	if (GLOBALVALUEMGR->GetToolMode() == TOOL_MODE_TERRAIN) {
+		m_pStempManager->SetTerrain(m_pHeightData);
+	}
+	else if (GLOBALVALUEMGR->GetToolMode() == TOOL_MODE_SPLATTING) {
+		m_pSplattingInfoManager->SetBlendinginfo(m_pStempManager);
+	}
 }
 
 CTerrainContainer::CTerrainContainer() : CObject("terraincontainer") {

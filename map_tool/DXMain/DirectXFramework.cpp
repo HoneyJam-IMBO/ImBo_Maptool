@@ -138,13 +138,17 @@ void CDirectXFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPA
 	{
 
 	case WM_LBUTTONDOWN:
-		INPUTMGR->SetbCapture(true);
+		if (GLOBALVALUEMGR->GetToolMode() == TOOL_MODE_FREECAMERA)
+			INPUTMGR->SetbCapture(true);
+
 		INPUTMGR->SetOldCursorPos();
 		INPUTMGR->SetMouseLeft(true);
 		break;
 
 	case WM_RBUTTONDOWN:
-		INPUTMGR->SetbCapture(true);
+		if (GLOBALVALUEMGR->GetToolMode() == TOOL_MODE_FREECAMERA)
+			INPUTMGR->SetbCapture(true);
+
 		INPUTMGR->SetOldCursorPos();
 		INPUTMGR->SetMouseRight(true);
 		break;

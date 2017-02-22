@@ -2,6 +2,14 @@
 
 #include "SingleTon.h"
 
+enum TOOL_MODE {
+	//TOOL_MODE_ANIMATION,
+	TOOL_MODE_TERRAIN,
+	TOOL_MODE_SPLATTING,
+	TOOL_MODE_OBJECTPOSITIONING,
+	TOOL_MODE_FREECAMERA,
+	TOOL_MODE_CHARACTER
+};
 class CGlobalValueManager : public CSingleTonBase<CGlobalValueManager> {
 
 public:
@@ -24,6 +32,8 @@ public:
 	ID3D11Device* GetDevice() { return m_pd3dDevice; }
 	ID3D11DeviceContext* GetDeviceContext() { return m_pd3dDeviceContext; }
 
+	void SetToolMode(TOOL_MODE mode) { m_ToolMode = mode; }
+	TOOL_MODE GetToolMode() { return m_ToolMode; }
 private:
 	//begin func
 	//wnd
@@ -32,6 +42,7 @@ private:
 	//begin func
 
 	//mode
+	TOOL_MODE m_ToolMode{ TOOL_MODE_FREECAMERA };
 	bool m_bWireFrame{ false };
 	bool m_bDebug{ false };
 

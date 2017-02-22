@@ -33,6 +33,7 @@ void CStempManager::UpdateShaderState(){
 	pPicposRenderInfo->PickPos.x = (m_pPicposRenderInfo->PickPos.x);
 	pPicposRenderInfo->PickPos.y = 1 - (m_pPicposRenderInfo->PickPos.y);
 	pPicposRenderInfo->Extent = m_pPicposRenderInfo->Extent;
+	pPicposRenderInfo->ToolMode = (UINT)GLOBALVALUEMGR->GetToolMode();
 	m_pPicposRenderInfoBuffer->Unmap();
 }
 

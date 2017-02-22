@@ -1,6 +1,13 @@
 #include "stdafx.h"
 #include "SceneMain.h"
 
+static bool gTerrain{ false };
+static bool gSplatting{ false };
+static bool gObjectPositioning{ false };
+static bool gFreeCamera{ false };
+static bool gCharacter{ false };
+static float gMode{ 3.f };
+
 void TW_CALL LoadFileCallback(void * clientData) {
 	LoadFileStruct* pLFS = reinterpret_cast<LoadFileStruct*>(clientData);
 //	string s = pLFS->Filename;
@@ -46,7 +53,8 @@ bool CSceneMain::Begin() {
 	//fbx mesh 변경 버튼 -> 기존 객체 mesh animation 정보 전부 삭제
 	//fbx animation 정보 추가 -> 기존 객체 mesh의 animater에 정보 추가
 	//
-	const char* barName{ "MainControll" };
+
+	const char* barName{ "TOOL_MODE" };
 	TWBARMGR->AddBar(barName);
 	//set param
 	TWBARMGR->SetBarSize(barName, 500, 200);
@@ -56,11 +64,14 @@ bool CSceneMain::Begin() {
 	TWBARMGR->SetBarMovable(barName, false);
 	TWBARMGR->SetBarResizable(barName, false);
 	//set param
-	TWBARMGR->AddButtonCB(barName, "load", "load file button", LoadFileButtonCallback, this);
-	TWBARMGR->AddButtonCB(barName, "add", "add info button", AddInfoButtonCallback, this);
-	TWBARMGR->AddButtonCB(barName, "clear", "clear all button", ClearAllButtonCallback, this);
-	TWBARMGR->AddButtonCB(barName, "write", "write now button", WriteNowButtonCallback, this);
-
+	TWBARMGR->AddMinMaxBarRW(barName, "MODE", "Mode_Controll", &gMode,
+		0.0f, (float)TOOL_MODE_CHARACTER, 1.0f);
+	TWBARMGR->AddBoolBar(barName, "MODEVIEW", "Terrain", &gTerrain);
+	TWBARMGR->AddBoolBar(barName, "MODEVIEW", "Splatting", &gSplatting);
+	TWBARMGR->AddBoolBar(barName, "MODEVIEW", "ObjectPositioning", &gObjectPositioning);
+	TWBARMGR->AddBoolBar(barName, "MODEVIEW", "FreeCamera", &gFreeCamera);
+	TWBARMGR->AddBoolBar(barName, "MODEVIEW", "Character", &gCharacter);
+	
 	//m_pPlayer = new CPlayer;
 	//m_pPlayer->Begin();
 	//----------------------------------camera-------------------------------------
@@ -215,19 +226,33 @@ bool CSceneMain::End() {
 }
 
 void CSceneMain::Animate(float fTimeElapsed) {
-	//drag & drop 처리문
-	const char* test{ nullptr };
-	test = INPUTMGR->GetDropFileName();
-	if (test) {
-		if (nullptr == m_pFBXObject) {//만약 없다면 
-			CreateControllObject("../../Assets/Model/fbx/1-2/Die_85.fbx");
-		}
-		else {
-			AddFBXAnimationInfo("../../Assets/Model/fbx/1-2/Die_85.fbx");
-			m_pFBXObject->PickingProc();
-		}
+	//mode check 문
+
+
+	gTerrain = false;
+	gSplatting = false;
+	gObjectPositioning = false;
+	gFreeCamera = false;
+	gCharacter = false;
+	int mode = (int)gMode;
+	GLOBALVALUEMGR->SetToolMode((TOOL_MODE)mode);
+	if (GLOBALVALUEMGR->GetToolMode() == TOOL_MODE_TERRAIN) {
+		gTerrain = true;
 	}
-	//drag & drop 처리문
+	if (GLOBALVALUEMGR->GetToolMode() == TOOL_MODE_SPLATTING) {
+		gSplatting = true;
+	}
+	if (GLOBALVALUEMGR->GetToolMode() == TOOL_MODE_OBJECTPOSITIONING) {
+		gObjectPositioning = true;
+	}
+	if (GLOBALVALUEMGR->GetToolMode() == TOOL_MODE_FREECAMERA) {
+		gFreeCamera = true;
+	}
+	if (GLOBALVALUEMGR->GetToolMode() == TOOL_MODE_CHARACTER) {
+		gCharacter = true;
+	}
+	//mode check 문
+
 	//-----------------------------------space------------------------------
 	m_pSpaceContainer->Animate(fTimeElapsed);
 	m_pSpaceContainer->PrepareRender(m_pCamera);
@@ -297,7 +322,8 @@ void CSceneMain::ProcessInput(float fTimeElapsed) {
 	if (INPUTMGR->KeyDown(VK_P)) {
 		INPUTMGR->SetDebugMode(static_cast<bool>((INPUTMGR->GetDebugMode() + 1) % 2));
 	}
-	m_pCamera->ProcessInput(fTimeElapsed);
+	if(GLOBALVALUEMGR->GetToolMode() == TOOL_MODE_FREECAMERA)
+		m_pCamera->ProcessInput(fTimeElapsed);
 }
 
 

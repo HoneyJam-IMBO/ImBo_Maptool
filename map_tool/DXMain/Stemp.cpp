@@ -100,7 +100,7 @@ void CStemp::SetTerrain(Pixel24* pHeightData, XMFLOAT2 pickPos, float fRadius){
 CStemp * CStemp::CreateStemp(wstring name, CStempManager* pStempManager){
 	CStemp* pStemp = new CStemp;
 	pStemp->SetStempManager(pStempManager);
-	pStemp->SetStempTexture(CTexture::CreateTexture(name, RESOURCEMGR->GetSampler("DEFAULT"), 2, BIND_PS));
+	pStemp->SetStempTexture(CTexture::CreateTexture(name, RESOURCEMGR->GetSampler("DEFAULT"), 3, BIND_PS));
 	
 	Pixel24* pStempData = IMPORTER->ReadBitmap24(name.c_str());
 	

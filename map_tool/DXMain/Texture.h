@@ -28,10 +28,13 @@ public:
 
 	static ID3D11ShaderResourceView *CreateTexture2DArraySRV(_TCHAR(*ppstrFilePaths)[128], UINT nTextures);
 	static ID3D11ShaderResourceView *CreateTexture2DArraySRV(ID3D11Texture2D **ppd3dTextures, UINT nTextures);
+	static ID3D11ShaderResourceView *CreateTexture2DArraySRV(ID3D11ShaderResourceView **ppd3dSRVs, UINT nTextures);
 
 	//texture array
 	static shared_ptr<CTexture> CreateTexture(UINT nTextures, _TCHAR(*ppstrFilePaths)[128], shared_ptr<CSampler> pSampler, UINT Slot = 0, UINT BindFlag = BIND_PS, shared_ptr<CBuffer> pConstantBuffer = nullptr);
-	static shared_ptr<CTexture> CreateTexture(UINT nTextures, ID3D11Texture2D **ppd3dTextures, shared_ptr<CSampler> pSampler, UINT Slot, UINT BindFlag, shared_ptr<CBuffer> pConstantBuffer);
+	//static shared_ptr<CTexture> CreateTexture(UINT nTextures, WCHAR(*ppstrFilePaths)[128], shared_ptr<CSampler> pSampler, UINT Slot = 0, UINT BindFlag = BIND_PS, shared_ptr<CBuffer> pConstantBuffer = nullptr);
+	static shared_ptr<CTexture> CreateTexture(UINT nTextures, ID3D11Texture2D **ppd3dTextures, shared_ptr<CSampler> pSampler, UINT Slot = 0, UINT BindFlag = BIND_PS, shared_ptr<CBuffer> pConstantBuffer = nullptr);
+	static shared_ptr<CTexture> CreateTexture(UINT nTextures, ID3D11ShaderResourceView **ppd3dSRVs, shared_ptr<CSampler> pSampler, UINT Slot = 0, UINT BindFlag = BIND_PS, shared_ptr<CBuffer> pConstantBuffer = nullptr);
 	//texture 1°³
 	static shared_ptr<CTexture> CreateTexture(_TCHAR(pstrFilePath)[128], shared_ptr<CSampler> pSampler, UINT Slot = 0, UINT BindFlag = BIND_PS, shared_ptr<CBuffer> pConstantBuffer = nullptr);
 	static shared_ptr<CTexture> CreateTexture(wstring pstrFilePath, shared_ptr<CSampler> pSampler, UINT Slot = 0, UINT BindFlag = BIND_PS, shared_ptr<CBuffer> pConstantBuffer = nullptr);

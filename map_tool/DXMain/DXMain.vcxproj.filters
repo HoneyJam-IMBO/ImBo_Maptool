@@ -387,6 +387,9 @@
     <Filter Include="소스 파일\44.GameObject\Terrain\SplattingInfo">
       <UniqueIdentifier>{984e3699-5c4d-4393-877b-7105d13bd93f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\44.GameObject\Terrain\SplattingInfo\SplattingInfoManager">
+      <UniqueIdentifier>{4c58f6ce-e130-407a-98b0-7054d1da6058}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -689,6 +692,9 @@
     <ClInclude Include="SplattingInfo.h">
       <Filter>소스 파일\44.GameObject\Terrain\SplattingInfo</Filter>
     </ClInclude>
+    <ClInclude Include="SplattingInfoManager.h">
+      <Filter>소스 파일\44.GameObject\Terrain\SplattingInfo\SplattingInfoManager</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -978,6 +984,9 @@
     </ClCompile>
     <ClCompile Include="SplattingInfo.cpp">
       <Filter>소스 파일\44.GameObject\Terrain\SplattingInfo</Filter>
+    </ClCompile>
+    <ClCompile Include="SplattingInfoManager.cpp">
+      <Filter>소스 파일\44.GameObject\Terrain\SplattingInfo\SplattingInfoManager</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

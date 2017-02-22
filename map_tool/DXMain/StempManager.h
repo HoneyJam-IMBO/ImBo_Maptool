@@ -5,7 +5,7 @@
 struct TERRAIN_PICPOS_RENDER_INFO {
 	XMFLOAT2 PickPos{ 0.f, 0.f };//pick pos/ space_size;
 	float Extent{ 50.f / SPACE_SIZE };//¿øÀÇ r/space_size;
-	UINT pad;
+	UINT ToolMode;
 };
 
 class CStempManager : public DXObject {
