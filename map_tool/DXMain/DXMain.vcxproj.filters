@@ -339,9 +339,6 @@
     <Filter Include="소스 파일\SingleTon\Renderer">
       <UniqueIdentifier>{9f2ee8dd-a346-477a-a80c-ed39a7764aca}</UniqueIdentifier>
     </Filter>
-    <Filter Include="HLSL\Compute\PostProcessing\AmbientOcculution">
-      <UniqueIdentifier>{84f0ea03-3d62-4726-b737-a3950ed8b1fa}</UniqueIdentifier>
-    </Filter>
     <Filter Include="소스 파일\SingleTon\Renderer\11.ObjectRenderer">
       <UniqueIdentifier>{c8a650b0-6fe2-4d34-9983-7af61186c579}</UniqueIdentifier>
     </Filter>
@@ -366,9 +363,6 @@
     <Filter Include="소스 파일\SingleTon\Renderer\88.SSLR">
       <UniqueIdentifier>{7efba3ad-22c5-41de-b72c-277902974ba7}</UniqueIdentifier>
     </Filter>
-    <Filter Include="HLSL\Compute\PostProcessing\SSLR">
-      <UniqueIdentifier>{4224c8fa-3654-4621-9b5f-ef22000478db}</UniqueIdentifier>
-    </Filter>
     <Filter Include="HLSL\SSLR">
       <UniqueIdentifier>{4c71a679-97a5-4b69-b572-8393e8288504}</UniqueIdentifier>
     </Filter>
@@ -389,6 +383,12 @@
     </Filter>
     <Filter Include="소스 파일\44.GameObject\Terrain\SplattingInfo\SplattingInfoManager">
       <UniqueIdentifier>{4c58f6ce-e130-407a-98b0-7054d1da6058}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="HLSL\Compute\AmbientOcculution">
+      <UniqueIdentifier>{84f0ea03-3d62-4726-b737-a3950ed8b1fa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="HLSL\Compute\SSLR">
+      <UniqueIdentifier>{4224c8fa-3654-4621-9b5f-ef22000478db}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -1139,13 +1139,13 @@
       <Filter>HLSL\Debug\BoundingBox</Filter>
     </FxCompile>
     <FxCompile Include="CSAONormalDepthDownScale.hlsl">
-      <Filter>HLSL\Compute\PostProcessing\AmbientOcculution</Filter>
+      <Filter>HLSL\Compute\AmbientOcculution</Filter>
     </FxCompile>
     <FxCompile Include="CSSSAOCompute.hlsl">
-      <Filter>HLSL\Compute\PostProcessing\AmbientOcculution</Filter>
+      <Filter>HLSL\Compute\AmbientOcculution</Filter>
     </FxCompile>
     <FxCompile Include="Occlussion.hlsl">
-      <Filter>HLSL\Compute\PostProcessing\SSLR</Filter>
+      <Filter>HLSL\Compute\SSLR</Filter>
     </FxCompile>
     <FxCompile Include="PSRayTrace.hlsl">
       <Filter>HLSL\SSLR\RayTrace</Filter>

@@ -46,6 +46,7 @@ public:
 
 
 	CGameObject* PickObjectPointedByCursor(int xClient, int yClient);
+	CTerrainContainer* GetTerrainContainer() { return m_pTerrainContainer; }
 
 	//animation tool을 위한 함수
 	void CreateControllObject(string path);
@@ -55,10 +56,16 @@ public:
 	void ClearAllFBXObject();
 
 	void ClearAllFBXUI();
+
+	void CreateBaseTextureSelectUI();
+	void CreateObjectPositioningUI();
 	//변수
 	vector<LoadFileStruct> m_LoadFileStruct;
 	//fbx object
 	CTestObject* m_pFBXObject{ nullptr };
+	
+	void ObjectPositioning();
+//	void SetPositioningObject(CGameObject* pObject) { m_pPositioningObject = pObject; };
 private:
 	int m_MeshCnt{ 0 };
 	//framework
@@ -91,8 +98,11 @@ private:
 	
 	//picking
 	CGameObject* m_pPickingObject{ nullptr };
+
+	//모든 생성 가능한 객체를 벡터로 미리 만들어 둔다.
+	//이 안의 모든 객체를 버튼으로써 제작한다.
+	vector<CGameObject*> m_vpObjectList;
 public:
 	CSceneMain(CDirectXFramework* pFrameWork);
 	~CSceneMain();
-
 };

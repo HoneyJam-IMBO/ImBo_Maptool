@@ -163,6 +163,17 @@ bool CInputManager::MouseLeftDown(){
 	return m_bLeftCheck;
 }
 
+bool CInputManager::MouseLeftOnlyDown(){
+	if (m_bLeftCheck) {
+		m_bLeftOnlyCheck = true;
+		return false;
+	}
+	else if (m_bLeftOnlyCheck) {
+		m_bLeftOnlyCheck = false;
+		return true;
+	}
+}
+
 bool CInputManager::MouseRightDown(){
 	return m_bRightCheck;
 }

@@ -8,6 +8,19 @@ static bool gFreeCamera{ false };
 static bool gCharacter{ false };
 static float gMode{ 3.f };
 
+void TW_CALL BaseTextureSelectCallback(void * clientData) {
+	LoadFileStruct* pLFS = reinterpret_cast<LoadFileStruct*>(clientData);
+	//	string s = pLFS->Filename;
+	//	string path{ "../inputdata/" };
+
+	wstring ws = { L"" };
+	ws.assign(pLFS->Filename.cbegin(), pLFS->Filename.cend());
+	pLFS->m_pScene->GetTerrainContainer()->SetBaseTexture(ws);
+	const char* barName{ "LoadFile" };
+	TWBARMGR->DeleteBar(barName);
+	//string s = pLFS;
+}
+
 void TW_CALL LoadFileCallback(void * clientData) {
 	LoadFileStruct* pLFS = reinterpret_cast<LoadFileStruct*>(clientData);
 //	string s = pLFS->Filename;
@@ -47,7 +60,54 @@ void TW_CALL WriteNowButtonCallback(void * clientData) {
 	EXPORTER->ExportFbxObject(pScene->m_pFBXObject);
 	EXPORTER->End();
 }
+//==============================================================================
+
+void TW_CALL TMTerrainButtonCallback(void * clientData) {
+	GLOBALVALUEMGR->SetToolMode(TOOL_MODE_TERRAIN);
+}
+void TW_CALL TMSplattingButtonCallback(void * clientData) {
+	GLOBALVALUEMGR->SetToolMode(TOOL_MODE_SPLATTING);
+}
+void TW_CALL TMObjectPositioningButtonCallback(void * clientData) {
+	GLOBALVALUEMGR->SetToolMode(TOOL_MODE_OBJECTPOSITIONING);
+	CSceneMain* pData = (CSceneMain*)clientData;
+	pData->CreateObjectPositioningUI();
+	//object positioning ui제작
+
+}
+void TW_CALL TMFreeCameraButtonCallback(void * clientData) {
+	GLOBALVALUEMGR->SetToolMode(TOOL_MODE_FREECAMERA);
+}
+void TW_CALL TMCharacterButtonCallback(void * clientData) {
+	GLOBALVALUEMGR->SetToolMode(TOOL_MODE_CHARACTER);
+}
+void TW_CALL MCBaseTextureSelectButtonCallback(void * clientData) {
+	CSceneMain* pData = (CSceneMain*)clientData;
+	//ui를 하나 새로 만들어서 texture랑 terrain rendercontainer로
+	pData->CreateBaseTextureSelectUI();
+}
+void TW_CALL MCCreateSplattingButtonCallback(void * clientData) {
+	CSceneMain* pData = (CSceneMain*)clientData;
+	pData->GetTerrainContainer()->CreateSplattingInfo();
+	pData->GetTerrainContainer()->GetSplattingInfoManager()->CreateSplattingListUI();
+}
+void TW_CALL OPCreatePositioningObjectButtonCallback(void * clientData) {
+	CGameObject* pObject = (CGameObject*)clientData;
+	GLOBALVALUEMGR->SetPositioningObject(pObject);
+}
+
 bool CSceneMain::Begin() {
+	CPointLight *pPositioningPointLight = new CPointLight;
+	pPositioningPointLight->Begin(POINT_LIGHT{ 100.f, XMFLOAT3(rand() % 5, rand() % 5, rand() % 5) });
+	m_vpObjectList.push_back(pPositioningPointLight);
+
+	CCapsuleLight* pPositioningCapsuleLight = new CCapsuleLight;
+	pPositioningCapsuleLight->Begin(CAPSULE_LIGHT{ 100.f, XMFLOAT3(rand() % 5, rand() % 5, rand() % 5), 50.f });
+	m_vpObjectList.push_back(pPositioningCapsuleLight);
+
+	CSpotLight* pPositioningSpotLight = new CSpotLight;
+	pPositioningSpotLight->Begin(SPOT_LIGHT{ 100.f, XMFLOAT3(rand() % 100, rand() % 100, rand() % 100), 50.f, 50.f });
+	m_vpObjectList.push_back(pPositioningSpotLight);
 	//main button ui추가 
 	//추가될 버튼
 	//fbx mesh 변경 버튼 -> 기존 객체 mesh animation 정보 전부 삭제
@@ -57,21 +117,22 @@ bool CSceneMain::Begin() {
 	const char* barName{ "TOOL_MODE" };
 	TWBARMGR->AddBar(barName);
 	//set param
-	TWBARMGR->SetBarSize(barName, 500, 200);
-	TWBARMGR->SetBarPosition(barName, 250, 550);
+	TWBARMGR->SetBarSize(barName, 250, 300);
+	TWBARMGR->SetBarPosition(barName, 0, 0);
 	TWBARMGR->SetBarColor(barName, 255, 0, 255);
 	TWBARMGR->SetBarContained(barName, true);
 	TWBARMGR->SetBarMovable(barName, false);
 	TWBARMGR->SetBarResizable(barName, false);
 	//set param
-	TWBARMGR->AddMinMaxBarRW(barName, "MODE", "Mode_Controll", &gMode,
-		0.0f, (float)TOOL_MODE_CHARACTER, 1.0f);
-	TWBARMGR->AddBoolBar(barName, "MODEVIEW", "Terrain", &gTerrain);
-	TWBARMGR->AddBoolBar(barName, "MODEVIEW", "Splatting", &gSplatting);
-	TWBARMGR->AddBoolBar(barName, "MODEVIEW", "ObjectPositioning", &gObjectPositioning);
-	TWBARMGR->AddBoolBar(barName, "MODEVIEW", "FreeCamera", &gFreeCamera);
-	TWBARMGR->AddBoolBar(barName, "MODEVIEW", "Character", &gCharacter);
+	TWBARMGR->AddButtonCB(barName, "TOOL_MODE", "Terrain", TMTerrainButtonCallback, nullptr);
+	TWBARMGR->AddButtonCB(barName, "TOOL_MODE", "Splatting", TMSplattingButtonCallback, nullptr);
+	TWBARMGR->AddButtonCB(barName, "TOOL_MODE", "ObjectPositioning", TMObjectPositioningButtonCallback, this);
+	TWBARMGR->AddButtonCB(barName, "TOOL_MODE", "FreeCamera", TMFreeCameraButtonCallback, nullptr);
+	TWBARMGR->AddButtonCB(barName, "TOOL_MODE", "Character", TMCharacterButtonCallback, nullptr);
 	
+	TWBARMGR->AddButtonCB(barName, "MainControll", "BaseTextureSelect", MCBaseTextureSelectButtonCallback, this);
+	TWBARMGR->AddButtonCB(barName, "MainControll", "CreateSplatting", MCCreateSplattingButtonCallback, this);
+
 	//m_pPlayer = new CPlayer;
 	//m_pPlayer->Begin();
 	//----------------------------------camera-------------------------------------
@@ -84,7 +145,7 @@ bool CSceneMain::Begin() {
 	m_pSpaceContainer->Begin(static_cast<int>(SPACE_SIZE), static_cast<int>(SPACE_LEVEL));
 	//terrain
 	m_pTerrainContainer = new CTerrainContainer();
-	m_pTerrainContainer->Begin(L"../../Assets/HeightMap.raw", 257, 257, 0.5, m_pSpaceContainer);
+	m_pTerrainContainer->Begin(L"../../Assets/HeightMap.raw", 256, 256, 0.5, m_pSpaceContainer);
 	RENDERER->SetTerrainContainer(m_pTerrainContainer);
 	//-------------------------------------space-------------------------------------
 
@@ -92,13 +153,15 @@ bool CSceneMain::Begin() {
 	int nMaxObjects = 1;
 	int space_size = static_cast<int>(SPACE_SIZE);
 
-	//for (int i = 0; i < 15; ++i) {
-	//	CTestCube* pCube = new CTestCube();
-	//	pCube->Begin();
-	//	pCube->SetTerrainContainer(m_pTerrainContainer);
-	//	pCube->SetPosition(XMVectorSet(rand() % space_size, 100, rand() % space_size, 0.f));
-	//	m_pSpaceContainer->AddObject(pCube);
-	//}
+	for (int i = 0; i < 10; ++i) {
+		for (int j = 0; j < 10; ++j) {
+			CTestCube* pCube = new CTestCube();
+			pCube->Begin();
+			pCube->SetTerrainContainer(m_pTerrainContainer);
+			pCube->SetPosition(XMVectorSet(i * 100, 100, j * 100, 0.f));
+			m_pSpaceContainer->AddObject(pCube);
+		}
+	}
 
 	//m_pRotationTestObject = new CTestCube();
 	//m_pRotationTestObject->Begin();
@@ -174,11 +237,12 @@ bool CSceneMain::Begin() {
 	//directional light
 	m_pDirectionalLight = new CDirectionalLight;
 	m_pDirectionalLight->Begin(DIRECTIONAL_AMBIENT_LIGHT{
-		XMFLOAT4(1.0f, -1.0f, 1.0f, 0.0f),XMFLOAT4(0.0f, 0.1f, 0.1f, 0.0f) , XMFLOAT4(1.5f, 1.5f, 1.5f, 1.f),//dir
+		XMFLOAT4(1.0f, -1.0f, 1.0f, 0.0f),XMFLOAT4(0.1f, 0.1f, 0.1f, 0.0f) , XMFLOAT4(1.5f, 1.5f, 1.5f, 1.f),//dir
 		XMFLOAT4(0.1f, 0.1f, 0.1f, 1.f), XMFLOAT4(0.1f, 0.1f, 0.1f, 1.f), XMFLOAT4(0.1f, 0.1f, 0.1f, 1.f), XMFLOAT4(5.1f, 5.1f, 5.1f, 1.f)//ambient
 	});
 	m_pDirectionalLight->SetPosition(XMVectorSet(SPACE_SIZE / 2.f, SPACE_SIZE, SPACE_SIZE / 2.f, 0.f));
 	m_pDirectionalLight->Rotate(30.f, 0.f, 0.f);
+	RENDERER->SetDirectionalLight(m_pDirectionalLight);
 	/*
 	XMFLOAT4 m_DirToLight;
 	XMFLOAT4 m_DirLightColor;
@@ -197,6 +261,10 @@ bool CSceneMain::Begin() {
 }
 
 bool CSceneMain::End() {
+	for (auto pObject : m_vpObjectList) {
+		delete pObject;
+	}
+	m_vpObjectList.clear();
 	//m_pPlayer->End();
 	//seller
 	//m_RenderContainerSeller->End();
@@ -226,33 +294,6 @@ bool CSceneMain::End() {
 }
 
 void CSceneMain::Animate(float fTimeElapsed) {
-	//mode check 문
-
-
-	gTerrain = false;
-	gSplatting = false;
-	gObjectPositioning = false;
-	gFreeCamera = false;
-	gCharacter = false;
-	int mode = (int)gMode;
-	GLOBALVALUEMGR->SetToolMode((TOOL_MODE)mode);
-	if (GLOBALVALUEMGR->GetToolMode() == TOOL_MODE_TERRAIN) {
-		gTerrain = true;
-	}
-	if (GLOBALVALUEMGR->GetToolMode() == TOOL_MODE_SPLATTING) {
-		gSplatting = true;
-	}
-	if (GLOBALVALUEMGR->GetToolMode() == TOOL_MODE_OBJECTPOSITIONING) {
-		gObjectPositioning = true;
-	}
-	if (GLOBALVALUEMGR->GetToolMode() == TOOL_MODE_FREECAMERA) {
-		gFreeCamera = true;
-	}
-	if (GLOBALVALUEMGR->GetToolMode() == TOOL_MODE_CHARACTER) {
-		gCharacter = true;
-	}
-	//mode check 문
-
 	//-----------------------------------space------------------------------
 	m_pSpaceContainer->Animate(fTimeElapsed);
 	m_pSpaceContainer->PrepareRender(m_pCamera);
@@ -260,8 +301,18 @@ void CSceneMain::Animate(float fTimeElapsed) {
 	//-----------------------------------space------------------------------
 
 	//--------------------------전역 객체 animate / regist-------------------------
-	m_pDirectionalLight->SetColor(xmf4DirectionalLightColor.x, xmf4DirectionalLightColor.y, xmf4DirectionalLightColor.z);
-	
+	//object positioning 객체 랜더
+	if (GLOBALVALUEMGR->GetToolMode() == TOOL_MODE_OBJECTPOSITIONING) {
+		
+		if (GLOBALVALUEMGR->GetPositioningObject()) {
+			XMFLOAT2 xmf2CurPicPos = m_pTerrainContainer->GetCurPickPos();
+			float fHeight = m_pTerrainContainer->GetHeight(xmf2CurPicPos);
+
+			GLOBALVALUEMGR->GetPositioningObject()->SetPosition(XMVectorSet(xmf2CurPicPos.x, fHeight, xmf2CurPicPos.y, 1.0));
+			GLOBALVALUEMGR->GetPositioningObject()->RegistToContainer();
+		}
+	}
+
 	//skybox camera 동기화
 	m_pSkyBox->Animate(fTimeElapsed);
 	//sky box 등록
@@ -324,6 +375,14 @@ void CSceneMain::ProcessInput(float fTimeElapsed) {
 	}
 	if(GLOBALVALUEMGR->GetToolMode() == TOOL_MODE_FREECAMERA)
 		m_pCamera->ProcessInput(fTimeElapsed);
+
+	if (GLOBALVALUEMGR->GetToolMode() == TOOL_MODE_OBJECTPOSITIONING) {
+		if (INPUTMGR->MouseLeftOnlyDown()) {
+			if (GLOBALVALUEMGR->GetPositioningObject()) {
+				ObjectPositioning();
+			}
+		}
+	}
 }
 
 
@@ -524,11 +583,86 @@ void CSceneMain::ClearAllFBXUI(){
 	TWBARMGR->DeleteBar("LoadTextureFile");
 }
 
+void CSceneMain::CreateBaseTextureSelectUI(){
+	const char* barName{ "LoadFile" };
+	TWBARMGR->AddBar(barName);
+
+	vector<wstring> vFile;
+	DIRECTORYFINDER->GetFiles(vFile, L"../../Assets", true, true, L".jpg");
+	DIRECTORYFINDER->GetFiles(vFile, L"../../Assets", true, true, L".JPG");
+	DIRECTORYFINDER->GetFiles(vFile, L"../../Assets", true, true, L".png");
+	DIRECTORYFINDER->GetFiles(vFile, L"../../Assets", true, true, L".PNG");
+
+	//const char* groupName = "File";
+	char menuName[64];
+	int cnt{ 0 };
+	m_LoadFileStruct.resize(vFile.size());
+	for (auto data : vFile) {
+		//file directory store;
+		data = DIRECTORYFINDER->ReplaceString(data, L"\\", L"/");
+		string filsDirectory{ "" };
+		filsDirectory.assign(data.cbegin(), data.cend());
+		m_LoadFileStruct[cnt] = LoadFileStruct{ this, filsDirectory };
+
+		//menu name = file name
+		string menuNameString{ "" };
+		menuNameString.assign(data.cbegin(), data.cend());
+		sprintf(menuName, "%s", menuNameString.c_str());
+
+		//group name = directory name
+		data = DIRECTORYFINDER->ReplaceString(data, L"/", L"\\");
+		LPWSTR str = (LPWSTR)data.c_str();
+		PathRemoveFileSpec(str);
+
+		wstring wGroupName{ str };
+		string groupName;
+		groupName.assign(wGroupName.cbegin(), wGroupName.cend());
+		TWBARMGR->AddButtonCB(barName, groupName.c_str(), menuName, BaseTextureSelectCallback, &m_LoadFileStruct[cnt]);
+		cnt++;
+	}
+}
+
+void CSceneMain::CreateObjectPositioningUI(){
+	const char* barName{ "TOOL_MODE" };
+	TWBARMGR->AddBar(barName);
+	//set param
+	TWBARMGR->SetBarSize(barName, 250, 300);
+	TWBARMGR->SetBarPosition(barName, 0, 0);
+	TWBARMGR->SetBarColor(barName, 255, 0, 255);
+	TWBARMGR->SetBarContained(barName, true);
+	TWBARMGR->SetBarMovable(barName, false);
+	TWBARMGR->SetBarResizable(barName, false);
+	//set param
+	for (auto pObject : m_vpObjectList) {
+		TWBARMGR->AddButtonCB(barName, "Objects", pObject->GetName().c_str(), OPCreatePositioningObjectButtonCallback, pObject);
+	}
+}
+
+void CSceneMain::ObjectPositioning(){
+	if (GLOBALVALUEMGR->GetPositioningObject()->GetName() == "pointlight") {
+		CPointLight *pPositioningPointLight = new CPointLight;
+		pPositioningPointLight->Begin(POINT_LIGHT{ 100.f, XMFLOAT3(rand() % 5, rand() % 5, rand() % 5) });
+		pPositioningPointLight->SetPosition(GLOBALVALUEMGR->GetPositioningObject()->GetPosition());
+		m_pSpaceContainer->AddObject(pPositioningPointLight);
+	}
+	else if (GLOBALVALUEMGR->GetPositioningObject()->GetName() == "spotlight") {
+		CSpotLight* pPositioningSpotLight = new CSpotLight;
+		pPositioningSpotLight->Begin(SPOT_LIGHT{ 100.f, XMFLOAT3(rand() % 100, rand() % 100, rand() % 100), 50.f, 50.f });
+		pPositioningSpotLight->SetPosition(GLOBALVALUEMGR->GetPositioningObject()->GetPosition());
+		m_pSpaceContainer->AddObject(pPositioningSpotLight);
+	}
+	else if (GLOBALVALUEMGR->GetPositioningObject()->GetName() == "capsulelight") {
+		CCapsuleLight* pPositioningCapsuleLight = new CCapsuleLight;
+		pPositioningCapsuleLight->Begin(CAPSULE_LIGHT{ 100.f, XMFLOAT3(rand() % 5, rand() % 5, rand() % 5), 50.f });
+		pPositioningCapsuleLight->SetPosition(GLOBALVALUEMGR->GetPositioningObject()->GetPosition());
+		m_pSpaceContainer->AddObject(pPositioningCapsuleLight);
+	}
+}
+
 CSceneMain::CSceneMain(CDirectXFramework* pFrameWork) : CScene("Main") {
 	m_pFrameWork = pFrameWork;
 }
 CSceneMain::~CSceneMain() {
 
 }
-
 

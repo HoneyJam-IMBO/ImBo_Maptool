@@ -3,6 +3,29 @@
 #include "Renderer.h"
 
 bool CRenderer::Begin() {
+	const char* barName{ "Effects" };
+	TWBARMGR->AddBar(barName);
+	//set param
+	TWBARMGR->SetBarSize(barName, 250, 250);
+	TWBARMGR->SetBarPosition(barName, 0, 300);
+	TWBARMGR->SetBarColor(barName, 255, 0, 255);
+	TWBARMGR->SetBarContained(barName, true);
+	TWBARMGR->SetBarMovable(barName, false);
+	TWBARMGR->SetBarResizable(barName, false);
+	//set param
+	TWBARMGR->AddMinMaxBarRW(barName, "SSAO", "Radius", &m_SSAO_Radius, 1.0f, 1000.f, 0.5f);
+	TWBARMGR->AddMinMaxBarRW(barName, "SSAO", "OffsetRadius", &m_SSAO_OffsetRadius, 1.0f, 100.f, 0.1f);
+
+	TWBARMGR->AddMinMaxBarRW(barName, "BLOOM", "Threshold", &m_fBloomThreshold, 0.0f, 10.f, 0.001f);
+	TWBARMGR->AddMinMaxBarRW(barName, "BLOOM", "MiddleGrey", &m_fMiddleGrey, 0.0f, 4.f, 0.001f);
+	TWBARMGR->AddMinMaxBarRW(barName, "BLOOM", "White", &m_fWhite, 0.0f, 4.f, 0.001f);
+	TWBARMGR->AddMinMaxBarRW(barName, "BLOOM", "BloomScale", &m_fBloomScale, 0.f, 100.f, 0.1f);
+
+	//float m_fBloomThreshold{ 2.0f };
+	//float m_fMiddleGrey = { 0.0025f };
+	//float m_fWhite = { 1.5f };
+	//float m_fBloomScale{ 0.1f };
+
 	D3D11_DEPTH_STENCIL_DESC descDepth;
 	descDepth.DepthEnable = TRUE;
 	descDepth.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
@@ -97,66 +120,71 @@ bool CRenderer::End() {
 }
  
 void CRenderer::Render(shared_ptr<CCamera> pCamera) {
-	// Store the previous depth state
-	ID3D11DepthStencilState* pPrevDepthState;
-	UINT nPrevStencil;
-	GLOBALVALUEMGR->GetDeviceContext()->OMGetDepthStencilState(&pPrevDepthState, &nPrevStencil);
-
+	//CLEAR
 	ClearDepthStencilView(m_pd3ddsvDepthStencil);
 	SetForwardRenderTargets();//gbuff가 될 rtv/ dsv set
 	GLOBALVALUEMGR->GetDeviceContext()->OMSetDepthStencilState(m_pd3dDepthStencilState, 1);
+	//CLEAR
 
-	//object render
+	//OBJECT RENDER
+	//terrain/ skybox render
 	if(m_pTerrainContainer) m_pTerrainContainer->Render(pCamera);
+	//object
 	m_pObjectRenderer->Excute(pCamera);
 	//debuge
 	if (INPUTMGR->GetDebugMode()) {
 		DEBUGER->DebugRender(pCamera);
 	}
+	//OBJECT RENDER
+
+	//SSAO
 	SetRenderTargetViews(1, &m_pd3drtvLight, m_pd3ddsvReadOnlyDepthStencil);
-	//m_pFrameWork->SetMainRenderTargetView();
 	for (auto texture : m_vObjectLayerResultTexture) {
 		texture->SetShaderState();
 	}	
-	ID3D11ShaderResourceView* pAmbientOcclution = m_pAORenderer->Excute(pCamera, 20, 1000);
+	ID3D11ShaderResourceView* pAmbientOcclution = m_pAORenderer->Excute(pCamera, m_SSAO_OffsetRadius, m_SSAO_Radius);
 	pAmbientOcclution  = m_p4to1Blur->Excute(pAmbientOcclution);
 	GLOBALVALUEMGR->GetDeviceContext()->PSSetShaderResources(4, 1, &pAmbientOcclution);
-	//ambient occulution 과정
+	//SSAO
 
+	//LIGHT RENDER
 	m_pLightRenderer->Excute(pCamera);
-
 	for (auto texture : m_vObjectLayerResultTexture) {
 		texture->CleanShaderState();
 	}
-	
-	//ClearDepthStencilView(m_pd3dDepthStencilView);
+	//LIGHT RENDER
 
-	//진짜 rtv set! rtv만 set하구 dsv는 set하지 않는다. 
+	//SSLR
+	if (GLOBALVALUEMGR->GetSSLR()) {
+		if (m_pDirectionalLIght) {
+			D3D11_VIEWPORT oldvp;
+			UINT num = 1;
+			GLOBALVALUEMGR->GetDeviceContext()->RSGetViewports(&num, &oldvp);
+			ID3D11RasterizerState* pPrevRSState;
+			GLOBALVALUEMGR->GetDeviceContext()->RSGetState(&pPrevRSState);
 
-	////sslr
-	//D3D11_VIEWPORT oldvp;
-	//UINT num = 1;
-	//GLOBALVALUEMGR->GetDeviceContext()->RSGetViewports(&num, &oldvp);
-	//ID3D11RasterizerState* pPrevRSState;
-	//GLOBALVALUEMGR->GetDeviceContext()->RSGetState(&pPrevRSState);
-	//
-	//m_pSSLR->Excute(pCamera, m_pd3drtvLight, pAmbientOcclution, XMVectorSet(-1,-1,-1,0), XMFLOAT3(0.1f, 0.1f, 0.1f));
-	//
-	//// Restore the states
-	//GLOBALVALUEMGR->GetDeviceContext()->RSSetViewports(num, &oldvp);
-	//GLOBALVALUEMGR->GetDeviceContext()->RSSetState(pPrevRSState);
-	//if(pPrevRSState)pPrevRSState->Release();
+			XMVECTOR xmvSunDir = m_pDirectionalLIght->GetLook();
+			XMFLOAT3 xmf3Color = m_pDirectionalLIght->GetColor();
+			m_pSSLR->Excute(pCamera, m_pd3drtvLight, pAmbientOcclution, xmvSunDir, xmf3Color);
+
+			// Restore the states
+			GLOBALVALUEMGR->GetDeviceContext()->RSSetViewports(num, &oldvp);
+			GLOBALVALUEMGR->GetDeviceContext()->RSSetState(pPrevRSState);
+			if (pPrevRSState)pPrevRSState->Release();
+		}
+	}//sslr 모드가 true이면 sslr 실행 
 	//SSLR
 
+	//POST PROCESSING
 	SetMainRenderTargetView();
 	m_vLightLayerResultTexture[0]->SetShaderState();
 	PostProcessing(pCamera);
-
-
 	for (auto texture : m_vLightLayerResultTexture) {
 		texture->CleanShaderState();
 	}
-	
+	//POST PROCESSING
+
+	//DEBUG
 	if (INPUTMGR->GetDebugMode()) {
 		ID3D11Buffer* pGBufferUnpackingBuffer = pCamera->GetGBufferUnpackingBuffer();
 		GLOBALVALUEMGR->GetDeviceContext()->PSSetConstantBuffers(PS_UNPACKING_SLOT, 1, &pGBufferUnpackingBuffer);
@@ -167,7 +195,7 @@ void CRenderer::Render(shared_ptr<CCamera> pCamera) {
 		//DEBUGER->AddTexture(XMFLOAT2(100, 400), XMFLOAT2(250, 550), m_pd3dsrvLight);
 		//DEBUGER->AddTexture(XMFLOAT2(100, 100), XMFLOAT2(500, 500), m_pd3dsrvDepthStencil);
 		//debug
-		//DEBUGER->AddTexture(XMFLOAT2(250, 100), XMFLOAT2(500, 250), pAmbientOcclution);
+		DEBUGER->AddTexture(XMFLOAT2(500, 0), XMFLOAT2(750, 150), pAmbientOcclution);
 		//DEBUGER->AddTexture(XMFLOAT2(0, 0), XMFLOAT2(1000, 500), pAmbientOcclution);
 
 		//이건 꼭 여기서 해줘야함.
@@ -179,32 +207,28 @@ void CRenderer::Render(shared_ptr<CCamera> pCamera) {
 	else {
 		DEBUGER->ClearDebuger();
 	}
+	//DEBUG
 
-	//	//ui
+	//UI
 	TWBARMGR->Render();
+	//UI
 
-	//present
+	//PRESENT
 	m_pdxgiSwapChain->Present(0, 0);
-
-	// Restore the previous depth state
-	GLOBALVALUEMGR->GetDeviceContext()->OMSetDepthStencilState(pPrevDepthState, nPrevStencil);
-	if (pPrevDepthState) pPrevDepthState->Release();
+	//PRESENT
 }
 void CRenderer::Update(float fTimeElapsed) {
 	m_pBloomDownScale->SetAdaptation(fTimeElapsed);
 }
 void CRenderer::PostProcessing(shared_ptr<CCamera> pCamera) {
-	m_pBloomDownScale->Excute(pCamera, 2.0f);
+	m_pBloomDownScale->Excute(pCamera, m_fBloomThreshold);
 	ID3D11ShaderResourceView* pBloomImage = m_pBloom->Excute(pCamera);
 	pBloomImage = m_p16to1Blur->Excute(pBloomImage);
 
 	GLOBALVALUEMGR->GetDeviceContext()->PSSetShaderResources(2, 1, &pBloomImage);
 
 	//rtv에 풀스크린 드로우 
-	float fMiddleGrey = 0.0025f;
-	float fWhite = 1.5f;
-	float fBloomScale = 0.1f;
-	m_pPostProcessingFinalPass->Excute(pCamera, fMiddleGrey, fWhite, fBloomScale);
+	m_pPostProcessingFinalPass->Excute(pCamera, m_fMiddleGrey, m_fWhite, m_fBloomScale);
 
 	//적응을 하기위한 이전avgLum과 지금 계산한 avgLum을 교환
 	m_pBloomDownScale->SwapAdaptationBuff();

@@ -43,6 +43,7 @@ public:
 	virtual void SetLength(float len);
 	virtual void SetRange(float outer, float inner = 0.0f);
 	virtual void SetColor(float r, float g, float b);//color
+	virtual XMFLOAT3 GetColor();
 private:
 	//data
 	CAPSULE_LIGHT m_CapsuleData;

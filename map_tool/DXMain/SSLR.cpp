@@ -4,6 +4,14 @@
 bool g_bShowRayTraceRes = false;
 
 bool CSSLR::Begin(){
+	const char* barName{ "Effects" };
+	TWBARMGR->AddMinMaxBarRW(barName, "SSLR", "OffsetSunPos", &m_fOffsetSunPos, -1000, -0.1f, 0.01f);
+	TWBARMGR->AddMinMaxBarRW(barName, "SSLR", "MaxSunDist", &m_fMaxSunDist, 0.0f, 1000.f, 0.01f);
+	TWBARMGR->AddMinMaxBarRW(barName, "SSLR", "InitDecay", &m_fInitDecay, 0.0f, 4.f, 0.001f);
+	TWBARMGR->AddMinMaxBarRW(barName, "SSLR", "DistDecay", &m_fDistDecay, 0.f, 4, 0.001f);
+	TWBARMGR->AddMinMaxBarRW(barName, "SSLR", "MaxDeltaLen", &m_fMaxDeltaLen, 0.001f, 0.05, 0.0001f);
+	TWBARMGR->AddBoolBar(barName, "SSLR", "on/off", &GLOBALVALUEMGR->GetSSLR());
+
 	// Allocate the occlussion constant buffer
 	m_pOcclusionCB = CBuffer::CreateConstantBuffer(1, sizeof(CB_OCCLUSSION), 0, BIND_CS);
 	m_pRayTraceCB = CBuffer::CreateConstantBuffer(1, sizeof(CB_LIGHT_RAYS), 0, BIND_PS);
@@ -58,7 +66,7 @@ void CSSLR::Excute(shared_ptr<CCamera>pCamera, ID3D11RenderTargetView* pLightAcc
 		return;
 	}
 
-	XMVECTOR vSunPos = -200.0f * vSunDir;
+	XMVECTOR vSunPos = m_fOffsetSunPos * vSunDir;
 	XMFLOAT3 xmf3Eye;
 	XMStoreFloat3(&xmf3Eye, pCamera->GetPosition());
 	XMVECTOR offset = XMVectorSet(xmf3Eye.x, 0.f, xmf3Eye.z, 0.f);
@@ -72,11 +80,13 @@ void CSSLR::Excute(shared_ptr<CCamera>pCamera, ID3D11RenderTargetView* pLightAcc
 	// If the sun is too far out of view we just want to turn off the effect
 	XMFLOAT3 xmf3SunPossSS;
 	XMStoreFloat3(&xmf3SunPossSS, vSunPos);
-	static const float fMaxSunDist = 1000.f;
-	if (abs(long(xmf3SunPossSS.x)) >= fMaxSunDist || abs(long(xmf3SunPossSS.y)) >= fMaxSunDist){
+	if (abs(long(xmf3SunPossSS.x)) >= m_fMaxSunDist || abs(long(xmf3SunPossSS.y)) >= m_fMaxSunDist){
 		return;
 	}
-	XMFLOAT3 vSunColorAtt = vSunColor;//태양 색 설정하는건데 잘 모르겟음 왜 하는건지
+	XMFLOAT3 vSunColorAtt = vSunColor;
+	//카메라 각도와 거리를 이용해 태양의 강도를 설정하는 것인데 
+	//이건 내 scale과 예제 scale이 달라서 사용불가 수정필요
+
 	//float fMaxDist = max(abs(long(xmf3SunPossSS.x)), abs(long(xmf3SunPossSS.y)));
 	//if (fMaxDist >= 1.0f)
 	//{
@@ -137,10 +147,11 @@ void CSSLR::RayTrace(shared_ptr<CCamera>pCamera, const XMFLOAT2 & vSunPosSS, con
 	//m_fInitDecay(0.2f), m_fDistDecay(0.8f), m_fMaxDeltaLen(0.005f)
 	CB_LIGHT_RAYS* pRayTrace = (CB_LIGHT_RAYS*)m_pRayTraceCB->Map();
 	pRayTrace->vSunPos = XMFLOAT2(0.5f * vSunPosSS.x + 0.5f, -0.5f * vSunPosSS.y + 0.5f);
-	pRayTrace->fInitDecay = 0.2f;
-	pRayTrace->fDistDecay = 0.8f;
+	
+	pRayTrace->fInitDecay = m_fInitDecay;
+	pRayTrace->fDistDecay = m_fDistDecay;
 	pRayTrace->vRayColor = vSunColor;
-	pRayTrace->fMaxDeltaLen = 0.005f;
+	pRayTrace->fMaxDeltaLen = m_fMaxDeltaLen;
 	m_pRayTraceCB->Unmap();
 	m_pRayTraceCB->SetShaderState();
 

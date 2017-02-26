@@ -8,6 +8,7 @@ public:
 	//----------------------------dxobject-----------------------------
 	bool Begin();
 	virtual bool End();
+	virtual void Animate(float fTimeElapsed);
 	//----------------------------dxobject-----------------------------
 
 	virtual void SetPosition(XMVECTOR pos);

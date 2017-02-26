@@ -3,6 +3,7 @@
 #include "SingleTon.h"
 
 //
+#include "DirectionalLight.h"
 #include "TerrainContainer.h"
 #include "ObjectRenderer.h"
 #include "AORenderer.h"
@@ -34,7 +35,25 @@ public:
 
 	bool ResizeBuffer();
 	void SetTerrainContainer(CTerrainContainer* pTerrainContainer) { m_pTerrainContainer = pTerrainContainer; }
+	void SetDirectionalLight(CDirectionalLight* pDirectionalLight) { m_pDirectionalLIght = pDirectionalLight; }
 private:
+	//SSAO 관련 변수
+	float m_SSAO_OffsetRadius{ 20.f };
+	float m_SSAO_Radius{ 1000.f };
+	//SSAO 관련 변수
+
+	//BLOOM 관련 변수
+	float m_fBloomThreshold{ 2.0f };//블룸할 색 구할때 강조값
+	float m_fMiddleGrey = { 0.0025f };//중간 회색
+	float m_fWhite = { 1.5f };//가장 밝은 색
+	float m_fBloomScale{ 0.1f };//블룸 강조값 
+	//BLOOM 관련 변수
+
+	//SSLR관련 변수
+	//이건 scene에서 delete해줄 변수
+	CDirectionalLight* m_pDirectionalLIght{ nullptr };
+	//SSLR관련 변수
+
 	IDXGISwapChain			*	m_pdxgiSwapChain{ nullptr };
 	ID3D11RenderTargetView	*	m_pd3dRenderTargetView{ nullptr };
 	

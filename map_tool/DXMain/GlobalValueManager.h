@@ -1,6 +1,7 @@
 #pragma once
 
 #include "SingleTon.h"
+#include "GameObject.h"
 
 enum TOOL_MODE {
 	//TOOL_MODE_ANIMATION,
@@ -34,6 +35,12 @@ public:
 
 	void SetToolMode(TOOL_MODE mode) { m_ToolMode = mode; }
 	TOOL_MODE GetToolMode() { return m_ToolMode; }
+	void SetSSLR(bool bSSLR) { m_bSSLR = bSSLR; }
+	bool& GetSSLR() { return m_bSSLR; }
+
+	CGameObject* GetPositioningObject() { return m_pPositioningObject; }
+	void SetPositioningObject(CGameObject* pObject) { m_pPositioningObject = pObject; }
+
 private:
 	//begin func
 	//wnd
@@ -45,6 +52,7 @@ private:
 	TOOL_MODE m_ToolMode{ TOOL_MODE_FREECAMERA };
 	bool m_bWireFrame{ false };
 	bool m_bDebug{ false };
+	bool m_bSSLR{ false };
 
 	//wnd
 	HINSTANCE m_hInst;
@@ -55,7 +63,8 @@ private:
 	ID3D11Device			*	m_pd3dDevice{ nullptr };
 	ID3D11DeviceContext		*	m_pd3dDeviceContext{ nullptr };
 
-
+	//object pisitioning °´Ã¼ 
+	CGameObject* m_pPositioningObject{ nullptr };
 public:
 	CGlobalValueManager();
 	virtual ~CGlobalValueManager();

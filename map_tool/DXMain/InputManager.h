@@ -88,6 +88,7 @@ public:
 	void SetMousePoint(int qx, int y);
 	void SetMousePoint(POINT _pt);
 	bool MouseLeftDown();
+	bool MouseLeftOnlyDown();
 	bool MouseRightDown();
 	bool MouseLeftUp();
 	bool MouseRightUp();
@@ -131,6 +132,7 @@ private:
 
 	bool								m_bCapture{ false };
 	bool								m_bLeftCheck{ false };
+	bool m_bLeftOnlyCheck{ false };
 	bool								m_bRightCheck{ false };
 
 	POINT							m_ptOldCursorPos;

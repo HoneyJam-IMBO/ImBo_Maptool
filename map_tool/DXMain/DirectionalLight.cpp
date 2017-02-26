@@ -50,6 +50,12 @@ void CDirectionalLight::SetColor(float r, float g, float b){
 	m_Directional_AmbientData.m_DirLightColor = XMFLOAT4(r, g, b, 0.f);
 }
 
+XMFLOAT3 CDirectionalLight::GetColor()
+{
+	XMFLOAT3 xmf3Color = XMFLOAT3(m_Directional_AmbientData.m_DirLightColor.x, m_Directional_AmbientData.m_DirLightColor.y, m_Directional_AmbientData.m_DirLightColor.z);
+	return xmf3Color;
+}
+
 bool CDirectionalLight::IsVisible(shared_ptr<CCamera> pCamera){
 	//m_BoundingBox = m_OriBoundingBox;
 	//m_BoundingBox.Transform(m_BoundingBox, GetWorldMtx());
@@ -57,7 +63,7 @@ bool CDirectionalLight::IsVisible(shared_ptr<CCamera> pCamera){
 	return true;
 }
 
-CDirectionalLight::CDirectionalLight() {
+CDirectionalLight::CDirectionalLight() : CLight("directionallight") {
 	
 }
 CDirectionalLight::~CDirectionalLight() {

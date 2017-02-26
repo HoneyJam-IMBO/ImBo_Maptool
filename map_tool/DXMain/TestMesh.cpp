@@ -5,9 +5,9 @@
 #define RANDOM_COLOR XMFLOAT4(((rand() * 0xFFFFFF) / RAND_MAX),((rand() * 0xFFFFFF) / RAND_MAX),((rand() * 0xFFFFFF) / RAND_MAX),((rand() * 0xFFFFFF) / RAND_MAX))
 
 
-#define WIDTH 25
-#define HEIGHT 100
-#define DEPTH 25
+#define WIDTH 10
+#define HEIGHT 10
+#define DEPTH 10
 
 bool CTestMesh::CreateVertexBuffer() {
 	m_nVertices = 36;

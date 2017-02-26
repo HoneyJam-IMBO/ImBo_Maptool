@@ -31,7 +31,24 @@ public:
 	void ResizeBuffer();
 	void ReleaseBuffer();
 
+	void SetOffsetSunPos(float fOffsetSunPos) { m_fOffsetSunPos = fOffsetSunPos; }
+	void SetSunDist(float fMaxSunDist) { m_fMaxSunDist = fMaxSunDist; }
+	void SetInitDecay(float fInitDecay) { m_fInitDecay = fInitDecay; }
+	void SetDistDecay(float fDistDecay) { m_fDistDecay = fDistDecay; }
+	void SetMaxDeltaLen(float fMaxDeltaLen) { m_fMaxDeltaLen = fMaxDeltaLen; }
+
+	float& GetOffsetSunPos() { return m_fOffsetSunPos; }
+	float& GetMaxSunDist() { return m_fMaxSunDist; }
+	float& GetInitDecay() { return m_fInitDecay; }
+	float& GetDistDecay() { return m_fDistDecay; }
+	float& GetMaxDeltaLen() { return m_fMaxDeltaLen; }
 private:
+	float m_fOffsetSunPos{ -200.f };
+	float m_fMaxSunDist = 1000.f;
+	float m_fInitDecay{ 0.2f };
+	float m_fDistDecay{ 0.8f };
+	float m_fMaxDeltaLen{ 0.005f };
+
 	// Prepare the occlusion map
 	void PrepareOcclusion(ID3D11ShaderResourceView* pMiniDepthSRV);
 
@@ -44,9 +61,6 @@ private:
 	UINT m_nWidth{ 0 };
 	UINT m_nHeight{ 0 };
 	UINT m_nThreadGroup{ 0 };
-	float m_fInitDecay{ 0.f };
-	float m_fDistDecay{ 0.f };
-	float m_fMaxDeltaLen{ 0.f };
 
 	ID3D11Texture2D* m_pOcclusionTex;
 	ID3D11UnorderedAccessView* m_pOcclusionUAV;

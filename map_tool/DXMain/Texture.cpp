@@ -132,17 +132,20 @@ ID3D11ShaderResourceView* CTexture::CreateTexture2DArraySRV(_TCHAR(*ppstrFilePat
 	ID3D11Texture2D *pd3dTexture2DArray;
 	GLOBALVALUEMGR->GetDevice()->CreateTexture2D(&d3dTexture2DArrayDesc, 0, &pd3dTexture2DArray);
 
+	ID3D11DeviceContext *pd3dDeviceContext;
+	GLOBALVALUEMGR->GetDevice()->GetImmediateContext(&pd3dDeviceContext);
+
 	D3D11_MAPPED_SUBRESOURCE d3dMappedTexture2D;
 	for (UINT t = 0; t < nTextures; t++)
 	{
 		for (UINT m = 0; m < d3dTexure2DDesc.MipLevels; m++)
 		{
-	//? map 왜 함? 병신임?
-			GLOBALVALUEMGR->GetDeviceContext()->Map(ppd3dTextures[t], m, D3D11_MAP_READ, 0, &d3dMappedTexture2D);
-			GLOBALVALUEMGR->GetDeviceContext()->UpdateSubresource(pd3dTexture2DArray, D3D11CalcSubresource(m, t, d3dTexure2DDesc.MipLevels), 0, d3dMappedTexture2D.pData, d3dMappedTexture2D.RowPitch, d3dMappedTexture2D.DepthPitch);
-			GLOBALVALUEMGR->GetDeviceContext()->Unmap(ppd3dTextures[t], m);
+			pd3dDeviceContext->Map(ppd3dTextures[t], m, D3D11_MAP_READ, 0, &d3dMappedTexture2D);
+			pd3dDeviceContext->UpdateSubresource(pd3dTexture2DArray, D3D11CalcSubresource(m, t, d3dTexure2DDesc.MipLevels), 0, d3dMappedTexture2D.pData, d3dMappedTexture2D.RowPitch, d3dMappedTexture2D.DepthPitch);
+			pd3dDeviceContext->Unmap(ppd3dTextures[t], m);
 		}
 	}
+
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC d3dTextureSRVDesc;
 	ZeroMemory(&d3dTextureSRVDesc, sizeof(D3D11_SHADER_RESOURCE_VIEW_DESC));
@@ -160,6 +163,8 @@ ID3D11ShaderResourceView* CTexture::CreateTexture2DArraySRV(_TCHAR(*ppstrFilePat
 
 	for (UINT i = 0; i < nTextures; i++) if (ppd3dTextures[i]) ppd3dTextures[i]->Release();
 	delete[] ppd3dTextures;
+
+	if (pd3dDeviceContext) pd3dDeviceContext->Release();
 
 	return(pd3dsrvTextureArray);
 }

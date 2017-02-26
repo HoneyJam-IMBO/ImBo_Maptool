@@ -2,8 +2,22 @@
 #include "StempManager.h"
 
 void CStempManager::Begin(){
+	//葛电 stemp力累
+	vector<wstring> vFile;
+	DIRECTORYFINDER->GetFiles(vFile, L"../../Assets/Stemp", true, true, L".bmp");
+	DIRECTORYFINDER->GetFiles(vFile, L"../../Assets/Stemp", true, true, L".BMP");
+	
+	//const char* groupName = "File";
+	for (auto data : vFile) {
+		CreateStemp(data);
+	}
+	//葛电 stemp力累
+
 	m_pPicposRenderInfoBuffer = CBuffer::CreateConstantBuffer(1, sizeof(TERRAIN_PICPOS_RENDER_INFO), 4, BIND_PS);
 	m_pPicposRenderInfo = new TERRAIN_PICPOS_RENDER_INFO;
+
+	TWBARMGR->AddMinMaxBarRW("TOOL_MODE", "STEMP_CONTROLL", "STEMP_EXTENT", &m_fExtent, 10.f, 256.f, 0.5f);
+	TWBARMGR->AddMinMaxBarRW("TOOL_MODE", "STEMP_CONTROLL", "STEMP_INDEX", &m_nCurStemp, 0.f, m_vStemp.size()-1, 1.f);
 }
 
 bool CStempManager::End(){
@@ -32,7 +46,7 @@ void CStempManager::UpdateShaderState(){
 	TERRAIN_PICPOS_RENDER_INFO* pPicposRenderInfo = (TERRAIN_PICPOS_RENDER_INFO*)m_pPicposRenderInfoBuffer->Map();
 	pPicposRenderInfo->PickPos.x = (m_pPicposRenderInfo->PickPos.x);
 	pPicposRenderInfo->PickPos.y = 1 - (m_pPicposRenderInfo->PickPos.y);
-	pPicposRenderInfo->Extent = m_pPicposRenderInfo->Extent;
+	pPicposRenderInfo->Extent = m_pPicposRenderInfo->Extent = m_fExtent / SPACE_SIZE;;
 	pPicposRenderInfo->ToolMode = (UINT)GLOBALVALUEMGR->GetToolMode();
 	m_pPicposRenderInfoBuffer->Unmap();
 }

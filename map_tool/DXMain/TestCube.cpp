@@ -19,6 +19,9 @@ bool CTestCube::End() {
 
 	return CGameObject::End();
 }
+void CTestCube::Animate(float fTimeElapsed){
+	SetPositionY(m_pTerrainContainer->GetHeight(GetPosition()));
+}
 void CTestCube::SetPosition(XMVECTOR pos) {
 	XMFLOAT3 xmfPos;
 	XMStoreFloat3(&xmfPos, pos);

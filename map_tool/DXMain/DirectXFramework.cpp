@@ -6,12 +6,12 @@ void CDirectXFramework::Begin(HINSTANCE hInstance, HWND hWnd)
 	//singleton Init 
 	//global value
 	GLOBALVALUEMGR->Begin(hInstance, hWnd);
+	TWBARMGR->Begin(" GLOBAL help='test ui death' ");
 	RESOURCEMGR->Begin();
 	RCSELLER->Begin();
-	RENDERER->Begin();
 	DEBUGER->Begin();
 	INPUTMGR->Begin();
-	TWBARMGR->Begin(" GLOBAL help='test ui death' ");
+	RENDERER->Begin();
 	//singleton Init
 
 	_tcscpy_s(m_pszBuffer, _T("DXMAIN ("));

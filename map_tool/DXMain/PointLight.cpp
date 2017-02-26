@@ -69,9 +69,14 @@ void CPointLight::SetColor(float r, float g, float b){
 	m_PointData.xmf3Color = XMFLOAT3(r, g, b);
 }
 
+XMFLOAT3 CPointLight::GetColor()
+{
+	return XMFLOAT3();
+}
 
 
-CPointLight::CPointLight() {
+
+CPointLight::CPointLight() : CLight("pointlight") {
 	
 }
 CPointLight::~CPointLight() {

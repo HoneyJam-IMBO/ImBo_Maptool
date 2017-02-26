@@ -3,18 +3,29 @@
 #include "SpaceContainer.h"
 
 #define TEXTURE_SIZE 257
+void TW_CALL SMSetButtonCallback(void * clientData) {
+	CTerrainContainer* pData = (CTerrainContainer*)clientData;
+	pData->SetStempMode(STEMP_MODE_SET);
+}
+void TW_CALL SMIndeButtonCallback(void * clientData) {
+	CTerrainContainer* pData = (CTerrainContainer*)clientData;
+	pData->SetStempMode(STEMP_MODE_INDE);
+}
 
 void CTerrainContainer::Begin(LPCTSTR pHeightmapFileName, int nWidth, int nLength, float fHeightScale, CSpaceContainer* pSpaceContainer) {
+	
+	TWBARMGR->AddButtonCB("TOOL_MODE", "STEMP_MODEVIEW", "SetStemp", SMSetButtonCallback, this);
+	TWBARMGR->AddButtonCB("TOOL_MODE", "STEMP_MODEVIEW", "IndeStemp", SMIndeButtonCallback, this);
+
 	m_pSplattingInfoManager = new CSplattingInfoManager();
 	m_pSplattingInfoManager->Begin();
-	m_pSplattingInfoManager->CreateSplattingInfo(L"../slide.bmp", L"../../Assets/Detail_Texture_9.jpg");
-
+	//m_pSplattingInfoManager->CreateSplattingInfo(L"../slide.bmp", L"../../Assets/Detail_Texture_9.jpg");
 
 	m_pStempManager = new CStempManager();
+	//모든 stemp제작
 	m_pStempManager->Begin();
-	m_pStempManager->CreateStemp(L"../slide.bmp");
-	m_pSpaceContainer = pSpaceContainer;
 
+	m_pSpaceContainer = pSpaceContainer;
 	//global object 제작
 	//m_pGlobalTerrain = new CGlobalTerrain();
 	////global object set, Update
@@ -29,11 +40,13 @@ void CTerrainContainer::Begin(LPCTSTR pHeightmapFileName, int nWidth, int nLengt
 	m_pGlobalTerrainData->OneSpaceSizeRcp = 1.0f / fOneSpaceSize;
 	m_pGlobalTerrainData->HeightScale = fHeightScale;
 
-	m_pHeightData = new Pixel24[(nWidth - 1) * (nLength - 1)];
-	ZeroMemory(m_pHeightData, sizeof(Pixel24) * (nWidth - 1) * (nLength - 1));
+	//texture 제작
+	m_pHeightData = new Pixel24[(nWidth) * (nLength)];
+	ZeroMemory(m_pHeightData, sizeof(Pixel24) * (nWidth) * (nLength));
 	//height map data init
-	EXPORTER->MakeBitmap24(L"../TempHeightmap.bmp", m_pHeightData, nWidth-1, nLength-1);
+	EXPORTER->MakeBitmap24(L"../TempHeightmap.bmp", m_pHeightData, nWidth, nLength);
 	m_pHeightMapTexture = CTexture::CreateTexture(L"../TempHeightmap.bmp", RESOURCEMGR->GetSampler("TerrainHeightMap"), 1, BIND_DS);
+	m_pBaseTexture = CTexture::CreateTexture(L"../../Assets/default.jpg", RESOURCEMGR->GetSampler("DEFAULT"), 0);
 
 	//터레인 제작
 	//terrain
@@ -52,26 +65,8 @@ void CTerrainContainer::Begin(LPCTSTR pHeightmapFileName, int nWidth, int nLengt
 
 	m_nWidth = nWidth;
 	m_nLength = nLength;
-	m_xmf3Scale = XMFLOAT3(static_cast<float>(m_pSpaceContainer->GetSize() / (m_nWidth-1)),
-		fHeightScale, static_cast<float>(m_pSpaceContainer->GetSize()/(m_nLength - 1)));
-
-	BYTE *pHeightMapImage = new BYTE[m_nWidth * m_nLength];
-
-	HANDLE hFile = ::CreateFile(pHeightmapFileName, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_ATTRIBUTE_READONLY, NULL);
-	DWORD dwBytesRead;
-	::ReadFile(hFile, pHeightMapImage, (m_nWidth * m_nLength), &dwBytesRead, NULL);
-	::CloseHandle(hFile);
-
-	m_pHeightMapImage = new BYTE[m_nWidth * m_nLength];
-	for (int y = 0; y < m_nLength; y++)
-	{
-		for (int x = 0; x < m_nWidth; x++)
-		{
-			m_pHeightMapImage[x + ((m_nLength - 1 - y)*m_nWidth)] = pHeightMapImage[x + (y*m_nWidth)];
-		}
-	}
-
-	if (pHeightMapImage) delete[] pHeightMapImage;
+	m_xmf3Scale = XMFLOAT3(static_cast<float>(m_pSpaceContainer->GetSize() / (m_nWidth)),
+		fHeightScale, static_cast<float>(m_pSpaceContainer->GetSize()/(m_nLength)));
 
 	//skybox depth stencil
 	D3D11_DEPTH_STENCIL_DESC descDepth;
@@ -101,12 +96,28 @@ void CTerrainContainer::Begin(LPCTSTR pHeightmapFileName, int nWidth, int nLengt
 }
 
 bool CTerrainContainer::End() {
+	if (m_pHeightData) delete[] m_pHeightData;
+	if (m_pBaseTexture) m_pBaseTexture->End();
+	if (m_pHeightMapTexture) m_pHeightMapTexture->End();
+
 	//if (m_pGlobalTerrain) delete m_pGlobalTerrain;
+
 	if (m_pGlobalTerrainData) delete m_pGlobalTerrainData;
-	if (m_pStempManager) m_pStempManager->End();
-	if (m_pSplattingInfoManager) m_pSplattingInfoManager->End();
+	if (m_pStempManager) {
+		m_pStempManager->End();
+		delete m_pStempManager;
+	}
+
+	if (m_pSplattingInfoManager) {
+		m_pSplattingInfoManager->End();
+		delete m_pSplattingInfoManager;
+	}
 	m_vpTerrain.clear();
 
+	if(m_pd3dSpaceRSState)m_pd3dSpaceRSState->Release();
+	if(m_pd3dTempRSState)m_pd3dTempRSState->Release();
+	if(m_pd3dDepthStencilState)m_pd3dDepthStencilState->Release();
+	if(m_pd3dTempDepthStencilState)m_pd3dTempDepthStencilState->Release();
 	return false;
 }
 
@@ -123,6 +134,7 @@ void CTerrainContainer::Render(shared_ptr<CCamera> pCamera){
 	SetBufferInfo();
 	//map tool ready
 
+	m_pBaseTexture->SetShaderState();
 	m_pHeightMapTexture->SetShaderState();
 	m_pStempManager->SetShaderState();
 	m_pGlobalTerrainBuffer->SetShaderState();
@@ -131,9 +143,10 @@ void CTerrainContainer::Render(shared_ptr<CCamera> pCamera){
 	m_pTerrainRenderContainer->Render(pCamera);//render
 	m_pSplattingInfoManager->CleanShaderState();//splatting
 	/////////////////////////////////////////
+	m_pBaseTexture->CleanShaderState();
+	m_pHeightMapTexture->CleanShaderState();
 	m_pStempManager->CleanShaderState();
 	m_pGlobalTerrainBuffer->CleanShaderState();
-	m_pHeightMapTexture->CleanShaderState();
 }
 
 float CTerrainContainer::GetHeight(XMVECTOR xmvPos){
@@ -141,6 +154,13 @@ float CTerrainContainer::GetHeight(XMVECTOR xmvPos){
 	XMStoreFloat3(&xmf3Pos, xmvPos);
 	float fx = xmf3Pos.x;
 	float fz = xmf3Pos.z;
+
+	return GetHeight(XMFLOAT2(fx, fz));
+}
+
+float CTerrainContainer::GetHeight(XMFLOAT2 xmf2Pos){
+	float fx = SPACE_SIZE - xmf2Pos.x;
+	float fz = SPACE_SIZE - xmf2Pos.y;
 
 	fx = fx / m_xmf3Scale.x;
 	fz = fz / m_xmf3Scale.z;
@@ -189,6 +209,8 @@ float CTerrainContainer::GetHeight(XMVECTOR xmvPos){
 }
 
 void CTerrainContainer::SetPicpos(float x, float y){
+	m_xmf2CurPickPos.x = x;
+	m_xmf2CurPickPos.y = y;
 	m_pStempManager->SetPickPos(XMFLOAT2(x / SPACE_SIZE, y / SPACE_SIZE));
 }
 
@@ -226,15 +248,13 @@ void CTerrainContainer::Update(shared_ptr<CCamera> pCamera) {
 	pNearestObject = PickObjects(pCamera->GetPosition(), XMVector3Normalize(xmvRayDir), fHitDistance);
 	fNearDistance = fHitDistance;
 	
-	static bool g_SetTerrain = true;
-	
-	
-	if (g_SetTerrain) {
+	int mode = m_StempMode;
+	if (mode == STEMP_MODE_SET) {
 		if (INPUTMGR->MouseLeftDown() || INPUTMGR->MouseRightDown()) {
 			SetPickPosHeight();
 		}
 	}
-	else {
+	else if(mode == STEMP_MODE_INDE){
 		if (INPUTMGR->MouseLeftDown()) {
 			IncreasePickPosHeight();
 		}
@@ -260,6 +280,7 @@ CGameObject * CTerrainContainer::PickObjects(XMVECTOR xmvWorldCameraStartPos, XM
 				distance = fHitDistance;//더 가까우면 가장 가까운 객체 변경
 				return pObject;
 			}
+
 		}
 	}
 	//return pObj;
@@ -269,7 +290,7 @@ void CTerrainContainer::ReadyHeightMap(){
 	m_pHeightMapTexture->End();
 	
 	//height map data init
-	EXPORTER->MakeBitmap24(L"../TempHeightmap.bmp", m_pHeightData, m_nWidth - 1, m_nLength - 1);
+	EXPORTER->MakeBitmap24(L"../TempHeightmap.bmp", m_pHeightData, m_nWidth, m_nLength);
 	m_pHeightMapTexture = CTexture::CreateTexture(L"../TempHeightmap.bmp", RESOURCEMGR->GetSampler("TerrainHeightMap"), 1, BIND_DS);
 }
 
@@ -288,7 +309,8 @@ void CTerrainContainer::IncreasePickPosHeight(){
 		m_pStempManager->IncreaseTerrain(m_pHeightData);
 	}
 	else if (GLOBALVALUEMGR->GetToolMode() == TOOL_MODE_SPLATTING) {
-		m_pSplattingInfoManager->IncreaseBlendinginfo(m_pStempManager);
+		if (m_pSplattingInfoManager->GetSplattingInfos().empty()) return;
+		m_pStempManager->IncreaseTerrain(m_pSplattingInfoManager->GetCurSplattingInfo()->GetBlendInfo());
 	}
 }
 
@@ -297,7 +319,8 @@ void CTerrainContainer::DecreasePickPosHeight(){
 		m_pStempManager->DecreaseTerrain(m_pHeightData);
 	}
 	else if (GLOBALVALUEMGR->GetToolMode() == TOOL_MODE_SPLATTING) {
-		m_pSplattingInfoManager->DecreaseBlendinginfo(m_pStempManager);
+		if (m_pSplattingInfoManager->GetSplattingInfos().empty()) return;
+		m_pStempManager->DecreaseTerrain(m_pSplattingInfoManager->GetCurSplattingInfo()->GetBlendInfo());
 	}
 }
 
@@ -306,8 +329,22 @@ void CTerrainContainer::SetPickPosHeight(){
 		m_pStempManager->SetTerrain(m_pHeightData);
 	}
 	else if (GLOBALVALUEMGR->GetToolMode() == TOOL_MODE_SPLATTING) {
-		m_pSplattingInfoManager->SetBlendinginfo(m_pStempManager);
+		if (m_pSplattingInfoManager->GetSplattingInfos().empty()) return;
+		m_pStempManager->SetTerrain(m_pSplattingInfoManager->GetCurSplattingInfo()->GetBlendInfo());
 	}
+}
+
+void CTerrainContainer::SetBaseTexture(wstring path){
+	if (m_pBaseTexture)m_pBaseTexture->End();
+	m_pBaseTexture = nullptr;
+
+	m_pBaseTexture = CTexture::CreateTexture(path, RESOURCEMGR->GetSampler("DEFAULT"), 0);
+}
+
+void CTerrainContainer::CreateSplattingInfo(){
+	//m_pSplattingInfoManager->CreateSplattingInfo(L"../outputdata/SplattingBlendInfo/BlendInfo0.bmp", L"../../Assets/Detail_Texture_9.jpg");
+	m_pSplattingInfoManager->CreateSplattingInfo(L"../../Assets/Detail_Texture/Detail_Texture_Default.jpg");
+	//m_pSplattingInfoManager->CreateSplattingInfo(L"../outputdata/SplattingBlendInfo/BlendInfo0.bmp", L"../../Assets/default.jpg");
 }
 
 CTerrainContainer::CTerrainContainer() : CObject("terraincontainer") {

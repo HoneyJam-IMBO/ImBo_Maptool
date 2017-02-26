@@ -22,7 +22,7 @@ public:
 	virtual void SetLength(float len) = 0;
 	virtual void SetRange(float outer, float inner = 0.0f) = 0;
 	virtual void SetColor(float r, float g, float b) = 0;//color
-
+	virtual XMFLOAT3 GetColor() = 0;
 	light_id GetLightID() { return m_lightid; };
 
 
@@ -32,6 +32,6 @@ protected:
 	light_id m_lightid{ light_id::LIGHT_END };
 
 public:
-	CLight():CGameObject("light", tag::TAG_DYNAMIC_OBJECT) { m_lightid = light_id::LIGHT_END; }
+	CLight(string name):CGameObject(name, tag::TAG_DYNAMIC_OBJECT) { m_lightid = light_id::LIGHT_END; }
 	virtual ~CLight() {}
 };

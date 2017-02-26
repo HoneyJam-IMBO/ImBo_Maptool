@@ -5,8 +5,8 @@
 #define SPLATTING_NUM 1
 
 texture2D gtxtBase : register(t0);
-texture2D gtxtDetail : register(t1);
-texture2D gtxtBlendInfo : register(t2);
+Texture2DArray gtxtDetail : register(t1);
+Texture2DArray gtxtBlendInfo : register(t2);
 texture2D gtxtPicpos : register(t3);
 sampler gssTerrain : register(s0);
 sampler gssPicpos : register(s2);
@@ -28,7 +28,9 @@ cbuffer gPicposRenderInfo : register(b4) {
 	float gRenderRadius : packoffset(c0.z);
 	uint gMode : packoffset(c0.w);
 }
-
+cbuffer gSplattingInfo : register(b5) {
+	uint gSplattingNum : packoffset(c0.x);
+}
 struct DS_OUT {
 	float4 position : SV_POSITION;
 	float3 positionW : POSITION;
@@ -52,8 +54,7 @@ float4 RenderPickPos(float2 texCoord) {
 	//picpos render
 	return cColor;
 }
-PS_GBUFFER_OUT main(DS_OUT input)
-{
+PS_GBUFFER_OUT main(DS_OUT input){
 	PS_GBUFFER_OUT output = (PS_GBUFFER_OUT)0;
 
 	//set base color
@@ -63,24 +64,21 @@ PS_GBUFFER_OUT main(DS_OUT input)
 
 	float4 cCurrentTexColor = float4(1.0f, 1.0f, 1.0f, 1.0f);
 	float4 cPreviousTexColor = cBaseTexColor;
-
-	//	¿Œµ¶Ω∫
-	float CurrentTextureIndex = 0;
-	cCurrentTexColor = gtxtDetail.Sample(gssTerrain, input.detailTexCoord);//get detail
-	//cCurrentTexColor = saturate((cPreviousTexColor * 0.5f) + (cCurrentTexColor * 0.5f)); 
-	cDetailAlpha = gtxtBlendInfo.Sample(gssTerrain, input.texCoord).x;
-	cDetailTexColor = lerp(cPreviousTexColor, cCurrentTexColor, cDetailAlpha);
-	cPreviousTexColor = cDetailTexColor;
+	cDetailTexColor = cBaseTexColor;
 	//set base color
 
+	//¿Œµ¶Ω∫ 
+	float CurrentTextureIndex = 0;
+
 	//set splatting detail color
-	//while (CurrentTextureIndex < gvTerrainTextureIndex.a)
-	//{
-	//	cCurrentTexColor = gtxtDetail.Sample(gssTerrain, input.detailTexCoord);
-	//	cDetailAlpha = gtxtBlendInfo.Sample(gssTerrain, input.texCoordBase).x;
-	//	cDetailTexColor = lerp(cPreviousTexColor, cCurrentTexColor, cDetailAlpha);
-	//	cPreviousTexColor = cDetailTexColor;
-	//}
+	while (CurrentTextureIndex < gSplattingNum){
+		cCurrentTexColor = gtxtDetail.Sample(gssTerrain, float3(input.detailTexCoord, CurrentTextureIndex));//get detail
+		//cCurrentTexColor = saturate((cPreviousTexColor * 0.5f) + (cCurrentTexColor * 0.5f)); 
+		cDetailAlpha = gtxtBlendInfo.Sample(gssTerrain, float3(input.texCoord, CurrentTextureIndex)).x;
+		cDetailTexColor = lerp(cPreviousTexColor, cCurrentTexColor, cDetailAlpha);
+		cPreviousTexColor = cDetailTexColor;
+		CurrentTextureIndex++;
+	}
 
 	float4 cColor = saturate(cDetailTexColor);
 

@@ -32,6 +32,7 @@ public:
 	virtual void SetLength(float len);
 	virtual void SetRange(float outer, float inner = 0.0f);
 	virtual void SetColor(float r, float g, float b);//color
+	virtual XMFLOAT3 GetColor();
 
 	virtual bool IsVisible(shared_ptr<CCamera> pCamera);
 private:

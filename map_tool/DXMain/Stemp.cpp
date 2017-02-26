@@ -46,6 +46,7 @@ void CStemp::IncreaseTerrain(Pixel24* pHeightData, XMFLOAT2 pickPos, float fRadi
 			int stempIndex = (is*scale) + (js*scale) * STEMP_HEIGHT;
 			//m_pHeightData[index].r = m_pHeightData[index].r + 1;
 			//m_pHeightData[index].g = m_pHeightData[index].g + 1;
+			if ((pHeightData[index].r + m_pStempData[stempIndex].r) > 255) continue;
 			pHeightData[index].r = pHeightData[index].r + m_pStempData[stempIndex].r;
 		}
 	}
@@ -69,6 +70,7 @@ void CStemp::DecreaseTerrain(Pixel24* pHeightData, XMFLOAT2 pickPos, float fRadi
 			int stempIndex = (is*scale) + (js*scale) * STEMP_HEIGHT;
 			//m_pHeightData[index].r = m_pHeightData[index].r + 1;
 			//m_pHeightData[index].g = m_pHeightData[index].g + 1;
+			if ((pHeightData[index].r + m_pStempData[stempIndex].r) <= 0) continue;
 			pHeightData[index].r = pHeightData[index].r - m_pStempData[stempIndex].r;
 		}
 	}

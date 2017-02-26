@@ -91,7 +91,12 @@ void CSpotLight::SetColor(float r, float g, float b){
 	m_SpotData.SpotLightColor = XMFLOAT3(r,g,b);
 }
 
-CSpotLight::CSpotLight() {
+XMFLOAT3 CSpotLight::GetColor()
+{
+	return XMFLOAT3();
+}
+
+CSpotLight::CSpotLight() : CLight("spotlight") {
 	
 }
 CSpotLight::~CSpotLight() {

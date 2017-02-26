@@ -23,7 +23,7 @@ public:
 
 	void SetPickPos(XMFLOAT2 xmf2Pos) { m_pPicposRenderInfo->PickPos = xmf2Pos; }
 	XMFLOAT2 GetPickPos() { return m_pPicposRenderInfo->PickPos; }
-	void SetExtent(float extent) { m_pPicposRenderInfo->Extent = extent; }
+	void SetExtent(float extent) { m_pPicposRenderInfo->Extent = (extent / SPACE_SIZE); }
 	float GetExtent() { return m_pPicposRenderInfo->Extent; }
 	TERRAIN_PICPOS_RENDER_INFO* GetTerrainPickPosRenderInfo() { return m_pPicposRenderInfo; }
 	vector<CStemp*>& GetStemps() { return m_vStemp; }
@@ -31,13 +31,12 @@ public:
 	void SetCurStempIndex(int index);
 	void CreateStemp(wstring name);
 private:
-	XMFLOAT2 m_xmf2PickPos;
-	float m_fExtent{ 0.f };
+	float m_fExtent{ 50.f };
 	TERRAIN_PICPOS_RENDER_INFO* m_pPicposRenderInfo{ nullptr };
 	shared_ptr<CBuffer> m_pPicposRenderInfoBuffer{ nullptr };
 
 	vector<CStemp*> m_vStemp;
-	int m_nCurStemp{ 0 };
+	float m_nCurStemp{ 0.f };
 public:
 	CStempManager();
 	~CStempManager();

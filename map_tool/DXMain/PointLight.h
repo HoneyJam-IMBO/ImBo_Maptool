@@ -30,6 +30,7 @@ public:
 	virtual void SetLength(float len);
 	virtual void SetRange(float outer, float inner = 0.0f);
 	virtual void SetColor(float r, float g, float b);//color
+	virtual XMFLOAT3 GetColor();
 private:
 	//data
 	POINT_LIGHT m_PointData{};

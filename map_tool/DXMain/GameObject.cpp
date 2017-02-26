@@ -394,10 +394,9 @@ void CGameObject::CreateObjectUI(){
 	TWBARMGR->SetBarMovable(barName, false);
 	TWBARMGR->SetBarResizable(barName, false);
 	//set param
-	TWBARMGR->AddRotationMinMaxBar(barName, "Rotation World", "Rotate", this);
+	TWBARMGR->AddRotationBar(barName, "Rotation World", "Rotate", this);
 	TWBARMGR->AddPositionBar(barName, "Position", "Position", this, 0.f, SPACE_SIZE - 1.0f, 1.0f);
 	TWBARMGR->AddScaleBar(barName, "Scale", "Scale", this, 0.1f, 100.f, 0.1f);
-
 }
 
 void CGameObject::CreateMeshUI(){

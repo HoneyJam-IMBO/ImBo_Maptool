@@ -223,6 +223,7 @@ bool CGlobalValueManager::End() {
 	if (m_pd3dDevice) m_pd3dDevice->Release();
 	if (m_pd3dDeviceContext) m_pd3dDeviceContext->Release();
 
+	if (m_pPositioningObject) delete m_pPositioningObject;
 	return true;
 }
 

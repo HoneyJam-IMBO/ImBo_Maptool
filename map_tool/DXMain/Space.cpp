@@ -104,7 +104,7 @@ void CSpace::Animate(float fTimeElapsed){
 			nObject++;
 		}
 		if(INPUTMGR->GetDebugMode())
-			DEBUGER->AddText(10.0f, 10.0f, static_cast<float>(m_index * 15.f), YT_Color(255, 255, 255), L"space %d object_num : %d", m_index, nObject);
+			DEBUGER->AddText(10.0f, 250.0f, static_cast<float>(m_index * 15.f), YT_Color(255, 255, 255), L"space %d object_num : %d", m_index, nObject);
 
 
 		for (auto pObject : lpDeleteObject) {

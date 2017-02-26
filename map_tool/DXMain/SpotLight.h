@@ -39,6 +39,7 @@ public:
 	virtual void SetLength(float len);
 	virtual void SetRange(float outer, float inner = 0.0f);
 	virtual void SetColor(float r, float g, float b);//color
+	virtual XMFLOAT3 GetColor();
 private:
 	float m_fSpotLightRangeRcp{ 0.0 };
 	float m_fSpotCosOuterCone{ 0.0 };

@@ -71,8 +71,13 @@ void CCapsuleLight::SetColor(float r, float g, float b){
 	m_CapsuleData.CapsuleLightColor = XMFLOAT3(r, g, b);
 }
 
+XMFLOAT3 CCapsuleLight::GetColor(){
 
-CCapsuleLight::CCapsuleLight() {
+	return XMFLOAT3();
+}
+
+
+CCapsuleLight::CCapsuleLight() : CLight("capsulelight") {
 	
 }
 CCapsuleLight ::~CCapsuleLight() {

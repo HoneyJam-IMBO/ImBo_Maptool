@@ -134,8 +134,8 @@ CRenderContainer* CRenderContainerSeller::GetRenderContainer(object_id objectid)
 		m_mRenderContainer[objectid]->SetShader(RESOURCEMGR->GetRenderShader("Terrain"));
 		m_mRenderContainer[objectid]->AddMaterial(RESOURCEMGR->GetMaterial("Terrain"));
 		m_mRenderContainer[objectid]->AddInstanceBuffer(RESOURCEMGR->GetBuffer("TerrainIB"));
-		m_mRenderContainer[objectid]->AddTexture(RESOURCEMGR->GetTexture("TerrainHeightMap"));
-		m_mRenderContainer[objectid]->AddTexture(RESOURCEMGR->GetTexture("TerrainBase"));
+		//m_mRenderContainer[objectid]->AddTexture(RESOURCEMGR->GetTexture("TerrainHeightMap"));
+		//m_mRenderContainer[objectid]->AddTexture(RESOURCEMGR->GetTexture("TerrainBase"));
 		//m_mRenderContainer[objectid]->AddTexture(RESOURCEMGR->GetTexture("TerrainDetail"));
 		m_mRenderContainer[objectid]->AddTexture(RESOURCEMGR->GetTexture("TerrainNormalMap"));
 
