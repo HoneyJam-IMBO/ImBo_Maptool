@@ -17,6 +17,8 @@
 #include "SpaceContainer.h"
 //terrain
 #include "TerrainContainer.h"
+//skybox
+#include "SkyBoxContainer.h"
 //light
 #include "PointLight.h"
 #include "SpotLight.h"
@@ -74,16 +76,6 @@ private:
 	//진짜 카메라는 framework에 있다.
 	shared_ptr<CCamera> m_pCamera{ nullptr };
 
-	//global object
-	CSkyBox* m_pSkyBox{ nullptr };
-	CDirectionalLight* m_pDirectionalLight{ nullptr };
-	//global object
-
-	//container seller
-	//CRenderContainerSeller* m_RenderContainerSeller{ nullptr };
-	//container seller
-	CTestCube* m_pRotationTestObject{ nullptr };
-	
 	//space
 	CSpaceContainer* m_pSpaceContainer{ nullptr };
 	//space
@@ -92,6 +84,10 @@ private:
 	CTerrainContainer* m_pTerrainContainer{ nullptr };
 	//terrain
 	
+	//skybox
+	CSkyBoxContainer* m_pSkyBoxContainer{ nullptr };
+	//skybox
+
 	//player
 	CPlayer* m_pPlayer{ nullptr };
 	//player

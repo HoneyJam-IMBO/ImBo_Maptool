@@ -1,12 +1,10 @@
 #include "stdafx.h"
 #include "PointLight.h"
 
-bool CPointLight::Begin(POINT_LIGHT& light_info) {
+bool CPointLight::Begin() {
 	m_lightid = light_id::LIGHT_POINT;
 	m_objectID = object_id::OBJECT_POINT_LIGHT;
 
-	m_PointData = light_info;
-	
 	m_xmmtxScale = XMMatrixScalingFromVector(XMVECTOR(XMVectorSet(m_PointData.fRange, m_PointData.fRange, m_PointData.fRange, 1.0f)));
 	m_fRangeRcp = 1 / m_PointData.fRange;
 
@@ -72,6 +70,16 @@ void CPointLight::SetColor(float r, float g, float b){
 XMFLOAT3 CPointLight::GetColor()
 {
 	return XMFLOAT3();
+}
+
+CPointLight* CPointLight::CreatePointLight(float fRange, XMFLOAT3 xmf3Color){
+	CPointLight* pLight = new CPointLight;
+	POINT_LIGHT data;
+	data.fRange = fRange;
+	data.xmf3Color = xmf3Color;
+	pLight->SetPointLightData(data);
+	pLight->Begin();
+	return pLight;
 }
 
 

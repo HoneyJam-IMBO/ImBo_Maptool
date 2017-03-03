@@ -1,11 +1,9 @@
 #include "stdafx.h"
 #include "CapsuleLight.h"
 
-bool CCapsuleLight::Begin(CAPSULE_LIGHT& light_info) {
+bool CCapsuleLight::Begin() {
 	m_lightid = light_id::LIGHT_CAPSULE;
 	m_objectID = object_id::OBJECT_CAPSULE_LIGHT;
-
-	m_CapsuleData = light_info;
 
 	m_fHalfSegmentLen = m_CapsuleData.CapsuleLightLen*0.5f;
 	m_fCapsuleLightRangeRcp = 1 / m_CapsuleData.CapsuleLightRange;
@@ -57,6 +55,7 @@ void CCapsuleLight::SetBufferInfo(void** ppMappedResources, int& nInstance, shar
 
 }
 
+
 void CCapsuleLight::SetLength(float len){
 	m_CapsuleData.CapsuleLightLen = len;
 	m_fHalfSegmentLen = m_CapsuleData.CapsuleLightLen*0.5f;
@@ -74,6 +73,17 @@ void CCapsuleLight::SetColor(float r, float g, float b){
 XMFLOAT3 CCapsuleLight::GetColor(){
 
 	return XMFLOAT3();
+}
+
+CCapsuleLight * CCapsuleLight::CreateCapsuleLight(float CapsuleLightLen, XMFLOAT3 CapsuleLightColor, float CapsuleLightRange){
+	CCapsuleLight* pLight = new CCapsuleLight;
+	CAPSULE_LIGHT data;
+	data.CapsuleLightColor = CapsuleLightColor;
+	data.CapsuleLightLen = CapsuleLightLen;
+	data.CapsuleLightRange = CapsuleLightRange;
+	pLight->SetCapsuleLightData(data);
+	pLight->Begin();
+	return pLight;
 }
 
 

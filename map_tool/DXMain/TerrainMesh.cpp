@@ -33,14 +33,18 @@ bool CTerrainMesh::CreateVertexBuffer() {
 		B[j] = B[0];
 	}
 	m_pd3dPositionBuffer = CreateBuffer(sizeof(XMFLOAT3), m_nVertices, m_pVertices, D3D11_BIND_VERTEX_BUFFER, D3D11_USAGE_DEFAULT, 0);
-	m_pd3dTBuffer = CreateBuffer(sizeof(XMFLOAT3), m_nVertices, T, D3D11_BIND_VERTEX_BUFFER, D3D11_USAGE_DEFAULT, 0);
-	m_pd3dBBuffer = CreateBuffer(sizeof(XMFLOAT3), m_nVertices, B, D3D11_BIND_VERTEX_BUFFER, D3D11_USAGE_DEFAULT, 0);
+	//m_pd3dTBuffer = CreateBuffer(sizeof(XMFLOAT3), m_nVertices, T, D3D11_BIND_VERTEX_BUFFER, D3D11_USAGE_DEFAULT, 0);
+	//m_pd3dBBuffer = CreateBuffer(sizeof(XMFLOAT3), m_nVertices, B, D3D11_BIND_VERTEX_BUFFER, D3D11_USAGE_DEFAULT, 0);
 
 	//-----------------------------------버퍼 조립-----------------------------------
-	ID3D11Buffer *pd3dBuffers[3] = { m_pd3dPositionBuffer,m_pd3dTBuffer,m_pd3dBBuffer };
-	UINT pnBufferStrides[3] = { sizeof(XMFLOAT3),sizeof(XMFLOAT3) ,sizeof(XMFLOAT3) };
-	UINT pnBufferOffsets[3] = { 0,0,0 };
-	AssembleToVertexBuffer(3, pd3dBuffers, pnBufferStrides, pnBufferOffsets);
+	//ID3D11Buffer *pd3dBuffers[3] = { m_pd3dPositionBuffer,m_pd3dTBuffer,m_pd3dBBuffer };
+	//UINT pnBufferStrides[3] = { sizeof(XMFLOAT3),sizeof(XMFLOAT3) ,sizeof(XMFLOAT3) };
+	//UINT pnBufferOffsets[3] = { 0,0,0 };
+	//AssembleToVertexBuffer(3, pd3dBuffers, pnBufferStrides, pnBufferOffsets);
+	ID3D11Buffer *pd3dBuffers[1] = { m_pd3dPositionBuffer };
+	UINT pnBufferStrides[1] = { sizeof(XMFLOAT3) };
+	UINT pnBufferOffsets[1] = { 0 };
+	AssembleToVertexBuffer(1, pd3dBuffers, pnBufferStrides, pnBufferOffsets);
 	//-----------------------------------버퍼 조립-----------------------------------
 
 //	m_pd3dPositionBuffer = CreateBuffer(sizeof(XMFLOAT3), m_nVertices, m_pVertices, D3D11_BIND_VERTEX_BUFFER, D3D11_USAGE_DEFAULT, 0);

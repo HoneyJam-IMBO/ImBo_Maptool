@@ -5,6 +5,7 @@
 //
 #include "DirectionalLight.h"
 #include "TerrainContainer.h"
+#include "SkyBoxContainer.h"
 #include "ObjectRenderer.h"
 #include "AORenderer.h"
 #include "LightRenderer.h"
@@ -35,6 +36,7 @@ public:
 
 	bool ResizeBuffer();
 	void SetTerrainContainer(CTerrainContainer* pTerrainContainer) { m_pTerrainContainer = pTerrainContainer; }
+	void SetSkyBoxContainer(CSkyBoxContainer* pSkyBoxContainer) { m_pSkyBoxContainer = pSkyBoxContainer; }
 	void SetDirectionalLight(CDirectionalLight* pDirectionalLight) { m_pDirectionalLIght = pDirectionalLight; }
 private:
 	//SSAO 관련 변수
@@ -87,6 +89,7 @@ private:
 	//--------------------------light render target----------------
 	//-------------------------layer-------------------------
 	CTerrainContainer* m_pTerrainContainer{ nullptr };
+	CSkyBoxContainer* m_pSkyBoxContainer{ nullptr };
 	CObjectRenderer* m_pObjectRenderer{ nullptr };
 	CAORenderer* m_pAORenderer{ nullptr };
 	CLightRenderer* m_pLightRenderer{ nullptr };

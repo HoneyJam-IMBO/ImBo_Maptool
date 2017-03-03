@@ -7,7 +7,7 @@
 
 class CSpaceContainer : public CObject {
 public:
-	void Begin(int size, int lv);
+	void Begin();
 	bool End();
 
 	//space controller
@@ -30,6 +30,9 @@ public:
 	UINT GetLevel() { return m_level; }
 	UINT GetOneSideSpaceNum() { return m_oneSideSpaceNum; }
 	UINT GetOneSpaceSize() { return m_oneSpaceSize; }
+
+	void SetSpaceSize(int size) { m_size = size; }
+	void SetSpaceLevel(int lv) { m_level = lv; }
 	//자신이 있는 공간을 찾는 함수 해당 공간의 번호를 리턴한다.
 	
 
@@ -40,8 +43,9 @@ public:
 
 	//모든 lay 충돌 검사된 객체 중 가장 가장 가까운 객체
 	CGameObject* PickObject(XMVECTOR xmvWorldCameraStartPos, XMVECTOR xmvRayDir, float& distanse);
+
+	static CSpaceContainer* CreateSpaceContainer(int size, int lv);
 private:
-	
 	//space들을 관리한다.
 	CSpace** m_ppSpace{ nullptr };
 	//쿼드 트리의 루트노드에 해당하는 startSpace 관리

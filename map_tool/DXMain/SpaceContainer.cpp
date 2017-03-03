@@ -1,15 +1,11 @@
 #include "stdafx.h"
 #include "SpaceContainer.h"
 
-void CSpaceContainer::Begin(int size, int lv){
-	//크기 설정 
-	m_size = size;
-	//레벨 설정
-	m_level = lv;
+void CSpaceContainer::Begin(){
 	//한 사이드에 있는 공간의 개수
 	m_oneSideSpaceNum = static_cast<int>(pow(2, m_level));
 	//공간 하나의 크기
-	m_oneSpaceSize = size / m_oneSideSpaceNum;
+	m_oneSpaceSize = m_size / m_oneSideSpaceNum;
 	//공간의 개수 쿼드트리니까 제곱
 	m_nSpace = static_cast<int>(pow(m_oneSideSpaceNum, 2));
 
@@ -19,7 +15,6 @@ void CSpaceContainer::Begin(int size, int lv){
 	//공간 할당.
 	m_pStartSpace = new CSpace();
 	m_pStartSpace->Begin(this, m_size, m_level, XMVectorSet(0.f, 0.f, 0.f, 0.f));
-
 }
 
 bool CSpaceContainer::End(){
@@ -142,10 +137,19 @@ CGameObject * CSpaceContainer::PickObject(XMVECTOR xmvWorldCameraStartPos, XMVEC
 	return pNearObj;
 }
 
-CSpaceContainer::CSpaceContainer() : CObject("spacecontainer"){
+CSpaceContainer * CSpaceContainer::CreateSpaceContainer(int size, int lv){
+	CSpaceContainer* pSpaceContainer = new CSpaceContainer();
+	pSpaceContainer->SetSpaceSize(size);
+	pSpaceContainer->SetSpaceLevel(lv);
+	pSpaceContainer->Begin();
+	return pSpaceContainer;
 }
 
-CSpaceContainer::~CSpaceContainer()
-{
+CSpaceContainer::CSpaceContainer() : CObject("spacecontainer"){
+
+}
+
+CSpaceContainer::~CSpaceContainer(){
+
 }
 

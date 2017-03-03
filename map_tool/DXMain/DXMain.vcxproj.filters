@@ -390,6 +390,9 @@
     <Filter Include="HLSL\Compute\SSLR">
       <UniqueIdentifier>{4224c8fa-3654-4621-9b5f-ef22000478db}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\44.GameObject\SkyBox\SkyBoxContainer">
+      <UniqueIdentifier>{7bf44cdf-3aa7-4696-b042-2c218d921544}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -695,6 +698,9 @@
     <ClInclude Include="SplattingInfoManager.h">
       <Filter>소스 파일\44.GameObject\Terrain\SplattingInfo\SplattingInfoManager</Filter>
     </ClInclude>
+    <ClInclude Include="SkyBoxContainer.h">
+      <Filter>소스 파일\44.GameObject\SkyBox\SkyBoxContainer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -987,6 +993,9 @@
     </ClCompile>
     <ClCompile Include="SplattingInfoManager.cpp">
       <Filter>소스 파일\44.GameObject\Terrain\SplattingInfo\SplattingInfoManager</Filter>
+    </ClCompile>
+    <ClCompile Include="SkyBoxContainer.cpp">
+      <Filter>소스 파일\44.GameObject\SkyBox\SkyBoxContainer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

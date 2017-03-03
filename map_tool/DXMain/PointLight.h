@@ -19,7 +19,7 @@ struct POINT_LIGHT {
 
 class CPointLight : public CLight {
 public:
-	bool Begin(POINT_LIGHT& light_info);
+	bool Begin();
 	virtual bool End();
 
 
@@ -27,10 +27,13 @@ public:
 	virtual void SetBufferInfo(void** ppMappedResources, int& nInstance, shared_ptr<CCamera> pCamera);
 
 	//light info setter
+	void SetPointLightData(POINT_LIGHT& data) { m_PointData = data; }
 	virtual void SetLength(float len);
 	virtual void SetRange(float outer, float inner = 0.0f);
 	virtual void SetColor(float r, float g, float b);//color
 	virtual XMFLOAT3 GetColor();
+
+	static CPointLight* CreatePointLight(float fRange, XMFLOAT3 xmf3Color);
 private:
 	//data
 	POINT_LIGHT m_PointData{};

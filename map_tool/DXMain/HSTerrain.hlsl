@@ -3,8 +3,8 @@ struct VS_OUTPUT {
 	float3 positionW : POSITION;
 	float2 texCoord : TEXCOORD;
 	float2 detailTexCoord : TEXCOORD1;
-	float3 tangentW : TANGENT;
-	float3 bitangentW : BITANGET;
+	//float3 tangentW : TANGENT;
+	//float3 bitangentW : BITANGET;
 };
 
 // 제어점을 출력합니다.
@@ -13,8 +13,8 @@ struct TERRAIN_HS_OUTPUT
 	float3 positionW : POSITION;
 	float2 texCoord : TEXCOORD;
 	float2 detailTexCoord : TEXCOORD1;
-	float3 tangentW : TANGENT;
-	float3 bitangentW : BITANGET;
+	//float3 tangentW : TANGENT;
+	//float3 bitangentW : BITANGET;
 };
 
 // 패치 상수 데이터를 출력합니다.
@@ -54,7 +54,7 @@ TERRAIN_HS_OUTPUT main(InputPatch<VS_OUTPUT, 4> input, uint i : SV_OutputControl
 	output.positionW = input[i].positionW;
 	output.texCoord = input[i].texCoord;
 	output.detailTexCoord = input[i].detailTexCoord;
-	output.tangentW = input[i].tangentW;
-	output.bitangentW = input[i].bitangentW;
+	//output.tangentW = input[i].tangentW;
+	//output.bitangentW = input[i].bitangentW;
 	return output;
 }

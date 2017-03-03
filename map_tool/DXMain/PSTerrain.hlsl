@@ -1,5 +1,5 @@
 #include "PackGbuffer.hlsli"
-#include "GetWorldNormal.hlsli"
+//#include "GetWorldNormal.hlsli"
 
 //나중에 cBuffer로 바꿀 것임
 #define SPLATTING_NUM 1
@@ -10,6 +10,11 @@ Texture2DArray gtxtBlendInfo : register(t2);
 texture2D gtxtPicpos : register(t3);
 sampler gssTerrain : register(s0);
 sampler gssPicpos : register(s2);
+
+
+texture2D gtxtNormal : register(t5);
+sampler gssNormal : register(s5);
+
 
 struct Material {
 	float3 normal;
@@ -36,8 +41,8 @@ struct DS_OUT {
 	float3 positionW : POSITION;
 	float2 texCoord : TEXCOORD;
 	float2 detailTexCoord : TEXCOORD1;
-	float3 tangentW : TANGENT;
-	float3 bitangentW : BITANGET;
+	//float3 tangentW : TANGENT;
+	//float3 bitangentW : BITANGET;
 };
 float4 RenderPickPos(float2 texCoord) {
 	//picpos render
@@ -89,6 +94,9 @@ PS_GBUFFER_OUT main(DS_OUT input){
 	
 	
 	//get world normal
-	float3 normalW = GetWorldNormal(input.tangentW, input.bitangentW, input.texCoord);
+	//float3 normalW = GetWorldNormal(input.tangentW, input.bitangentW, input.texCoord);
+	float3 normalW = gtxtNormal.Sample(gssNormal, input.texCoord).rgb;
+	normalW *= 2;//0-2
+	normalW - float3(-1, -1, -1);//-1 1
 	return (PackGBuffer((float3)cColor, normalW, gSpecIntensity, gSpecExp));
 }

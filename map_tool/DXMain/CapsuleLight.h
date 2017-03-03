@@ -32,7 +32,7 @@ struct CAPSULE_LIGHT {
 
 class CCapsuleLight : public CLight {
 public:
-	virtual bool Begin(CAPSULE_LIGHT& light_info);
+	virtual bool Begin();
 	virtual bool End();
 
 	//instance buffer controll
@@ -40,10 +40,13 @@ public:
 	virtual void SetBufferInfo(void** ppMappedResource, int& nInstance, shared_ptr<CCamera> pCamera);
 
 	//light info setter
+	void SetCapsuleLightData(CAPSULE_LIGHT data) { m_CapsuleData = data; };
 	virtual void SetLength(float len);
 	virtual void SetRange(float outer, float inner = 0.0f);
 	virtual void SetColor(float r, float g, float b);//color
 	virtual XMFLOAT3 GetColor();
+
+	static CCapsuleLight* CreateCapsuleLight(float CapsuleLightLen, XMFLOAT3 CapsuleLightColor,	float CapsuleLightRange);
 private:
 	//data
 	CAPSULE_LIGHT m_CapsuleData;

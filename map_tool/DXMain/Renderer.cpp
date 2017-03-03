@@ -128,6 +128,7 @@ void CRenderer::Render(shared_ptr<CCamera> pCamera) {
 
 	//OBJECT RENDER
 	//terrain/ skybox render
+	if (m_pSkyBoxContainer) m_pSkyBoxContainer->Render(pCamera);
 	if(m_pTerrainContainer) m_pTerrainContainer->Render(pCamera);
 	//object
 	m_pObjectRenderer->Excute(pCamera);
@@ -191,11 +192,11 @@ void CRenderer::Render(shared_ptr<CCamera> pCamera) {
 
 		//if(testBotton){
 		//DEBUGER->AddTexture(XMFLOAT2(100, 100), XMFLOAT2(250, 250), m_pd3dsrvColorSpecInt);
-		//DEBUGER->AddTexture(XMFLOAT2(100, 250), XMFLOAT2(250, 400), m_pd3dsrvNormal);
+		DEBUGER->AddTexture(XMFLOAT2(500, 0), XMFLOAT2(750, 150), m_pd3dsrvNormal);
 		//DEBUGER->AddTexture(XMFLOAT2(100, 400), XMFLOAT2(250, 550), m_pd3dsrvLight);
 		//DEBUGER->AddTexture(XMFLOAT2(100, 100), XMFLOAT2(500, 500), m_pd3dsrvDepthStencil);
 		//debug
-		DEBUGER->AddTexture(XMFLOAT2(500, 0), XMFLOAT2(750, 150), pAmbientOcclution);
+		//DEBUGER->AddTexture(XMFLOAT2(500, 0), XMFLOAT2(750, 150), pAmbientOcclution);
 		//DEBUGER->AddTexture(XMFLOAT2(0, 0), XMFLOAT2(1000, 500), pAmbientOcclution);
 
 		//이건 꼭 여기서 해줘야함.
