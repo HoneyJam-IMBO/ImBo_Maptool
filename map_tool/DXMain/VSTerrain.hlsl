@@ -12,16 +12,16 @@ cbuffer GlobalTerrainInfo : register(b10)
 
 struct VS_INPUT {
 	float3 position : POSITION;
-	float3 tangent : TANGENT;
-	float3 bitangent : BITANGENT;
+	//float3 tangent : TANGENT;
+	//float3 bitangent : BITANGENT;
 	float4x4 mtxWorld : INSWORLDMTX;
 };
 struct VS_OUTPUT {
 	float3 positionW : POSITION;
 	float2 texCoord : TEXCOORD;
 	float2 detailTexCoord : TEXCOORD1;
-	float3 tangentW : TANGENT;
-	float3 bitangentW : BITANGET;
+	//float3 tangentW : TANGENT;
+	//float3 bitangentW : BITANGET;
 };
 
 float2 CalcUV(float3 positionW) {
@@ -51,8 +51,8 @@ VS_OUTPUT main( VS_INPUT input, uint vertexID : SV_VertexID )
 	output.positionW = mul(float4(input.position, 1.0f), input.mtxWorld).xyz;
 	output.texCoord = CalcUV(output.positionW);
 	output.detailTexCoord = arrUV[vertexID];
-	output.tangentW = mul(input.tangent, (float3x3)input.mtxWorld);
-	output.bitangentW = mul(input.bitangent, (float3x3)input.mtxWorld);
+	//output.tangentW = mul(input.tangent, (float3x3)input.mtxWorld);
+	//output.bitangentW = mul(input.bitangent, (float3x3)input.mtxWorld);
 
 	return output;
 }

@@ -12,7 +12,7 @@ void TW_CALL SMIndeButtonCallback(void * clientData) {
 	pData->SetStempMode(STEMP_MODE_INDE);
 }
 
-void CTerrainContainer::Begin(LPCTSTR pHeightmapFileName, int nWidth, int nLength, float fHeightScale, CSpaceContainer* pSpaceContainer) {
+void CTerrainContainer::Begin() {
 	
 	TWBARMGR->AddButtonCB("TOOL_MODE", "STEMP_MODEVIEW", "SetStemp", SMSetButtonCallback, this);
 	TWBARMGR->AddButtonCB("TOOL_MODE", "STEMP_MODEVIEW", "IndeStemp", SMIndeButtonCallback, this);
@@ -25,7 +25,6 @@ void CTerrainContainer::Begin(LPCTSTR pHeightmapFileName, int nWidth, int nLengt
 	//모든 stemp제작
 	m_pStempManager->Begin();
 
-	m_pSpaceContainer = pSpaceContainer;
 	//global object 제작
 	//m_pGlobalTerrain = new CGlobalTerrain();
 	////global object set, Update
@@ -38,16 +37,8 @@ void CTerrainContainer::Begin(LPCTSTR pHeightmapFileName, int nWidth, int nLengt
 	m_pGlobalTerrainData->OneSideSpaceNum = fOneSideSpaceNum;
 	m_pGlobalTerrainData->OneSideSpaceNumRcp = 1.0f / fOneSideSpaceNum;
 	m_pGlobalTerrainData->OneSpaceSizeRcp = 1.0f / fOneSpaceSize;
-	m_pGlobalTerrainData->HeightScale = fHeightScale;
-
-	//texture 제작
-	m_pHeightData = new Pixel24[(nWidth) * (nLength)];
-	ZeroMemory(m_pHeightData, sizeof(Pixel24) * (nWidth) * (nLength));
-	//height map data init
-	EXPORTER->MakeBitmap24(L"../TempHeightmap.bmp", m_pHeightData, nWidth, nLength);
-	m_pHeightMapTexture = CTexture::CreateTexture(L"../TempHeightmap.bmp", RESOURCEMGR->GetSampler("TerrainHeightMap"), 1, BIND_DS);
-	m_pBaseTexture = CTexture::CreateTexture(L"../../Assets/default.jpg", RESOURCEMGR->GetSampler("DEFAULT"), 0);
-
+	m_pGlobalTerrainData->HeightScale = m_xmf3Scale.y;
+	
 	//터레인 제작
 	//terrain
 	CTerrain* pTerrain = nullptr;
@@ -63,24 +54,7 @@ void CTerrainContainer::Begin(LPCTSTR pHeightmapFileName, int nWidth, int nLengt
 	}
 	//terrain
 
-	m_nWidth = nWidth;
-	m_nLength = nLength;
-	m_xmf3Scale = XMFLOAT3(static_cast<float>(m_pSpaceContainer->GetSize() / (m_nWidth)),
-		fHeightScale, static_cast<float>(m_pSpaceContainer->GetSize()/(m_nLength)));
-
-	//skybox depth stencil
-	D3D11_DEPTH_STENCIL_DESC descDepth;
-	descDepth.DepthEnable = FALSE;
-	descDepth.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
-	descDepth.DepthFunc = D3D11_COMPARISON_LESS;
-	descDepth.StencilEnable = TRUE;
-	descDepth.StencilReadMask = D3D11_DEFAULT_STENCIL_READ_MASK;
-	descDepth.StencilWriteMask = D3D11_DEFAULT_STENCIL_WRITE_MASK;
-	const D3D11_DEPTH_STENCILOP_DESC noSkyStencilOp = { D3D11_STENCIL_OP_KEEP, D3D11_STENCIL_OP_KEEP, D3D11_STENCIL_OP_KEEP, D3D11_COMPARISON_EQUAL };
-	descDepth.FrontFace = noSkyStencilOp;
-	descDepth.BackFace = noSkyStencilOp;
-	GLOBALVALUEMGR->GetDevice()->CreateDepthStencilState(&descDepth, &m_pd3dDepthStencilState);
-
+	
 	//RS
 	D3D11_RASTERIZER_DESC descRasterizer;
 	ZeroMemory(&descRasterizer, sizeof(D3D11_RASTERIZER_DESC));
@@ -90,7 +64,6 @@ void CTerrainContainer::Begin(LPCTSTR pHeightmapFileName, int nWidth, int nLengt
 	GLOBALVALUEMGR->GetDevice()->CreateRasterizerState(&descRasterizer, &m_pd3dSpaceRSState);
 	//RS
 
-	m_pSkyboxContainer = RCSELLER->GetRenderContainer(object_id::OBJECT_SKYBOX);
 	m_pTerrainRenderContainer = RCSELLER->GetRenderContainer(object_id::OBJECT_TERRAIN);
 	//height map data init
 }
@@ -116,26 +89,15 @@ bool CTerrainContainer::End() {
 
 	if(m_pd3dSpaceRSState)m_pd3dSpaceRSState->Release();
 	if(m_pd3dTempRSState)m_pd3dTempRSState->Release();
-	if(m_pd3dDepthStencilState)m_pd3dDepthStencilState->Release();
-	if(m_pd3dTempDepthStencilState)m_pd3dTempDepthStencilState->Release();
 	return false;
 }
 
 void CTerrainContainer::Render(shared_ptr<CCamera> pCamera){
-	//skybox
-	GLOBALVALUEMGR->GetDeviceContext()->OMGetDepthStencilState(&m_pd3dTempDepthStencilState, &m_TempStencil);
-	GLOBALVALUEMGR->GetDeviceContext()->OMSetDepthStencilState(m_pd3dDepthStencilState, 0);
-	m_pSkyboxContainer->Render(pCamera);
-	GLOBALVALUEMGR->GetDeviceContext()->OMSetDepthStencilState(m_pd3dTempDepthStencilState, m_TempStencil);
-	//skybox
-	
-	//map tool ready
 	ReadyHeightMap();
 	SetBufferInfo();
-	//map tool ready
-
 	m_pBaseTexture->SetShaderState();
 	m_pHeightMapTexture->SetShaderState();
+	m_pNormalTexture->SetShaderState();
 	m_pStempManager->SetShaderState();
 	m_pGlobalTerrainBuffer->SetShaderState();
 	/////////////////////////////////////////이부분을 루프돌것임
@@ -145,6 +107,7 @@ void CTerrainContainer::Render(shared_ptr<CCamera> pCamera){
 	/////////////////////////////////////////
 	m_pBaseTexture->CleanShaderState();
 	m_pHeightMapTexture->CleanShaderState();
+	m_pNormalTexture->SetShaderState();
 	m_pStempManager->CleanShaderState();
 	m_pGlobalTerrainBuffer->CleanShaderState();
 }
@@ -265,6 +228,13 @@ void CTerrainContainer::Update(shared_ptr<CCamera> pCamera) {
 
 	m_pStempManager->UpdateShaderState();
 	m_pSplattingInfoManager->UpdateShaderState();
+
+	//test
+	DEBUGER->AddTexture(XMFLOAT2(500, 150), XMFLOAT2(750, 300), m_pNormalTexture->GetShaderResourceView());
+	DEBUGER->AddTexture(XMFLOAT2(500, 150), XMFLOAT2(750, 300), m_pNormalTexture->GetShaderResourceView());
+	if (INPUTMGR->KeyDown(VK_R)) {
+		CreateNormalMap();
+	}
 	return;
 }
 
@@ -290,8 +260,10 @@ void CTerrainContainer::ReadyHeightMap(){
 	m_pHeightMapTexture->End();
 	
 	//height map data init
-	EXPORTER->MakeBitmap24(L"../TempHeightmap.bmp", m_pHeightData, m_nWidth, m_nLength);
-	m_pHeightMapTexture = CTexture::CreateTexture(L"../TempHeightmap.bmp", RESOURCEMGR->GetSampler("TerrainHeightMap"), 1, BIND_DS);
+	WCHAR path[256];
+	wsprintf(path, L"../%sHeightMap.bmp", m_wsTerrainName.c_str());//name
+	EXPORTER->MakeBitmap24(path, m_pHeightData, m_nWidth, m_nLength);
+	m_pHeightMapTexture = CTexture::CreateTexture(path, RESOURCEMGR->GetSampler("TerrainHeightMap"), 1, BIND_DS);
 }
 
 void CTerrainContainer::SetBufferInfo(){
@@ -345,6 +317,130 @@ void CTerrainContainer::CreateSplattingInfo(){
 	//m_pSplattingInfoManager->CreateSplattingInfo(L"../outputdata/SplattingBlendInfo/BlendInfo0.bmp", L"../../Assets/Detail_Texture_9.jpg");
 	m_pSplattingInfoManager->CreateSplattingInfo(L"../../Assets/Detail_Texture/Detail_Texture_Default.jpg");
 	//m_pSplattingInfoManager->CreateSplattingInfo(L"../outputdata/SplattingBlendInfo/BlendInfo0.bmp", L"../../Assets/default.jpg");
+}
+
+void CTerrainContainer::CreateNormalMap(){
+	//1. bitmap 좌표계의 height다.
+	//2. 그래서 world 좌표계 즉 x z가 반대로 되는 세계로 불러들인다.
+	//3. height는 그대로이다. 높이 값은 bitmap 세계에 있으니까 그냥 읽어도 됨
+	//4. normal을 계산한다.
+	//끝
+	m_pNormalTexture->End();
+
+	//calculate normal
+	XMVECTOR xmvSumNormal = XMVectorSet(0.f,0.f,0.f,0.f);
+	UINT nNormal{ 0 };
+	for (int i = 0; i < m_nWidth; ++i) {
+		for (int j = 0; j < m_nLength; ++j) {
+			xmvSumNormal = XMVectorSet(0.f, 0.f, 0.f, 0.f);
+			int xIndex = i;
+			int yIndex = j;
+			if ((xIndex -1) > 0 && (yIndex +1) < 255) {
+				XMVECTOR p0 = XMVectorSet(256 - (xIndex), m_pHeightData[(xIndex) + (m_nLength * yIndex)].r, 256 - yIndex, 0.f);
+				XMVECTOR p1 = XMVectorSet(256 - (xIndex - 1), m_pHeightData[(xIndex - 1) + (m_nLength * yIndex)].r, 256 - yIndex, 0.f);
+				XMVECTOR p2 = XMVectorSet(256 - (xIndex), m_pHeightData[(xIndex)+(m_nLength * (yIndex + 1))].r, 256 - (yIndex + 1), 0.f);
+				XMVECTOR edge1 = p1 - p0;
+				XMVECTOR edge2 = p2 - p0;
+				xmvSumNormal += XMVector3Normalize(XMVector3Cross(edge1, edge2));
+				nNormal++;
+			}
+			if ((xIndex +1) < 255 && (yIndex +1) < 255) {
+				XMVECTOR p0 = XMVectorSet(256 - (xIndex), m_pHeightData[(xIndex)+(m_nLength * yIndex)].r, 256 - yIndex, 0.f);
+				XMVECTOR p1 = XMVectorSet(256 - (xIndex), m_pHeightData[(xIndex)+(m_nLength * (yIndex + 1))].r, 256 - (yIndex + 1), 0.f);
+				XMVECTOR p2 = XMVectorSet(256 - (xIndex + 1), m_pHeightData[(xIndex + 1) + (m_nLength * yIndex)].r, 256 - yIndex, 0.f);
+				XMVECTOR edge1 = p1 - p0;
+				XMVECTOR edge2 = p2 - p0;
+				xmvSumNormal += XMVector3Normalize(XMVector3Cross(edge1, edge2));
+				nNormal++;
+			}
+			if (0 < (xIndex -1) && 0 < (yIndex -1)) {
+				XMVECTOR p0 = XMVectorSet(256 - xIndex, m_pHeightData[(xIndex)+(m_nLength * yIndex)].r, 256 - yIndex, 0.f);
+				XMVECTOR p1 = XMVectorSet(256 - xIndex, m_pHeightData[(xIndex)+(m_nLength * (yIndex - 1))].r, 256 - (yIndex - 1), 0.f);
+				XMVECTOR p2 = XMVectorSet(256 - (xIndex - 1), m_pHeightData[(xIndex - 1) + (m_nLength * yIndex)].r, 256 - yIndex, 0.f);
+				XMVECTOR edge1 = p1 - p0;
+				XMVECTOR edge2 = p2 - p0;
+				xmvSumNormal += XMVector3Normalize(XMVector3Cross(edge1, edge2));
+				nNormal++;
+			}
+			if ((xIndex +1) < 255 && 0 < (yIndex -1)) {
+				XMVECTOR p0 = XMVectorSet(256 - xIndex, m_pHeightData[(xIndex)+(m_nLength * yIndex)].r, 256 - yIndex, 0.f);
+				XMVECTOR p1 = XMVectorSet(256 - (xIndex + 1), m_pHeightData[(xIndex + 1) + (m_nLength * yIndex)].r, 256 - yIndex, 0.f);
+				XMVECTOR p2 = XMVectorSet(256 - xIndex, m_pHeightData[(xIndex)+(m_nLength * (yIndex - 1))].r, 256 - (yIndex - 1), 0.f);
+				XMVECTOR edge1 = p1 - p0;
+				XMVECTOR edge2 = p2 - p0;
+				xmvSumNormal += XMVector3Normalize(XMVector3Cross(edge1, edge2));
+				nNormal++;
+			}
+			XMVECTOR xmvAvgNormal = XMVector3Normalize(xmvSumNormal / nNormal);//-1 1
+			xmvAvgNormal += XMVectorSet(1.f,1.f,1.f,0.f);
+			xmvAvgNormal /= 2.f;//0-1
+
+			xmvAvgNormal *= 255;//0-255
+			XMFLOAT3 xmf3AvgNormal;
+			XMStoreFloat3(&xmf3AvgNormal, xmvAvgNormal);
+			m_pNormalData[xIndex + (yIndex * 256)].r = xmf3AvgNormal.x;
+			m_pNormalData[xIndex + (yIndex * 256)].g = xmf3AvgNormal.y;
+			m_pNormalData[xIndex + (yIndex * 256)].b = xmf3AvgNormal.z;
+		}
+	}
+	//height map data init
+	WCHAR path[256];
+	wsprintf(path, L"../%sNormalMap.bmp", m_wsTerrainName.c_str());//name
+	EXPORTER->MakeBitmap24(path, m_pNormalData, m_nWidth, m_nLength);
+	m_pNormalTexture = CTexture::CreateTexture(path, RESOURCEMGR->GetSampler("TerrainNormal"), PS_SLOT_NORMALMAP, BIND_PS);
+
+}
+
+CTerrainContainer * CTerrainContainer::CreateTerrainContainer(LPCTSTR pTerrainName, int nWidth, int nLength, float fHeightScale, CSpaceContainer * pSpaceContainer, bool isTool){
+	CTerrainContainer* pTerrainContainer = new CTerrainContainer;
+
+	pTerrainContainer->SetSpaceContainer(pSpaceContainer);
+	pTerrainContainer->SetTerrainWidth(nWidth);
+	pTerrainContainer->SetTerrainLength(nLength);
+	pTerrainContainer->SetTerrainScale(XMFLOAT3(static_cast<float>(pSpaceContainer->GetSize() / (nWidth)),
+		fHeightScale, static_cast<float>(pSpaceContainer->GetSize() / (nLength))));
+	pTerrainContainer->SetTerrainName(pTerrainName);
+	if (isTool) {
+		//make texture and use
+		pTerrainContainer->CreateResetTextures(pTerrainName);
+	}
+	else {
+		//just read texture
+		pTerrainContainer->CreateTerrainTextures(pTerrainName);
+	}
+
+	pTerrainContainer->Begin();
+	return pTerrainContainer;
+}
+
+void CTerrainContainer::CreateTerrainTextures(LPCTSTR pTerrainName){
+	WCHAR path[256];
+	wsprintf(path, L"../%sHeightMap.bmp", pTerrainName);//name
+	m_pHeightData = IMPORTER->ReadBitmap24(path);//heightmap
+	m_pHeightMapTexture = CTexture::CreateTexture(path, RESOURCEMGR->GetSampler("TerrainHeightMap"), 1, BIND_DS);
+	wsprintf(path, L"../%sNormalMap.bmp", pTerrainName);
+	m_pNormalData = IMPORTER->ReadBitmap24(path);//nomalmap
+	m_pNormalTexture = CTexture::CreateTexture(path, RESOURCEMGR->GetSampler("TerrainNormal"), PS_SLOT_NORMALMAP, BIND_PS);
+	m_pBaseTexture = CTexture::CreateTexture(L"../../Assets/default.jpg", RESOURCEMGR->GetSampler("DEFAULT"), 0);
+}
+
+void CTerrainContainer::CreateResetTextures(LPCTSTR pTerrainName){
+	//texture 제작
+	//height map data init
+	WCHAR path[256];
+	wsprintf(path, L"../%sHeightMap.bmp", pTerrainName);//name
+	m_pHeightData = new Pixel24[(m_nWidth) * (m_nLength)];//pixel data
+	ZeroMemory(m_pHeightData, sizeof(Pixel24) * (m_nWidth) * (m_nLength));
+	EXPORTER->MakeBitmap24(path, m_pHeightData, m_nWidth, m_nLength);
+	m_pHeightMapTexture = CTexture::CreateTexture(path, RESOURCEMGR->GetSampler("TerrainHeightMap"), 1, BIND_DS);
+	m_pBaseTexture = CTexture::CreateTexture(L"../../Assets/default.jpg", RESOURCEMGR->GetSampler("DEFAULT"), 0);
+	//normal
+	wsprintf(path, L"../%sNormalMap.bmp", pTerrainName);
+	m_pNormalData = new Pixel24[(m_nWidth) * (m_nLength)];
+	ZeroMemory(m_pNormalData, sizeof(Pixel24) * m_nWidth * m_nLength);
+	EXPORTER->MakeBitmap24(path, m_pNormalData, m_nWidth, m_nLength);
+	m_pNormalTexture = CTexture::CreateTexture(path, RESOURCEMGR->GetSampler("TerrainNormal"), PS_SLOT_NORMALMAP, BIND_PS);
+	CreateNormalMap();
 }
 
 CTerrainContainer::CTerrainContainer() : CObject("terraincontainer") {

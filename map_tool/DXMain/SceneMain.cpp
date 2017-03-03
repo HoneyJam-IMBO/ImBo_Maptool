@@ -97,16 +97,15 @@ void TW_CALL OPCreatePositioningObjectButtonCallback(void * clientData) {
 }
 
 bool CSceneMain::Begin() {
-	CPointLight *pPositioningPointLight = new CPointLight;
-	pPositioningPointLight->Begin(POINT_LIGHT{ 100.f, XMFLOAT3(rand() % 5, rand() % 5, rand() % 5) });
+	CPointLight *pPositioningPointLight = CPointLight::CreatePointLight(100.f, XMFLOAT3(rand() % 5, rand() % 5, rand() % 5));
 	m_vpObjectList.push_back(pPositioningPointLight);
 
-	CCapsuleLight* pPositioningCapsuleLight = new CCapsuleLight;
-	pPositioningCapsuleLight->Begin(CAPSULE_LIGHT{ 100.f, XMFLOAT3(rand() % 5, rand() % 5, rand() % 5), 50.f });
+	CCapsuleLight* pPositioningCapsuleLight = CCapsuleLight::CreateCapsuleLight(100.f, XMFLOAT3(rand() % 5, rand() % 5, rand() % 5), 50.f);
 	m_vpObjectList.push_back(pPositioningCapsuleLight);
 
-	CSpotLight* pPositioningSpotLight = new CSpotLight;
-	pPositioningSpotLight->Begin(SPOT_LIGHT{ 100.f, XMFLOAT3(rand() % 100, rand() % 100, rand() % 100), 50.f, 50.f });
+	CSpotLight* pPositioningSpotLight = CSpotLight::CreateSpotLight(500.f, XMFLOAT3(0.1f, 0.1f, 0.1f), 30.f, 15.f);
+	//CSpotLight* pPositioningSpotLight = new CSpotLight;
+	//pPositioningSpotLight->Begin(SPOT_LIGHT{ 500.f, XMFLOAT3(rand() % 100, rand() % 100, rand() % 100), 30.f, 15.f });
 	m_vpObjectList.push_back(pPositioningSpotLight);
 	//main button ui추가 
 	//추가될 버튼
@@ -141,12 +140,11 @@ bool CSceneMain::Begin() {
 
 	//--------------------------------------space-------------------------------------
 	//space
-	m_pSpaceContainer = new CSpaceContainer();
-	m_pSpaceContainer->Begin(static_cast<int>(SPACE_SIZE), static_cast<int>(SPACE_LEVEL));
+	m_pSpaceContainer = CSpaceContainer::CreateSpaceContainer(static_cast<int>(SPACE_SIZE), static_cast<int>(SPACE_LEVEL));
 	//terrain
-	m_pTerrainContainer = new CTerrainContainer();
-	m_pTerrainContainer->Begin(L"../../Assets/HeightMap.raw", 256, 256, 0.5, m_pSpaceContainer);
-	RENDERER->SetTerrainContainer(m_pTerrainContainer);
+	m_pTerrainContainer = CTerrainContainer::CreateTerrainContainer(L"Temp", 256, 256, 0.5, m_pSpaceContainer, true);
+	//skybox
+	m_pSkyBoxContainer = CSkyBoxContainer::CreateSkyBoxContainer();
 	//-------------------------------------space-------------------------------------
 
 	//--------------------------------객체 제작------------------------
@@ -228,21 +226,7 @@ bool CSceneMain::Begin() {
 	//}
 
 	//--------------------------전역 객체 제작-------------------------
-	//skybox
-	m_pSkyBox = new CSkyBox();
-	m_pSkyBox->Begin();
-	m_pSkyBox->SetCamera(m_pCamera);
-	//skybox
 
-	//directional light
-	m_pDirectionalLight = new CDirectionalLight;
-	m_pDirectionalLight->Begin(DIRECTIONAL_AMBIENT_LIGHT{
-		XMFLOAT4(1.0f, -1.0f, 1.0f, 0.0f),XMFLOAT4(0.1f, 0.1f, 0.1f, 0.0f) , XMFLOAT4(1.5f, 1.5f, 1.5f, 1.f),//dir
-		XMFLOAT4(0.1f, 0.1f, 0.1f, 1.f), XMFLOAT4(0.1f, 0.1f, 0.1f, 1.f), XMFLOAT4(0.1f, 0.1f, 0.1f, 1.f), XMFLOAT4(5.1f, 5.1f, 5.1f, 1.f)//ambient
-	});
-	m_pDirectionalLight->SetPosition(XMVectorSet(SPACE_SIZE / 2.f, SPACE_SIZE, SPACE_SIZE / 2.f, 0.f));
-	m_pDirectionalLight->Rotate(30.f, 0.f, 0.f);
-	RENDERER->SetDirectionalLight(m_pDirectionalLight);
 	/*
 	XMFLOAT4 m_DirToLight;
 	XMFLOAT4 m_DirLightColor;
@@ -280,15 +264,6 @@ bool CSceneMain::End() {
 		delete m_pTerrainContainer;
 	}
 
-	//global object
-	if (m_pSkyBox) {
-		m_pSkyBox->End();
-		delete m_pSkyBox;
-	}
-	if (m_pDirectionalLight) {
-		m_pDirectionalLight->End();
-		delete m_pDirectionalLight;
-	}
 	//카메라는 Framework에 존재하는 것이기에 End()작업을 진행하지 않는다.
 	return true;
 }
@@ -298,6 +273,9 @@ void CSceneMain::Animate(float fTimeElapsed) {
 	m_pSpaceContainer->Animate(fTimeElapsed);
 	m_pSpaceContainer->PrepareRender(m_pCamera);
 	m_pTerrainContainer->Update(m_pCamera);
+	RENDERER->SetTerrainContainer(m_pTerrainContainer);
+	m_pSkyBoxContainer->Update(m_pCamera, fTimeElapsed);
+	RENDERER->SetSkyBoxContainer(m_pSkyBoxContainer);
 	//-----------------------------------space------------------------------
 
 	//--------------------------전역 객체 animate / regist-------------------------
@@ -312,13 +290,6 @@ void CSceneMain::Animate(float fTimeElapsed) {
 			GLOBALVALUEMGR->GetPositioningObject()->RegistToContainer();
 		}
 	}
-
-	//skybox camera 동기화
-	m_pSkyBox->Animate(fTimeElapsed);
-	//sky box 등록
-	m_pSkyBox->RegistToContainer();
-	//directional light 등록
-	m_pDirectionalLight->RegistToContainer();
 	//--------------------------전역 객체 animate / regist-------------------------
 }
 
@@ -414,9 +385,9 @@ CGameObject* CSceneMain::PickObjectPointedByCursor(int xClient, int yClient)
 	float fNearDistance = FLT_MAX;
 	pNearestObject = m_pSpaceContainer->PickObject(m_pCamera->GetPosition(), XMVector3Normalize(xmvRayDir), fHitDistance);
 	fNearDistance = fHitDistance;
-	if (m_pDirectionalLight->CheckPickObject(m_pCamera->GetPosition(), XMVector3Normalize(xmvRayDir), fHitDistance)) {
+	if (m_pSkyBoxContainer->GetDirectionalLight()->CheckPickObject(m_pCamera->GetPosition(), XMVector3Normalize(xmvRayDir), fHitDistance)) {
 		if (fNearDistance > fHitDistance) {
-			pNearestObject = m_pDirectionalLight;
+			pNearestObject = m_pSkyBoxContainer->GetDirectionalLight();
 		}
 	}
 	return(pNearestObject);
@@ -640,20 +611,19 @@ void CSceneMain::CreateObjectPositioningUI(){
 
 void CSceneMain::ObjectPositioning(){
 	if (GLOBALVALUEMGR->GetPositioningObject()->GetName() == "pointlight") {
-		CPointLight *pPositioningPointLight = new CPointLight;
-		pPositioningPointLight->Begin(POINT_LIGHT{ 100.f, XMFLOAT3(rand() % 5, rand() % 5, rand() % 5) });
+		CPointLight *pPositioningPointLight = CPointLight::CreatePointLight(100.f, XMFLOAT3(rand() % 5, rand() % 5, rand() % 5));
 		pPositioningPointLight->SetPosition(GLOBALVALUEMGR->GetPositioningObject()->GetPosition());
 		m_pSpaceContainer->AddObject(pPositioningPointLight);
 	}
 	else if (GLOBALVALUEMGR->GetPositioningObject()->GetName() == "spotlight") {
-		CSpotLight* pPositioningSpotLight = new CSpotLight;
-		pPositioningSpotLight->Begin(SPOT_LIGHT{ 100.f, XMFLOAT3(rand() % 100, rand() % 100, rand() % 100), 50.f, 50.f });
+		CSpotLight* pPositioningSpotLight = CSpotLight::CreateSpotLight(500.f, XMFLOAT3(0.1f, 0.1f, 0.1f), 30.f, 15.f);
+		//CSpotLight* pPositioningSpotLight = new CSpotLight;
+		//pPositioningSpotLight->Begin(SPOT_LIGHT{ 500.f, XMFLOAT3(rand() % 100, rand() % 100, rand() % 100), 30.f, 15.f });
 		pPositioningSpotLight->SetPosition(GLOBALVALUEMGR->GetPositioningObject()->GetPosition());
 		m_pSpaceContainer->AddObject(pPositioningSpotLight);
 	}
 	else if (GLOBALVALUEMGR->GetPositioningObject()->GetName() == "capsulelight") {
-		CCapsuleLight* pPositioningCapsuleLight = new CCapsuleLight;
-		pPositioningCapsuleLight->Begin(CAPSULE_LIGHT{ 100.f, XMFLOAT3(rand() % 5, rand() % 5, rand() % 5), 50.f });
+		CCapsuleLight* pPositioningCapsuleLight = CCapsuleLight::CreateCapsuleLight(100.f, XMFLOAT3(rand() % 5, rand() % 5, rand() % 5), 50.f);
 		pPositioningCapsuleLight->SetPosition(GLOBALVALUEMGR->GetPositioningObject()->GetPosition());
 		m_pSpaceContainer->AddObject(pPositioningCapsuleLight);
 	}

@@ -26,16 +26,16 @@ struct TERRAIN_HS_OUTPUT
 	float3 positionW : POSITION;
 	float2 texCoord : TEXCOORD;
 	float2 detailTexCoord : TEXCOORD1;
-	float3 tangentW : TANGENT;
-	float3 bitangentW : BITANGET;
+	//float3 tangentW : TANGENT;
+	//float3 bitangentW : BITANGET;
 };
 struct DS_OUT {
 	float4 position : SV_POSITION;
 	float3 positionW : POSITION;
 	float2 texCoord : TEXCOORD;
 	float2 detailTexCoord : TEXCOORD1;
-	float3 tangentW : TANGENT;
-	float3 bitangentW : BITANGET;
+	//float3 tangentW : TANGENT;
+	//float3 bitangentW : BITANGET;
 };
 
 // 패치 상수 데이터를 출력합니다.
@@ -55,8 +55,8 @@ DS_OUT main(TERRAIN_HS_CONSTANT input, float2 uv : SV_DomainLocation, OutputPatc
 	output.texCoord = lerp(lerp(quad[0].texCoord, quad[1].texCoord, uv.x), lerp(quad[2].texCoord, quad[3].texCoord, uv.x), uv.y);
 	output.detailTexCoord = lerp(lerp(quad[0].detailTexCoord, quad[1].detailTexCoord, uv.x), lerp(quad[2].detailTexCoord, quad[3].detailTexCoord, uv.x), uv.y);
 	output.detailTexCoord = output.detailTexCoord * 8;
-	output.tangentW = lerp(lerp(quad[0].tangentW, quad[1].tangentW, uv.x), lerp(quad[2].tangentW, quad[3].tangentW, uv.x), uv.y);
-	output.bitangentW = lerp(lerp(quad[0].bitangentW, quad[1].bitangentW, uv.x), lerp(quad[2].bitangentW, quad[3].bitangentW, uv.x), uv.y);
+	//output.tangentW = lerp(lerp(quad[0].tangentW, quad[1].tangentW, uv.x), lerp(quad[2].tangentW, quad[3].tangentW, uv.x), uv.y);
+	//output.bitangentW = lerp(lerp(quad[0].bitangentW, quad[1].bitangentW, uv.x), lerp(quad[2].bitangentW, quad[3].bitangentW, uv.x), uv.y);
 
 	output.positionW.y = gtxtControllHeightMap.SampleLevel(gssHeightMap, output.texCoord, 0).r * 256 *gHeightScale;//get height 
 

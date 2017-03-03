@@ -80,7 +80,7 @@ void CResourceManager::CreateRenderShaders() {
 	//post processing shader
 	//terrain
 	CreateRenderShader("Terrain", L"Terrain",
-		IE_POSITION | IE_TANGENT | IE_BITANGENT | IE_INSWORLDMTX,
+		IE_POSITION | IE_INSWORLDMTX,
 		BIND_VS | BIND_HS | BIND_DS | BIND_PS);
 	//terrain
 	//BoundingBox

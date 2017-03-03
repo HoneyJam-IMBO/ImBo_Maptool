@@ -214,6 +214,7 @@
     <ClInclude Include="PostProcessingFinalPass.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="ResourceManager.h" />
+    <ClInclude Include="SkyBoxContainer.h" />
     <ClInclude Include="SpaceMesh.h" />
     <ClInclude Include="SplattingInfo.h" />
     <ClInclude Include="SplattingInfoManager.h" />
@@ -316,6 +317,7 @@
     <ClCompile Include="PostProcessingFinalPass.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="ResourceManager.cpp" />
+    <ClCompile Include="SkyBoxContainer.cpp" />
     <ClCompile Include="SpaceMesh.cpp" />
     <ClCompile Include="SplattingInfo.cpp" />
     <ClCompile Include="SplattingInfoManager.cpp" />

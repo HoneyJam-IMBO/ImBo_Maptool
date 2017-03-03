@@ -3,7 +3,7 @@
 #include "Light.h"
 #include "RotateComponent.h"
 
-struct SPOT_LIGHT_DS_CB{
+struct SPOT_LIGHT_DS_CB {
 	XMMATRIX LightProjection;
 	float SpotCosOuterCone;//밖 범위 설정<OuterAngle>
 	float SpotSinOuterCone;//<OuterAngle>
@@ -29,17 +29,20 @@ struct SPOT_LIGHT {
 };
 class CSpotLight : public CLight {
 public:
-	bool Begin(SPOT_LIGHT& light_info);
+	bool Begin();
 	virtual bool End();
 
 	//instance buffer controll
 	virtual void SetBufferInfo(void** ppMappedResources, int& nInstance, shared_ptr<CCamera> pCamera);
 
 	//light info setter
+	void SetSpotLightData(SPOT_LIGHT data) { m_SpotData = data; }
 	virtual void SetLength(float len);
 	virtual void SetRange(float outer, float inner = 0.0f);
 	virtual void SetColor(float r, float g, float b);//color
 	virtual XMFLOAT3 GetColor();
+	static CSpotLight* CreateSpotLight(float SpotLightRange, XMFLOAT3 SpotLightColor, float fOuterAngle, float fInnerAngle);
+
 private:
 	float m_fSpotLightRangeRcp{ 0.0 };
 	float m_fSpotCosOuterCone{ 0.0 };
