@@ -161,15 +161,15 @@ void CSSLR::RayTrace(shared_ptr<CCamera>pCamera, const XMFLOAT2 & vSunPosSS, con
 	m_pLayTraceRenderContainer->RenderWithOutObject(pCamera);
 
 	GLOBALVALUEMGR->GetDeviceContext()->RSSetViewports(num, &oldvp);
-
-	DEBUGER->AddTexture(XMFLOAT2(100, 250), XMFLOAT2(250, 400), m_pLightRaysSRV);
+	
+	DEBUGER->AddTexture(XMFLOAT2(500, 150), XMFLOAT2(750, 300), m_pLightRaysSRV);
 }
 
 void CSSLR::Combine(shared_ptr<CCamera>pCamera, ID3D11RenderTargetView * pLightAccumRTV){
 	ID3D11BlendState* pPrevBlendState;
 	FLOAT prevBlendFactor[4];
 	UINT prevSampleMask;
-	GLOBALVALUEMGR->GetDeviceContext()->OMGetBlendState(&pPrevBlendState, prevBlendFactor, &prevSampleMask);
+	GLOBALVALUEMGR->GetDeviceContext()->OMGetBlendState(&pPrevBlendState, prevBlendFactor, &prevSsampleMask);
 	GLOBALVALUEMGR->GetDeviceContext()->OMSetBlendState(m_pAdditiveBlendState, prevBlendFactor, prevSampleMask);
 
 	// Restore the light accumulation view
