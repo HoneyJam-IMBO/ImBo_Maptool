@@ -151,15 +151,15 @@ bool CSceneMain::Begin() {
 	int nMaxObjects = 1;
 	int space_size = static_cast<int>(SPACE_SIZE);
 
-	//for (int i = 0; i < 10; ++i) {
-	//	for (int j = 0; j < 10; ++j) {
-	//		CTestCube* pCube = new CTestCube();
-	//		pCube->Begin();
-	//		pCube->SetTerrainContainer(m_pTerrainContainer);
-	//		pCube->SetPosition(XMVectorSet(i * 100, 100, j * 100, 0.f));
-	//		m_pSpaceContainer->AddObject(pCube);
-	//	}
-	//}
+	for (int i = 0; i < 10; ++i) {
+		for (int j = 0; j < 10; ++j) {
+			CTestCube* pCube = new CTestCube();
+			pCube->Begin();
+			pCube->SetTerrainContainer(m_pTerrainContainer);
+			pCube->SetPosition(XMVectorSet(i * 100, 100, j * 100, 0.f));
+			m_pSpaceContainer->AddObject(pCube);
+		}
+	}
 
 	//m_pRotationTestObject = new CTestCube();
 	//m_pRotationTestObject->Begin();

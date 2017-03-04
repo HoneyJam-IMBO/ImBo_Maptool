@@ -169,7 +169,7 @@ void CSSLR::Combine(shared_ptr<CCamera>pCamera, ID3D11RenderTargetView * pLightA
 	ID3D11BlendState* pPrevBlendState;
 	FLOAT prevBlendFactor[4];
 	UINT prevSampleMask;
-	GLOBALVALUEMGR->GetDeviceContext()->OMGetBlendState(&pPrevBlendState, prevBlendFactor, &prevSsampleMask);
+	GLOBALVALUEMGR->GetDeviceContext()->OMGetBlendState(&pPrevBlendState, prevBlendFactor, &prevSampleMask);
 	GLOBALVALUEMGR->GetDeviceContext()->OMSetBlendState(m_pAdditiveBlendState, prevBlendFactor, prevSampleMask);
 
 	// Restore the light accumulation view

@@ -372,7 +372,7 @@ void CTerrainContainer::CreateNormalMap(){
 				nNormal++;
 			}
 			XMVECTOR xmvAvgNormal = XMVector3Normalize(xmvSumNormal / nNormal);//-1 1
-			xmvAvgNormal += XMVectorSet(1.f,1.f,1.f,0.f);
+			xmvAvgNormal += XMVectorSet(1.f,1.f,1.f,0.f);//0 - 2
 			xmvAvgNormal /= 2.f;//0-1
 
 			xmvAvgNormal *= 255;//0-255

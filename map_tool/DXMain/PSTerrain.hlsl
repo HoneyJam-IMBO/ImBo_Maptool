@@ -96,7 +96,6 @@ PS_GBUFFER_OUT main(DS_OUT input){
 	//get world normal
 	//float3 normalW = GetWorldNormal(input.tangentW, input.bitangentW, input.texCoord);
 	float3 normalW = gtxtNormal.Sample(gssNormal, input.texCoord).rgb;
-	normalW *= 2;//0-2
-	normalW - float3(-1, -1, -1);//-1 1
+	normalW = normalW*2-1;//0-2 //-1 1
 	return (PackGBuffer((float3)cColor, normalW, gSpecIntensity, gSpecExp));
 }

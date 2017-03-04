@@ -11,5 +11,6 @@ float3 GetWorldNormal(float3 tangentW, float3 bitangentW, float2 texCoord) {
 
 	//구한 TBN을 Normal Map에서 얻은 Normal에 곱한다.
 	float3 normal = gtxtNormal.Sample(gssNormal, texCoord).xyz;
+	//normal = 2.f*normal - 1.f;
 	return mul(normal, TBN);
 }

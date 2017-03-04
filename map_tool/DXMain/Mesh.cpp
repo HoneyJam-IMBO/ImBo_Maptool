@@ -143,8 +143,8 @@ void CMesh::CreateTBFromPoints(XMFLOAT3 * pPositions, XMFLOAT2 * pUVs, XMFLOAT3 
 		xmvPos[i] = XMLoadFloat3(&pPositions[i]);
 		xmvUV[i] = XMLoadFloat2(&pUVs[i]);
 	}
-	XMVECTOR e0 = xmvPos[1] - xmvPos[0];
-	XMVECTOR e1 = xmvPos[2] - xmvPos[0];
+	XMVECTOR e0 = XMVector3Normalize(xmvPos[1] - xmvPos[0]);
+	XMVECTOR e1 = XMVector3Normalize(xmvPos[2] - xmvPos[0]);
 
 	//p0 부터 p1까지의 uv좌표 변화량 
 	XMFLOAT2 UV0;
@@ -153,12 +153,20 @@ void CMesh::CreateTBFromPoints(XMFLOAT3 * pPositions, XMFLOAT2 * pUVs, XMFLOAT3 
 	XMFLOAT2 UV1;
 	XMStoreFloat2(&UV1, (xmvUV[2] - xmvUV[0]));
 
+	XMMATRIX mtxOffset = XMMatrixSet(
+		UV0.x, UV0.y, 0, 0,
+		UV1.x, UV1.y, 0, 0,
+		0, 0, 0, 0,
+		0, 0, 0, 0
+	);
+	mtxOffset = XMMatrixInverse(nullptr, mtxOffset);
+
 	//u0*v1 - v0*u1
 	float inverseValue = 1 / (UV0.x * UV1.y - UV0.y * UV1.x);
-	float x = inverseValue * UV1.y;
-	float y = inverseValue * -UV0.y;
-	float z = inverseValue * -UV1.x;
-	float w = inverseValue * UV0.x;
+	float x = inverseValue * UV1.y;//v1
+	float y = inverseValue * -UV0.y;//-v0
+	float z = inverseValue * -UV1.x;//-u1
+	float w = inverseValue * UV0.x;//u0
 
 	XMStoreFloat3(&outT, XMVector3Normalize(e0*x + e1*y));
 	XMStoreFloat3(&outB, XMVector3Normalize(e0*z + e1*w));

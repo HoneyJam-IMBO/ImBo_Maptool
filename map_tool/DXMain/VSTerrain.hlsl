@@ -36,8 +36,8 @@ float2 CalcUV(float3 positionW) {
 
 static const float2 arrUV[4] = {
 	float2(0, 1),
-	float2(0, 0),
 	float2(1, 1),
+	float2(0, 0),
 	float2(1, 0)
 };
 
