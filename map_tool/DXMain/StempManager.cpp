@@ -15,12 +15,16 @@ void CStempManager::Begin(){
 
 	m_pPicposRenderInfoBuffer = CBuffer::CreateConstantBuffer(1, sizeof(TERRAIN_PICPOS_RENDER_INFO), 4, BIND_PS);
 	m_pPicposRenderInfo = new TERRAIN_PICPOS_RENDER_INFO;
+	m_pPicposRenderInfo->Extent = 50.f / m_fSpaceSize;
 
-	TWBARMGR->AddMinMaxBarRW("TOOL_MODE", "STEMP_CONTROLL", "STEMP_EXTENT", &m_fExtent, 10.f, 256.f, 0.5f);
-	TWBARMGR->AddMinMaxBarRW("TOOL_MODE", "STEMP_CONTROLL", "STEMP_INDEX", &m_nCurStemp, 0.f, m_vStemp.size()-1, 1.f);
+	TWBARMGR->AddMinMaxBarRW("TOOL_MODE", "StempControll", "STEMP_EXTENT", &m_fExtent, 10.f, 256.f, 0.5f);
+	TWBARMGR->AddMinMaxBarRW("TOOL_MODE", "StempControll", "STEMP_INDEX", &m_nCurStemp, 0.f, m_vStemp.size()-1, 1.f);
 }
 
 bool CStempManager::End(){
+	//TWBARMGR->DeleteVar("TOOL_MODE", "STEMP_EXTENT");
+	//TWBARMGR->DeleteVar("TOOL_MODE", "STEMP_INDEX");
+
 	if (m_pPicposRenderInfo) delete m_pPicposRenderInfo;
 	if (m_pPicposRenderInfo) m_pPicposRenderInfoBuffer->End();
 	
@@ -46,7 +50,7 @@ void CStempManager::UpdateShaderState(){
 	TERRAIN_PICPOS_RENDER_INFO* pPicposRenderInfo = (TERRAIN_PICPOS_RENDER_INFO*)m_pPicposRenderInfoBuffer->Map();
 	pPicposRenderInfo->PickPos.x = (m_pPicposRenderInfo->PickPos.x);
 	pPicposRenderInfo->PickPos.y = 1 - (m_pPicposRenderInfo->PickPos.y);
-	pPicposRenderInfo->Extent = m_pPicposRenderInfo->Extent = m_fExtent / SPACE_SIZE;;
+	pPicposRenderInfo->Extent = m_pPicposRenderInfo->Extent = m_fExtent / m_fSpaceSize;
 	pPicposRenderInfo->ToolMode = (UINT)GLOBALVALUEMGR->GetToolMode();
 	m_pPicposRenderInfoBuffer->Unmap();
 }
@@ -71,6 +75,13 @@ void CStempManager::SetCurStempIndex(int index){
 void CStempManager::CreateStemp(wstring name){
 	CStemp* pStemp = CStemp::CreateStemp(name, this);
 	m_vStemp.push_back(pStemp);
+}
+
+CStempManager * CStempManager::CreateStempManager(float fSpaceSize){
+	CStempManager* pStempManager = new CStempManager;
+	pStempManager->SetSpaceSize(fSpaceSize);
+	pStempManager->Begin();
+	return pStempManager;
 }
 
 CStempManager::CStempManager() : DXObject("stempmanager"){

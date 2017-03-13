@@ -14,6 +14,7 @@ public:
 	void SetTerrainContainer(CTerrainContainer* pTerrainContainer);
 	virtual void PickingProc() {};
 	virtual bool CheckPickObject(XMVECTOR xmvWorldCameraStartPos, XMVECTOR xmvRayDir, float& distance);
+	static CTerrain* CreateTerrain(CTerrainContainer* pTerrainContainer, int x, int y);
 private:
 	CTerrainContainer* m_pTerrainContainer{ nullptr };
 

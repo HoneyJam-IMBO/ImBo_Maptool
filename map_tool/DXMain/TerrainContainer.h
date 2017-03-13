@@ -51,13 +51,25 @@ public:
 	static CTerrainContainer* CreateTerrainContainer(LPCTSTR pTerrainName, int nWidth, int nLength, float HeightScale, CSpaceContainer* pSpaceContainer, bool isTool = false);
 	void SetTerrainWidth(int nWidth) { m_nWidth = nWidth; }
 	void SetTerrainLength(int nLength) { m_nLength = nLength; }
+	void SetHeightScale(float scale);
+	float GetHeightScale() { return m_xmf3Scale.y; }
 	void SetTerrainScale(XMFLOAT3 xmf3Scale) { m_xmf3Scale = xmf3Scale; }
 	void SetSpaceContainer(CSpaceContainer* pSpaceContainer) { m_pSpaceContainer = pSpaceContainer; }
+	CSpaceContainer* GetSpaceContainer() { return m_pSpaceContainer; }
 	void SetTerrainName(wstring name) { m_wsTerrainName = name; }
+	wstring GetTerrainName() { return m_wsTerrainName; }
+	void SetIsTool(bool b) { m_bIsTool = b; }
+	bool GetIsTool() { return m_bIsTool; }
 	void CreateResetTextures(LPCTSTR pTerrainName);
 	void CreateTerrainTextures(LPCTSTR pTerrainName);
+	void CreateTerrainMesh(CSpaceContainer* pSpaceContainer);
 
+	void ChangeSpaceData();
+
+	void SetActive(bool b) { m_bActive = b; }
 private:
+	bool m_bIsTool{ false };
+	bool m_bActive{ true };
 	wstring m_wsTerrainName;
 	XMFLOAT2 m_xmf2CurPickPos{ 0.f, 0.f };
 	STEMP_MODE m_StempMode{ STEMP_MODE_SET };

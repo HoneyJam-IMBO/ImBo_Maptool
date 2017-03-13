@@ -1,7 +1,17 @@
 #include "stdafx.h"
 #include "SpaceContainer.h"
+#include "SceneMain.h"
+
+void TW_CALL SCAdaptationButtonCallback(void* clientData) {
+	CSceneMain* pScene = (CSceneMain*)clientData;
+	pScene->ChangeSceneContainers();
+}
 
 void CSpaceContainer::Begin(){
+	TWBARMGR->AddMinMaxBarRW("TOOL_MODE", "SpaceControll", "SpaceSize", &m_size, 256.f, 4096.f, 256.f);
+	TWBARMGR->AddMinMaxBarRW("TOOL_MODE", "SpaceControll", "SpaceLevel", &m_level, 0.f, 4.f, 1.f);
+	TWBARMGR->AddButtonCB("TOOL_MODE", "SpaceControll", "Adaptation", SCAdaptationButtonCallback, m_pScene);
+
 	//한 사이드에 있는 공간의 개수
 	m_oneSideSpaceNum = static_cast<int>(pow(2, m_level));
 	//공간 하나의 크기
@@ -15,6 +25,15 @@ void CSpaceContainer::Begin(){
 	//공간 할당.
 	m_pStartSpace = new CSpace();
 	m_pStartSpace->Begin(this, m_size, m_level, XMVectorSet(0.f, 0.f, 0.f, 0.f));
+
+	//directional light
+	m_pDirectionalLight = new CDirectionalLight;
+	m_pDirectionalLight->Begin(DIRECTIONAL_AMBIENT_LIGHT{
+		XMFLOAT4(1.0f, -1.0f, 1.0f, 0.0f),XMFLOAT4(0.1f, 0.1f, 0.1f, 0.0f) , XMFLOAT4(1.5f, 1.5f, 1.5f, 1.f),//dir
+		XMFLOAT4(0.1f, 0.1f, 0.1f, 1.f), XMFLOAT4(0.1f, 0.1f, 0.1f, 1.f), XMFLOAT4(0.1f, 0.1f, 0.1f, 1.f), XMFLOAT4(5.1f, 5.1f, 5.1f, 1.f)//ambient
+	});
+	m_pDirectionalLight->SetPosition(XMVectorSet(m_size / 2.f, m_size, m_size / 2.f, 0.f));
+	m_pDirectionalLight->Rotate(30.f, 0.f, 0.f);
 }
 
 bool CSpaceContainer::End(){
@@ -23,13 +42,25 @@ bool CSpaceContainer::End(){
 		delete pObject;
 	}
 
+	//all space end
+	//+ delete space pointer
 	m_pStartSpace->End();
+
+	//directional light
+	if (m_pDirectionalLight) {
+		m_pDirectionalLight->End();
+		delete m_pDirectionalLight;
+	}
+	//directional light
+	delete m_ppSpace;
 
 	return false;
 }
 
 void CSpaceContainer::Animate(float fTimeElapsed){
-	
+	//directional light 등록
+	m_pDirectionalLight->RegistToContainer();
+
 	//all space animate
 	m_pStartSpace->Animate(fTimeElapsed);
 
@@ -48,6 +79,8 @@ void CSpaceContainer::Animate(float fTimeElapsed){
 }
 
 void CSpaceContainer::PrepareRender(shared_ptr<CCamera> pCamera){
+	//directional light
+	//RENDERER->SetDirectionalLight(m_pDirectionalLight);
 	m_pStartSpace->PrepareRender(pCamera);
 }
 
@@ -71,9 +104,15 @@ void CSpaceContainer::AddObject(CGameObject * pObject){
 	pObject->SetSpaceIndex(current_index);
 }
 
-void CSpaceContainer::RevomeObject(CGameObject * pObject){
+void CSpaceContainer::RemoveObject(CGameObject * pObject){
 	for (int i = 0; i < m_nSpace; ++i) {
 		m_ppSpace[i]->RemoveObject(pObject);
+	}
+}
+
+void CSpaceContainer::RemoveObject(string name){
+	for (int i = 0; i < m_nSpace; ++i) {
+		m_ppSpace[i]->RemoveObject(name);
 	}
 }
 
@@ -118,6 +157,43 @@ void CSpaceContainer::AddSpace(UINT index, CSpace * pSpace){
 	m_ppSpace[index] = pSpace;
 }
 
+void CSpaceContainer::ChangeSpaceData(){
+	//directional light
+	m_pDirectionalLight->SetPosition(XMVectorSet(m_size / 2.f, m_size, m_size / 2.f, 0.f));
+
+	//1. space안의 모든 객체 임시 저장
+	vector<CGameObject*> m_vTempObjects;//임시 객체 벡터
+	for (int i = 0; i < m_nSpace; ++i) {//모든 space에 대해서
+		for (auto data : m_ppSpace[i]->GetmlpObject()) {//object map을 가져와서
+			for (auto pObject : data.second) {//해당 vector 안의 모든 object를
+				m_vTempObjects.push_back(pObject);//임시 저장
+			}
+		}
+	}
+	
+	//2. space delete/ not END()
+	delete m_pStartSpace;
+	m_pStartSpace = nullptr;
+	if (m_nSpace != 1) {
+		for (int i = 0; i < m_nSpace; ++i) {
+			delete m_ppSpace[i];
+		}
+	}
+	delete m_ppSpace;
+	//3. 새로운 space제작
+	m_oneSideSpaceNum = static_cast<int>(pow(2, m_level));
+	m_oneSpaceSize = m_size / m_oneSideSpaceNum;
+	m_nSpace = static_cast<int>(pow(m_oneSideSpaceNum, 2));
+	m_ppSpace = new CSpace*[m_nSpace];
+	m_pStartSpace = new CSpace();
+	m_pStartSpace->Begin(this, m_size, m_level, XMVectorSet(0.f, 0.f, 0.f, 0.f));
+
+	//4. 임시객체 재 배치
+	for (auto pObject : m_vTempObjects) {
+		AddObject(pObject);
+	}
+}
+
 CGameObject * CSpaceContainer::PickObject(XMVECTOR xmvWorldCameraStartPos, XMVECTOR xmvRayDir, float& distanse){
 	float fHitDistance = FLT_MAX;
 	float fNearHitDistance = FLT_MAX;
@@ -134,13 +210,21 @@ CGameObject * CSpaceContainer::PickObject(XMVECTOR xmvWorldCameraStartPos, XMVEC
 			}
 		}
 	}
+
+	if (m_pDirectionalLight->CheckPickObject(xmvWorldCameraStartPos, xmvRayDir, fHitDistance)) {
+		if (fNearHitDistance > fHitDistance) {
+			pNearObj = m_pDirectionalLight;
+		}
+	}
+
 	return pNearObj;
 }
 
-CSpaceContainer * CSpaceContainer::CreateSpaceContainer(int size, int lv){
+CSpaceContainer * CSpaceContainer::CreateSpaceContainer(CScene* pScene, int size, int lv){
 	CSpaceContainer* pSpaceContainer = new CSpaceContainer();
 	pSpaceContainer->SetSpaceSize(size);
 	pSpaceContainer->SetSpaceLevel(lv);
+	pSpaceContainer->SetScene(pScene);
 	pSpaceContainer->Begin();
 	return pSpaceContainer;
 }

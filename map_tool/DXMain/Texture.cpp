@@ -113,13 +113,22 @@ ID3D11ShaderResourceView* CTexture::CreateTexture2DArraySRV(_TCHAR(*ppstrFilePat
 	ID3D11Texture2D **ppd3dTextures = new ID3D11Texture2D*[nTextures];
 	for (UINT i = 0; i < nTextures; i++) D3DX11CreateTextureFromFile(GLOBALVALUEMGR->GetDevice(), ppstrFilePaths[i], &d3dxImageLoadInfo, 0, (ID3D11Resource **)&ppd3dTextures[i], 0);
 
+	//test
+	D3D11_TEXTURE2D_DESC* pd3dTexure2DDesc = new D3D11_TEXTURE2D_DESC[nTextures];
+	for (UINT i = 0; i < nTextures; i++) {
+		ppd3dTextures[i]->GetDesc(&pd3dTexure2DDesc[i]);
+	}
+	
+	//test
+
 	D3D11_TEXTURE2D_DESC d3dTexure2DDesc;
 	ppd3dTextures[0]->GetDesc(&d3dTexure2DDesc);
 
 	D3D11_TEXTURE2D_DESC d3dTexture2DArrayDesc;
 	d3dTexture2DArrayDesc.Width = d3dTexure2DDesc.Width;
 	d3dTexture2DArrayDesc.Height = d3dTexure2DDesc.Height;
-	d3dTexture2DArrayDesc.MipLevels = d3dTexure2DDesc.MipLevels;
+	//d3dTexture2DArrayDesc.MipLevels = d3dTexure2DDesc.MipLevels;
+	d3dTexture2DArrayDesc.MipLevels = 1;
 	d3dTexture2DArrayDesc.ArraySize = nTextures;
 	d3dTexture2DArrayDesc.Format = d3dTexure2DDesc.Format;
 	d3dTexture2DArrayDesc.SampleDesc.Count = 1;
@@ -141,7 +150,13 @@ ID3D11ShaderResourceView* CTexture::CreateTexture2DArraySRV(_TCHAR(*ppstrFilePat
 		for (UINT m = 0; m < d3dTexure2DDesc.MipLevels; m++)
 		{
 			pd3dDeviceContext->Map(ppd3dTextures[t], m, D3D11_MAP_READ, 0, &d3dMappedTexture2D);
-			pd3dDeviceContext->UpdateSubresource(pd3dTexture2DArray, D3D11CalcSubresource(m, t, d3dTexure2DDesc.MipLevels), 0, d3dMappedTexture2D.pData, d3dMappedTexture2D.RowPitch, d3dMappedTexture2D.DepthPitch);
+			pd3dDeviceContext->UpdateSubresource(	  pd3dTexture2DArray
+													, D3D11CalcSubresource(m, t, d3dTexure2DDesc.MipLevels)
+													, 0
+													, d3dMappedTexture2D.pData
+													, d3dMappedTexture2D.RowPitch
+													, d3dMappedTexture2D.DepthPitch
+			);
 			pd3dDeviceContext->Unmap(ppd3dTextures[t], m);
 		}
 	}
@@ -163,6 +178,8 @@ ID3D11ShaderResourceView* CTexture::CreateTexture2DArraySRV(_TCHAR(*ppstrFilePat
 
 	for (UINT i = 0; i < nTextures; i++) if (ppd3dTextures[i]) ppd3dTextures[i]->Release();
 	delete[] ppd3dTextures;
+	//test
+	delete[] pd3dTexure2DDesc;
 
 	if (pd3dDeviceContext) pd3dDeviceContext->Release();
 

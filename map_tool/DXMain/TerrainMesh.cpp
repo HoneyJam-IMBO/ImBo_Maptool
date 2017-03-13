@@ -17,9 +17,9 @@ bool CTerrainMesh::CreateVertexBuffer() {
 		x z -> 1, 0
 	*/
 	m_pVertices[i++] = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	m_pVertices[i++] = XMFLOAT3(ONESPACE_SIZE, 0.0f, 0.0f);
-	m_pVertices[i++] = XMFLOAT3(0.0f, 0.0f, ONESPACE_SIZE);
-	m_pVertices[i++] = XMFLOAT3(ONESPACE_SIZE, 0.0f, ONESPACE_SIZE);
+	m_pVertices[i++] = XMFLOAT3(m_fOneSpaceSize, 0.0f, 0.0f);
+	m_pVertices[i++] = XMFLOAT3(0.0f, 0.0f, m_fOneSpaceSize);
+	m_pVertices[i++] = XMFLOAT3(m_fOneSpaceSize, 0.0f, m_fOneSpaceSize);
 
 	//calc TBN
 	XMFLOAT3 T[4];
@@ -58,11 +58,9 @@ bool CTerrainMesh::CreateVertexBuffer() {
 
 	//create space mesh aabb
 	BoundingBox boundingBox;
-	BoundingBox::CreateFromPoints(boundingBox, XMVectorSet(0.f, 0.f, 0.f, 0.f), XMVectorSet(ONESPACE_SIZE, 5, ONESPACE_SIZE, 0.f));
+	BoundingBox::CreateFromPoints(boundingBox, XMVectorSet(0.f, 0.f, 0.f, 0.f), XMVectorSet(m_fOneSpaceSize, 5, m_fOneSpaceSize, 0.f));
 	m_AABB.SetBoundingBoxInfo(boundingBox);
 	
-
-
 	if (m_ppd3dVertexBuffers) return true;
 	//derectional light mesh는 점이 0개임 hlsl코드에서 알아서 제작한다.
 
@@ -71,6 +69,12 @@ bool CTerrainMesh::CreateVertexBuffer() {
 bool CTerrainMesh::CreateIndexBuffer() {
 
 	return true;
+}
+shared_ptr<CTerrainMesh> CTerrainMesh::CreateTerrainMesh(float one_space_size){
+	shared_ptr<CTerrainMesh> pTerrainMesh = make_shared<CTerrainMesh>();
+	pTerrainMesh->SetOneSpaceSize(one_space_size);
+	pTerrainMesh->Begin();
+	return pTerrainMesh;
 }
 CTerrainMesh::CTerrainMesh() : CMesh() {
 

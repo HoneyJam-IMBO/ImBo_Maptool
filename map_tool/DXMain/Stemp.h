@@ -5,6 +5,9 @@
 #define STEMP_WIDTH 256
 #define STEMP_HEIGHT 256
 
+struct Pixel24;
+class CTexture;
+
 class CStempManager;
 
 class CStemp : public DXObject{

@@ -27,33 +27,36 @@ public:
 
 	virtual void UpdateShaderState();
 
-	void Excute(shared_ptr<CCamera>pCamera, ID3D11RenderTargetView* pLightAccumRTV, ID3D11ShaderResourceView* pMiniDepthSRV, const XMVECTOR& vSunDir, const XMFLOAT3& vSunColor);
+	void Excute(shared_ptr<CCamera>pCamera, ID3D11RenderTargetView* pLightAccumRTV, ID3D11ShaderResourceView* pMiniDepthSRV, const XMVECTOR& vSunDir, const XMFLOAT3& vSunColor,
+		float fOffsetSunPos = -200.f,
+		float fMaxSunDist = 1000.f,
+	float fInitDecay = 0.2f,
+	float fDistDecay = 0.8f,
+	float fMaxDeltaLen = 0.005f);
 	void ResizeBuffer();
 	void ReleaseBuffer();
 
-	void SetOffsetSunPos(float fOffsetSunPos) { m_fOffsetSunPos = fOffsetSunPos; }
-	void SetSunDist(float fMaxSunDist) { m_fMaxSunDist = fMaxSunDist; }
-	void SetInitDecay(float fInitDecay) { m_fInitDecay = fInitDecay; }
-	void SetDistDecay(float fDistDecay) { m_fDistDecay = fDistDecay; }
-	void SetMaxDeltaLen(float fMaxDeltaLen) { m_fMaxDeltaLen = fMaxDeltaLen; }
-
-	float& GetOffsetSunPos() { return m_fOffsetSunPos; }
-	float& GetMaxSunDist() { return m_fMaxSunDist; }
-	float& GetInitDecay() { return m_fInitDecay; }
-	float& GetDistDecay() { return m_fDistDecay; }
-	float& GetMaxDeltaLen() { return m_fMaxDeltaLen; }
+//	void SetOffsetSunPos(float fOffsetSunPos) { m_fOffsetSunPos = fOffsetSunPos; }
+//	void SetSunDist(float fMaxSunDist) { m_fMaxSunDist = fMaxSunDist; }
+//	void SetInitDecay(float fInitDecay) { m_fInitDecay = fInitDecay; }
+//	void SetDistDecay(float fDistDecay) { m_fDistDecay = fDistDecay; }
+//	void SetMaxDeltaLen(float fMaxDeltaLen) { m_fMaxDeltaLen = fMaxDeltaLen; }
+//
+//	float& GetOffsetSunPos() { return m_fOffsetSunPos; }
+//	float& GetMaxSunDist() { return m_fMaxSunDist; }
+//	float& GetInitDecay() { return m_fInitDecay; }
+//	float& GetDistDecay() { return m_fDistDecay; }
+//	float& GetMaxDeltaLen() { return m_fMaxDeltaLen; }
 private:
-	float m_fOffsetSunPos{ -200.f };
-	float m_fMaxSunDist = 1000.f;
-	float m_fInitDecay{ 0.2f };
-	float m_fDistDecay{ 0.8f };
-	float m_fMaxDeltaLen{ 0.005f };
 
 	// Prepare the occlusion map
 	void PrepareOcclusion(ID3D11ShaderResourceView* pMiniDepthSRV);
 
 	// Ray trace the occlusion map to generate the rays
-	void RayTrace(shared_ptr<CCamera>pCamera, const XMFLOAT2& vSunPosSS, const XMFLOAT3& vSunColor);
+	void RayTrace(shared_ptr<CCamera>pCamera, const XMFLOAT2& vSunPosSS, const XMFLOAT3& vSunColor,
+		float fInitDecay = 0.2f,
+		float fDistDecay = 0.8f,
+		float fMaxDeltaLen = 0.005f);
 
 	// Combine the rays with the scene
 	void Combine(shared_ptr<CCamera>pCamera, ID3D11RenderTargetView* pLightAccumRTV);

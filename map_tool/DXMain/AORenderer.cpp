@@ -10,7 +10,7 @@ bool CAORenderer::Begin() {
 	return true;
 }
 
-bool CAORenderer::End(){
+bool CAORenderer::End() {
 	ReleaseAmbientOcculutionViews();
 
 	if (m_pCSAONormalDepthDownScale) {
@@ -33,7 +33,7 @@ void CAORenderer::SetShaderState() {
 }
 
 void CAORenderer::CleanShaderState() {
-	
+
 }
 
 void CAORenderer::UpdateShaderState() {
@@ -168,7 +168,7 @@ void CAORenderer::ResizeBuffer() {
 	m_pCSSSAOCompute->SetThreadGroup((UINT)ceil((float)(nWidth * nHeight) / 1024.0f), 1, 1);
 }
 
-void CAORenderer::ReleaseAmbientOcculutionViews(){
+void CAORenderer::ReleaseAmbientOcculutionViews() {
 
 	if (m_pd3dbufAOMiniNormalDepth)m_pd3dbufAOMiniNormalDepth->Release();//1/4scale texture
 	m_pd3dbufAOMiniNormalDepth = nullptr;

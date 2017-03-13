@@ -112,7 +112,7 @@ CRenderContainer* CRenderContainerSeller::GetRenderContainer(object_id objectid)
 		m_mRenderContainer[objectid]->SetShader(RESOURCEMGR->GetRenderShader("SkyBox"));
 		m_mRenderContainer[objectid]->AddMaterial(RESOURCEMGR->GetMaterial("SkyBox"));
 		m_mRenderContainer[objectid]->AddInstanceBuffer(RESOURCEMGR->GetBuffer("ONEIB"));
-		m_mRenderContainer[objectid]->AddTexture(RESOURCEMGR->GetTexture("SkyBox"));
+		//m_mRenderContainer[objectid]->AddTexture(RESOURCEMGR->GetTexture("SkyBox"));
 
 		m_mRenderContainer[objectid]->Begin();
 		break;
@@ -130,10 +130,10 @@ CRenderContainer* CRenderContainerSeller::GetRenderContainer(object_id objectid)
 	case object_id::OBJECT_TERRAIN:
 		m_mRenderContainer[objectid] = new CRenderContainer();
 
-		m_mRenderContainer[objectid]->SetMesh(RESOURCEMGR->GetMesh("Terrain"));
+		//m_mRenderContainer[objectid]->SetMesh(RESOURCEMGR->GetMesh("Terrain"));
 		m_mRenderContainer[objectid]->SetShader(RESOURCEMGR->GetRenderShader("Terrain"));
 		m_mRenderContainer[objectid]->AddMaterial(RESOURCEMGR->GetMaterial("Terrain"));
-		m_mRenderContainer[objectid]->AddInstanceBuffer(RESOURCEMGR->GetBuffer("TerrainIB"));
+		//m_mRenderContainer[objectid]->AddInstanceBuffer(RESOURCEMGR->GetBuffer("TerrainIB"));
 		//m_mRenderContainer[objectid]->AddTexture(RESOURCEMGR->GetTexture("TerrainHeightMap"));
 		//m_mRenderContainer[objectid]->AddTexture(RESOURCEMGR->GetTexture("TerrainBase"));
 		//m_mRenderContainer[objectid]->AddTexture(RESOURCEMGR->GetTexture("TerrainDetail"));
@@ -228,7 +228,7 @@ CRenderContainer* CRenderContainerSeller::GetRenderContainer(object_id objectid)
 #endif
 		m_mRenderContainer[objectid]->AddBuffer(RESOURCEMGR->GetBuffer("FBX"));
 		m_mRenderContainer[objectid]->AddMaterial(RESOURCEMGR->GetMaterial("FBX"));
-		//m_mRenderContainer[objectid]->AddTexture(RESOURCEMGR->GetTexture("FBX"));
+		//m_mRenderContainer[objectid]->AddTexture(RESOURCEMGR->GetTexture("DEFAULT"));
 		//m_mRenderContainer[objectid]->SetAnimater(RESOURCEMGR->GetAnimater("ELF"));
 
 		m_mRenderContainer[objectid]->Begin();

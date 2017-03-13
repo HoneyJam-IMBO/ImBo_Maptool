@@ -395,6 +395,8 @@ void CGameObject::CreateObjectUI(){
 	TWBARMGR->SetBarResizable(barName, false);
 	//set param
 	TWBARMGR->AddRotationBar(barName, "Rotation World", "Rotate", this);
+	//임시 방편
+	float SPACE_SIZE = 1000.f;
 	TWBARMGR->AddPositionBar(barName, "Position", "Position", this, 0.f, SPACE_SIZE - 1.0f, 1.0f);
 	TWBARMGR->AddScaleBar(barName, "Scale", "Scale", this, 0.1f, 100.f, 0.1f);
 }
@@ -447,7 +449,6 @@ void CGameObject::CreateMenuMeshTextureUI(){
 		TWBARMGR->AddButtonCB(barName, groupName, menuName, LoadTextureFileCallback, &m_vStructLoadTextureFile[cnt]);
 		cnt++;
 	}
-
 }
 
 

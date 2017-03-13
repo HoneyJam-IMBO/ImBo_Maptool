@@ -32,7 +32,6 @@
 #include "Space.h"//space
 #include "Terrain.h"//terrain
 #include "DebugTexture.h"//debug texture
-
 #include "Material.h"
 
 #include "Texture.h"
@@ -63,6 +62,7 @@ public:
 	UINT CreateMultiMesh(string path, string name);
 	UINT CreateGJMResource(string path, string name);
 	UINT CreateFBXResource(string path, string name);
+	void CreateTerrainMesh(float fOneSpaceSize, string name);
 	void CreateAnimater(string path, string animaterName);
 
 	//get resource func

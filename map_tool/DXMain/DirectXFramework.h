@@ -44,6 +44,7 @@ public:
 	void ChangeScene(CScene* pScene);
 	void PopScene();
 	void PushScene(CScene* pScene);
+	CScene* GetCurScene() { return m_stackScene.top(); }
 	//--------------------------------------scene-----------------------------------------
 
 	shared_ptr<CCamera> GetCamera() { return m_pCamera; }

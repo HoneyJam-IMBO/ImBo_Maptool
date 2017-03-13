@@ -5,9 +5,6 @@
 
 //---------------------------dxobject---------------------------------
 bool CRenderContainer::Begin() {
-	if(false == m_vpBuffer.empty()){
-		m_ppBufferData = new void*[m_vpBuffer.size()];
-	}
 	
 	return true;
 }
@@ -84,8 +81,10 @@ void CRenderContainer::SetShaderState() {
 }
 
 void CRenderContainer::RenderExcute() {
-	for (auto p : m_vpMesh) {
-		p->Render(m_nInstance);
+	if (m_nInstance > 0) {
+		for (auto p : m_vpMesh) {
+			p->Render(m_nInstance);
+		}
 	}
 }
 void CRenderContainer::RenderExcuteWithOutObject(){
@@ -138,9 +137,15 @@ void CRenderContainer::RenderWithOutObject(shared_ptr<CCamera> pCamera){
 }
 
 void CRenderContainer::ClearMesh(){
+	if (m_vpMesh.empty())return;
 	m_vpMesh.clear();
 }
 
+void CRenderContainer::ClearBuffer() {
+	if (m_vpBuffer.empty())return;
+	m_vpBuffer.clear();
+	m_nBuffer = 0;
+}
 void CRenderContainer::ClearAnimater(){
 	m_pAnimater = nullptr;
 	//animater를 지울일이 없음.. 사용하는거지 내가 관리할 녀석ㅇ ㅣ아니거든..
@@ -185,9 +190,13 @@ void CRenderContainer::AddTexture(shared_ptr<CTexture> pTexture) {
 void CRenderContainer::AddBuffer(shared_ptr<CBuffer> pBuffer){
 	if (!pBuffer) return;
 
+
 	//void**를 초기화 하기 위해 필요한놈
 	m_nBuffer++;
 	m_vpBuffer.emplace_back(pBuffer);
+
+	if (m_ppBufferData) delete[] m_ppBufferData;
+	m_ppBufferData = new void*[m_vpBuffer.size()];
 }
 void CRenderContainer::AddInstanceBuffer(shared_ptr<CBuffer> pBuffer){
 	if (!pBuffer) return;
@@ -195,6 +204,10 @@ void CRenderContainer::AddInstanceBuffer(shared_ptr<CBuffer> pBuffer){
 	//void**를 초기화 하기 위해 필요한놈
 	m_nBuffer++;
 	m_vpBuffer.emplace_back(pBuffer);
+
+	if (m_ppBufferData) delete[] m_ppBufferData;
+	m_ppBufferData = new void*[m_vpBuffer.size()];
+
 	ID3D11Buffer* ppBuffers[1] = { pBuffer->GetBuffer() };
 	UINT ppStrides[1] = { pBuffer->GetBufferStride() };
 	UINT ppOffset[1] = { pBuffer->GetOffset() };

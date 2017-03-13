@@ -177,17 +177,17 @@ enum shader_value_num {
 
 
 //space
-//space main info
-#define SPACE_SIZE 1024.f
-#define SPACE_LEVEL 2.0f
-//space main info
-
-//한 사이드에 있는 공간의 개수
-#define ONESIDE_SPACE_NUM  pow(2.0f, SPACE_LEVEL)
-//공간 하나의 크기
-#define ONESPACE_SIZE SPACE_SIZE / ONESIDE_SPACE_NUM
-//공간의 수
-#define SPACE_NUM  pow(ONESIDE_SPACE_NUM, 2.0f)
+////space main info
+//#define SPACE_SIZE 1024.f
+//#define SPACE_LEVEL 2.0f
+////space main info
+//
+////한 사이드에 있는 공간의 개수
+//#define ONESIDE_SPACE_NUM  pow(2.0f, SPACE_LEVEL)
+////공간 하나의 크기
+//#define ONESPACE_SIZE SPACE_SIZE / ONESIDE_SPACE_NUM
+////공간의 수
+//#define SPACE_NUM  pow(ONESIDE_SPACE_NUM, 2.0f)
 //space
 
 //aabb

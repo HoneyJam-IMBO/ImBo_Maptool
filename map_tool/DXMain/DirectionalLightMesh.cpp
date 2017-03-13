@@ -10,6 +10,7 @@ bool CDirectionalLightMesh::CreateVertexBuffer() {
 	m_ppd3dVertexBuffers = nullptr;
 	//derectional light mesh는 점이 0개임 hlsl코드에서 알아서 제작한다.
 	
+	float SPACE_SIZE = 10.f;//이거 필요 없음
 	float fx = SPACE_SIZE, fy = SPACE_SIZE, fz = SPACE_SIZE;
 
 	//create space mesh aabb

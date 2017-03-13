@@ -49,8 +49,8 @@ void CSplattingInfoManager::UpdateShaderState(){
 			wsprintf(ppstrBlendInfoTextureNames[index], pSplattingInfo->GetBlendInfoTexturePath());
 			wsprintf(ppstrDetailTextureNames[index++], pSplattingInfo->GetDetailTexturePath());
 		}
-		m_pDetailTextures = CTexture::CreateTexture(index, ppstrDetailTextureNames, RESOURCEMGR->GetSampler("DEFAULT"), 1, BIND_PS);;
 		m_pBlendInfoTextures = CTexture::CreateTexture(index, ppstrBlendInfoTextureNames, RESOURCEMGR->GetSampler("DEFAULT"), 2, BIND_PS);
+		m_pDetailTextures = CTexture::CreateTexture(index, ppstrDetailTextureNames, RESOURCEMGR->GetSampler("DEFAULT"), 1, BIND_PS);;
 
 		SPLATTING_INFO* pData = (SPLATTING_INFO*)m_pSplattingInfoBuffer->Map();
 		pData->nSplattingInfo = m_vSplattinfInfo.size();
@@ -79,6 +79,14 @@ void CSplattingInfoManager::RemoveSplattingInfoByIndex(UINT index){
 		m_vSplattinfInfo[i]->UpdateShaderState();
 	}
 	m_nCurIndex = 0;
+	if (m_vSplattinfInfo.size() <= 0) {
+		const char* barName = "SplattingControll";
+		TWBARMGR->DeleteBar(barName);
+		barName = "SPLATTING_INFO_LIST";
+		TWBARMGR->DeleteBar(barName);
+
+		return;
+	}
 	m_vSplattinfInfo[m_nCurIndex]->CreateControllUI();
 	CreateSplattingListUI();
 }

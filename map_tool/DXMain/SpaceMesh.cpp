@@ -5,6 +5,9 @@ bool CSpaceMesh::CreateVertexBuffer() {
 	m_nVertices = 36;
 	m_d3dPrimitiveTopology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
+	//안쓰니까 임시로 이렇게
+	float ONESPACE_SIZE = 10.f;
+	float SPACE_SIZE = 10.f;
 	float fx = static_cast<float>(ONESPACE_SIZE), fy = static_cast<float>(SPACE_SIZE), fz = static_cast<float>(ONESPACE_SIZE);
 
 	m_pVertices = new XMFLOAT3[m_nVertices];

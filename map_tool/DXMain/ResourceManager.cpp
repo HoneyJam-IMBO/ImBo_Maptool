@@ -31,17 +31,13 @@ void CResourceManager::CreateTextures() {
 	//
 	//texture
 	shared_ptr<CSampler> pSampler;
-	//skybox
-	int nIndex = 0;
-	_TCHAR pstrTextureNames[128];
-	_stprintf_s(pstrTextureNames, _T("../../Assets/SkyBox_%d.dds"), nIndex);
+	
 	//make sampler
 	
 	CreateSampler("CLAMPSAMPLER", 0, BIND_PS, D3D11_TEXTURE_ADDRESS_WRAP, D3D11_FILTER_MIN_MAG_MIP_LINEAR,
 		D3D11_COMPARISON_ALWAYS, 0, D3D11_FLOAT32_MAX);
 
 	pSampler = CreateSampler("DEFAULT", PS_TEXTURE_SAMPLER, BIND_PS);
-	CreateTexture("SkyBox", pstrTextureNames, pSampler, PS_SLOT_SKYBOX, BIND_PS);
 	CreateTexture("DEFAULT", _T("../../Assets/default.jpg"), pSampler, PS_TEXTURE, BIND_PS);
 	CreateTexture("PICPOS", _T("../../Assets/default.jpg"), pSampler, 2, BIND_PS);
 
@@ -197,10 +193,6 @@ void CResourceManager::CreateMeshs() {
 	pMesh->Begin();
 	m_mMesh.insert(pairMesh("Space", pMesh));
 
-	pMesh = make_shared<CTerrainMesh>();
-	pMesh->Begin();
-	m_mMesh.insert(pairMesh("Terrain", pMesh));
-
 	pMesh = make_shared<CBoundingBoxMesh>();
 	pMesh->Begin();
 	m_mMesh.insert(pairMesh("BoundingBox", pMesh));
@@ -261,8 +253,8 @@ void CResourceManager::CreateBuffers() {
 
 	CreateInstancingBuffer("ONEIB", 1, sizeof(VS_VB_INSTANCE));
 
-	CreateInstancingBuffer("SpaceIB", (UINT)SPACE_NUM, sizeof(VS_VB_INSTANCE));
-	CreateInstancingBuffer("TerrainIB", (UINT)SPACE_NUM, sizeof(VS_VB_INSTANCE));
+	//CreateInstancingBuffer("SpaceIB", (UINT)SPACE_NUM, sizeof(VS_VB_INSTANCE));
+	//CreateInstancingBuffer("TerrainIB", (UINT)SPACE_NUM, sizeof(VS_VB_INSTANCE));
 
 	CreateInstancingBuffer("BoundingBoxIB", BOUNDINGBOX_NUM, sizeof(VS_VB_BOUNDINGBOX_INSTANCE));
 	CreateInstancingBuffer("CoordinateSysIB", COORD_NUM, sizeof(VS_VB_INSTANCE));
@@ -314,67 +306,104 @@ void CResourceManager::CreateFBXResources() {
 }
 
 shared_ptr<CTexture> CResourceManager::CreateTexture(string name, UINT nTextures, _TCHAR(*ppstrFilePaths)[128], shared_ptr<CSampler> pSampler, UINT Slot, UINT BindFlag, shared_ptr<CBuffer> pConstantBuffer){
-	shared_ptr<CTexture> pTexture;
-	pTexture = CTexture::CreateTexture(nTextures, ppstrFilePaths, pSampler, Slot, BindFlag, pConstantBuffer);
+	shared_ptr<CTexture> pTexture = CTexture::CreateTexture(nTextures, ppstrFilePaths, pSampler, Slot, BindFlag, pConstantBuffer);
+	if (m_mTexture.find(name) != m_mTexture.end()) {
+		m_mTexture[name]->End();
+		m_mTexture.erase(name);
+	}
 	m_mTexture.insert(pairTexture(name, pTexture));
 	return m_mTexture[name];
 }
 
 shared_ptr<CTexture> CResourceManager::CreateTexture(string name, UINT nTextures, ID3D11Texture2D ** ppd3dTextures, shared_ptr<CSampler> pSampler, UINT Slot, UINT BindFlag, shared_ptr<CBuffer> pConstantBuffer){
-	shared_ptr<CTexture> pTexture;
-	pTexture = CTexture::CreateTexture(nTextures, ppd3dTextures, pSampler, Slot, BindFlag, pConstantBuffer);
+	shared_ptr<CTexture> pTexture = CTexture::CreateTexture(nTextures, ppd3dTextures, pSampler, Slot, BindFlag, pConstantBuffer);
+	if (m_mTexture.find(name) != m_mTexture.end()) {
+		m_mTexture[name]->End();
+		m_mTexture.erase(name);
+	}
 	m_mTexture.insert(pairTexture(name, pTexture));
 	return m_mTexture[name];
 }
 
 shared_ptr<CTexture> CResourceManager::CreateTexture(string name, _TCHAR(pstrFilePath)[128], shared_ptr<CSampler> pSampler, UINT Slot, UINT BindFlag, shared_ptr<CBuffer> pConstantBuffer){
-	shared_ptr<CTexture> pTexture;
-	pTexture = CTexture::CreateTexture(pstrFilePath, pSampler, Slot, BindFlag, pConstantBuffer);
+	shared_ptr<CTexture> pTexture = CTexture::CreateTexture(pstrFilePath, pSampler, Slot, BindFlag, pConstantBuffer);
+	if (m_mTexture.find(name) != m_mTexture.end()) {
+		m_mTexture[name]->End();
+		m_mTexture.erase(name);
+	}
 	m_mTexture.insert(pairTexture(name, pTexture));
 	return m_mTexture[name];
 }
 
 shared_ptr<CTexture> CResourceManager::CreateTexture(string name, ID3D11ShaderResourceView * pShaderResourceView, shared_ptr<CSampler> pSampler, UINT Slot, UINT BindFlag, shared_ptr<CBuffer> pConstantBuffer){
-	shared_ptr<CTexture> pTexture;
-	pTexture = CTexture::CreateTexture(pShaderResourceView, pSampler, Slot, BindFlag, pConstantBuffer);
+	shared_ptr<CTexture> pTexture = CTexture::CreateTexture(pShaderResourceView, pSampler, Slot, BindFlag, pConstantBuffer);
+	if (m_mTexture.find(name) != m_mTexture.end()) {
+		m_mTexture[name]->End();
+		m_mTexture.erase(name);
+	}
 	m_mTexture.insert(pairTexture(name, pTexture));
 	return m_mTexture[name];
 }
 
 shared_ptr<CSampler> CResourceManager::CreateSampler(string name, UINT Slot, UINT BindFlags, D3D11_TEXTURE_ADDRESS_MODE Mode, D3D11_FILTER Filter, D3D11_COMPARISON_FUNC ComparisionFunc, float MinLOD, float MaxLOD){
-	shared_ptr<CSampler> pSampler;
-	pSampler = CSampler::CreateSampler(Slot, BindFlags, Mode, Filter, ComparisionFunc, MinLOD, MaxLOD);
+	shared_ptr<CSampler> pSampler = CSampler::CreateSampler(Slot, BindFlags, Mode, Filter, ComparisionFunc, MinLOD, MaxLOD);
+	if (m_mSampler.find(name) != m_mSampler.end()) {
+		m_mSampler[name]->End();
+		m_mSampler.erase(name);
+	}
 	m_mSampler.insert(pairSampler(name, pSampler));
 	return m_mSampler[name];
 }
 
-shared_ptr<CRenderShader> CResourceManager::CreateRenderShader(string name, LPCTSTR ShaderName, UINT InputElementFlag, UINT BindFlag){
-	shared_ptr<CRenderShader> pShader = CRenderShader::CreateRenderShader(ShaderName,InputElementFlag, BindFlag);
+shared_ptr<CRenderShader> CResourceManager::CreateRenderShader(string name, LPCTSTR ShaderName, UINT InputElementFlag, UINT BindFlag) {
+	shared_ptr<CRenderShader> pShader = CRenderShader::CreateRenderShader(ShaderName, InputElementFlag, BindFlag);
+
+	if (m_mRenderShader.find(name) != m_mRenderShader.end()) {
+		m_mRenderShader[name]->End();
+		m_mRenderShader.erase(name);
+	}
 	m_mRenderShader.insert(pairShader(name, pShader));
 	return m_mRenderShader[name];
 }
 
 shared_ptr<CBuffer> CResourceManager::CreateConstantBuffer(string name, UINT nObject, UINT BufferStride, UINT Slot, UINT BindFlag, UINT Offset){
-	shared_ptr<CBuffer> pBuffer  = CBuffer::CreateConstantBuffer(nObject, BufferStride, Slot, BindFlag, Offset);
+	shared_ptr<CBuffer> pBuffer = CBuffer::CreateConstantBuffer(nObject, BufferStride, Slot, BindFlag, Offset);
+	if (m_mBuffer.find(name) != m_mBuffer.end()) {//있으면 기존의것을 대체
+		m_mBuffer[name]->End();
+		m_mBuffer.erase(name);
+	}
+	
 	m_mBuffer.insert(pairBuffer(name, pBuffer));
+	
 	return m_mBuffer[name];
 }
 
 shared_ptr<CBuffer> CResourceManager::CreateInstancingBuffer(string name, UINT nObject, UINT BufferStride, UINT Offset){
 	shared_ptr<CBuffer> pBuffer = CBuffer::CreateInstancingBuffer(nObject, BufferStride, Offset);
+	if (m_mBuffer.find(name) != m_mBuffer.end()) {//있으면 기존의것을 대체
+		m_mBuffer[name]->End();
+		m_mBuffer.erase(name);
+	}
 	m_mBuffer.insert(pairBuffer(name, pBuffer));
 	return m_mBuffer[name];
 }
 
 shared_ptr<CBuffer> CResourceManager::CreateGlobalBuffer(string name, UINT nObject, UINT BufferStride, UINT Slot, UINT BindFlag, UINT Offset) {
 	shared_ptr<CBuffer> pBuffer = CBuffer::CreateConstantBuffer(nObject, BufferStride, Slot, BindFlag, Offset);
+	if (m_mGlobalBuffer.find(name) != m_mGlobalBuffer.end()) {
+		m_mGlobalBuffer[name]->End();
+		m_mGlobalBuffer.erase(name);
+	}
 	m_mGlobalBuffer.insert(pairBuffer(name, pBuffer));
 	return m_mGlobalBuffer[name];
 }
 
 shared_ptr<CMaterial> CResourceManager::CreateMaterial(string name, XMFLOAT4 color, float specExp, float specIntensity){
-	shared_ptr<CMaterial> pMaterial;
-	pMaterial = CMaterial::CreateMaterial(color, specExp, specIntensity);
+	shared_ptr<CMaterial> pMaterial = CMaterial::CreateMaterial(color, specExp, specIntensity);;
+	if (m_mMaterial.find(name) != m_mMaterial.end()) {
+		m_mMaterial[name]->End();
+		m_mMaterial.erase(name);
+	}
 	m_mMaterial.insert(pairMaterial(name, pMaterial));
 	return m_mMaterial[name];
 }
@@ -384,6 +413,11 @@ void CResourceManager::CreateAnimater(string path, string animaterName) {
 }
 
 UINT CResourceManager::CreateMultiMesh(string path, string name) {
+	if (m_mMesh.find(name) != m_mMesh.end()) {
+		m_mMesh[name]->End();
+		m_mMesh.erase(name);
+	}
+
 	wstring ws{ L"" };
 	ws.assign(path.cbegin(), path.cend());
 	wstring extention{ PathFindExtension(ws.c_str()) };
@@ -458,6 +492,12 @@ UINT CResourceManager::CreateFBXResource(string path, string name){
 	int meshCnt = FBXIMPORTER->GetMeshCnt();
 	FBXIMPORTER->End();
 	return meshCnt;
+}
+
+void CResourceManager::CreateTerrainMesh(float fOneSpaceSize, string name){
+	if (m_mMesh.find(name) != m_mMesh.end()) 
+		m_mMesh[name]->End();
+	m_mMesh[name] = CTerrainMesh::CreateTerrainMesh(fOneSpaceSize);
 }
 
 //Release

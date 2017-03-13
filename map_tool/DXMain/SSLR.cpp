@@ -4,14 +4,6 @@
 bool g_bShowRayTraceRes = false;
 
 bool CSSLR::Begin(){
-	const char* barName{ "Effects" };
-	TWBARMGR->AddMinMaxBarRW(barName, "SSLR", "OffsetSunPos", &m_fOffsetSunPos, -1000, -0.1f, 0.01f);
-	TWBARMGR->AddMinMaxBarRW(barName, "SSLR", "MaxSunDist", &m_fMaxSunDist, 0.0f, 1000.f, 0.01f);
-	TWBARMGR->AddMinMaxBarRW(barName, "SSLR", "InitDecay", &m_fInitDecay, 0.0f, 4.f, 0.001f);
-	TWBARMGR->AddMinMaxBarRW(barName, "SSLR", "DistDecay", &m_fDistDecay, 0.f, 4, 0.001f);
-	TWBARMGR->AddMinMaxBarRW(barName, "SSLR", "MaxDeltaLen", &m_fMaxDeltaLen, 0.001f, 0.05, 0.0001f);
-	TWBARMGR->AddBoolBar(barName, "SSLR", "on/off", &GLOBALVALUEMGR->GetSSLR());
-
 	// Allocate the occlussion constant buffer
 	m_pOcclusionCB = CBuffer::CreateConstantBuffer(1, sizeof(CB_OCCLUSSION), 0, BIND_CS);
 	m_pRayTraceCB = CBuffer::CreateConstantBuffer(1, sizeof(CB_LIGHT_RAYS), 0, BIND_PS);
@@ -57,7 +49,8 @@ void CSSLR::CleanShaderState(){
 void CSSLR::UpdateShaderState(){
 }
 
-void CSSLR::Excute(shared_ptr<CCamera>pCamera, ID3D11RenderTargetView* pLightAccumRTV, ID3D11ShaderResourceView* pMiniDepthSRV, const XMVECTOR& vSunDir, const XMFLOAT3& vSunColor){
+void CSSLR::Excute(shared_ptr<CCamera>pCamera, ID3D11RenderTargetView* pLightAccumRTV, ID3D11ShaderResourceView* pMiniDepthSRV, const XMVECTOR& vSunDir, const XMFLOAT3& vSunColor,
+	float fOffsetSunPos, float fMaxSunDist, float fInitDecay, float fDistDecay, float fMaxDeltaLen){
 	XMFLOAT2 xmf2DotResult;
 	XMStoreFloat2(&xmf2DotResult, -XMVector3Dot(pCamera->GetLook(), vSunDir));
 	const float dotCamSun = xmf2DotResult.x;
@@ -66,7 +59,7 @@ void CSSLR::Excute(shared_ptr<CCamera>pCamera, ID3D11RenderTargetView* pLightAcc
 		return;
 	}
 
-	XMVECTOR vSunPos = m_fOffsetSunPos * vSunDir;
+	XMVECTOR vSunPos = fOffsetSunPos * vSunDir;
 	XMFLOAT3 xmf3Eye;
 	XMStoreFloat3(&xmf3Eye, pCamera->GetPosition());
 	XMVECTOR offset = XMVectorSet(xmf3Eye.x, 0.f, xmf3Eye.z, 0.f);
@@ -80,7 +73,7 @@ void CSSLR::Excute(shared_ptr<CCamera>pCamera, ID3D11RenderTargetView* pLightAcc
 	// If the sun is too far out of view we just want to turn off the effect
 	XMFLOAT3 xmf3SunPossSS;
 	XMStoreFloat3(&xmf3SunPossSS, vSunPos);
-	if (abs(long(xmf3SunPossSS.x)) >= m_fMaxSunDist || abs(long(xmf3SunPossSS.y)) >= m_fMaxSunDist){
+	if (abs(long(xmf3SunPossSS.x)) >= fMaxSunDist || abs(long(xmf3SunPossSS.y)) >= fMaxSunDist){
 		return;
 	}
 	XMFLOAT3 vSunColorAtt = vSunColor;
@@ -96,7 +89,7 @@ void CSSLR::Excute(shared_ptr<CCamera>pCamera, ID3D11RenderTargetView* pLightAcc
 	//}
 
 	PrepareOcclusion(pMiniDepthSRV);
-	RayTrace(pCamera, XMFLOAT2(xmf3SunPossSS.x, xmf3SunPossSS.y), vSunColorAtt);
+	RayTrace(pCamera, XMFLOAT2(xmf3SunPossSS.x, xmf3SunPossSS.y), vSunColorAtt, fInitDecay, fDistDecay, fMaxDeltaLen);
 	if (!g_bShowRayTraceRes)
 		Combine(pCamera, pLightAccumRTV);
 }
@@ -128,7 +121,7 @@ void CSSLR::PrepareOcclusion(ID3D11ShaderResourceView * pMiniDepthSRV){
 	//DEBUGER->AddTexture(XMFLOAT2(100, 250), XMFLOAT2(250, 400), m_pOcclusionSRV);
 }
 
-void CSSLR::RayTrace(shared_ptr<CCamera>pCamera, const XMFLOAT2 & vSunPosSS, const XMFLOAT3 & vSunColor){
+void CSSLR::RayTrace(shared_ptr<CCamera>pCamera, const XMFLOAT2 & vSunPosSS, const XMFLOAT3 & vSunColor, float fInitDecay, float fDistDecay, float fMaxDeltaLen){
 	
 	float ClearColor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 	GLOBALVALUEMGR->GetDeviceContext()->ClearRenderTargetView(m_pLightRaysRTV, ClearColor);
@@ -148,10 +141,10 @@ void CSSLR::RayTrace(shared_ptr<CCamera>pCamera, const XMFLOAT2 & vSunPosSS, con
 	CB_LIGHT_RAYS* pRayTrace = (CB_LIGHT_RAYS*)m_pRayTraceCB->Map();
 	pRayTrace->vSunPos = XMFLOAT2(0.5f * vSunPosSS.x + 0.5f, -0.5f * vSunPosSS.y + 0.5f);
 	
-	pRayTrace->fInitDecay = m_fInitDecay;
-	pRayTrace->fDistDecay = m_fDistDecay;
+	pRayTrace->fInitDecay = fInitDecay;
+	pRayTrace->fDistDecay = fDistDecay;
 	pRayTrace->vRayColor = vSunColor;
-	pRayTrace->fMaxDeltaLen = m_fMaxDeltaLen;
+	pRayTrace->fMaxDeltaLen = fMaxDeltaLen;
 	m_pRayTraceCB->Unmap();
 	m_pRayTraceCB->SetShaderState();
 

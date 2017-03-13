@@ -12,6 +12,7 @@ void CDirectXFramework::Begin(HINSTANCE hInstance, HWND hWnd)
 	DEBUGER->Begin();
 	INPUTMGR->Begin();
 	RENDERER->Begin();
+	RENDERER->SetFramework(this);
 	//singleton Init
 
 	_tcscpy_s(m_pszBuffer, _T("DXMAIN ("));

@@ -2,53 +2,88 @@
 #include "TerrainContainer.h"
 #include "SpaceContainer.h"
 
+//void TW_CALL MCTerrainHeightScaleGetCallback(void * value, void * clientData) {
+//	if (nullptr == clientData) return;
+//	CTerrainContainer* pTerrainContainer = reinterpret_cast<CTerrainContainer*>(clientData);
+//	*static_cast<float *>(value) = pTerrainContainer->GetHeightScale();
+//}
+//void TW_CALL MCTerrainHeightScaleSetCallback(const void * value, void * clientData) {
+//	if (nullptr == clientData) return;
+//	CTerrainContainer* pTerrainContainer = reinterpret_cast<CTerrainContainer*>(clientData);
+//	pTerrainContainer->SetHeightScale(*static_cast<const float *>(value));
+//}
+//void TW_CALL MCCreateSplattingButtonCallback(void * clientData) {
+//	CTerrainContainer* pData = (CTerrainContainer*)clientData;
+//	pData->CreateSplattingInfo();
+//	pData->GetSplattingInfoManager()->CreateSplattingListUI();
+//}
+//
+//void TW_CALL SMSetButtonCallback(void * clientData) {
+//	CTerrainContainer* pData = (CTerrainContainer*)clientData;
+//	pData->SetStempMode(STEMP_MODE_SET);
+//}
+//void TW_CALL SMIndeButtonCallback(void * clientData) {
+//	CTerrainContainer* pData = (CTerrainContainer*)clientData;
+//	pData->SetStempMode(STEMP_MODE_INDE);
+//}
 #define TEXTURE_SIZE 257
-void TW_CALL SMSetButtonCallback(void * clientData) {
-	CTerrainContainer* pData = (CTerrainContainer*)clientData;
-	pData->SetStempMode(STEMP_MODE_SET);
-}
-void TW_CALL SMIndeButtonCallback(void * clientData) {
-	CTerrainContainer* pData = (CTerrainContainer*)clientData;
-	pData->SetStempMode(STEMP_MODE_INDE);
-}
 
 void CTerrainContainer::Begin() {
-	
-	TWBARMGR->AddButtonCB("TOOL_MODE", "STEMP_MODEVIEW", "SetStemp", SMSetButtonCallback, this);
-	TWBARMGR->AddButtonCB("TOOL_MODE", "STEMP_MODEVIEW", "IndeStemp", SMIndeButtonCallback, this);
+	TWBARMGR->AddBoolBar("TOOL_MODE", "SceneObject", "TerrainOn/Off", &m_bActive);
+
+	//TWBARMGR->DeleteBar("TerrainController");
+	//TWBARMGR->AddBar("TerrainController");
+	//TWBARMGR->AddButtonCB("TerrainController", "STEMP_MODEVIEW", "SetStemp", SMSetButtonCallback, this);
+	//TWBARMGR->AddButtonCB("TerrainController", "STEMP_MODEVIEW", "IndeStemp", SMIndeButtonCallback, this);
+	//TWBARMGR->AddMinMaxBarCB("TerrainController", "MainControll", "TerrainHeightScale", MCTerrainHeightScaleSetCallback, MCTerrainHeightScaleGetCallback,
+	//	this, 0.1f, 10.f, 0.001f);
+	//TWBARMGR->AddButtonCB("TerrainController", "MainControll", "CreateSplatting", MCCreateSplattingButtonCallback, this);
+
+	//terrain texture create
+	string name{ "" }; name.assign(m_wsTerrainName.begin(), m_wsTerrainName.end());
+	if (m_bIsTool) {
+		//make texture and use
+		CreateResetTextures(m_wsTerrainName.c_str());
+		RESOURCEMGR->CreateInstancingBuffer(name, 256, sizeof(VS_VB_INSTANCE));
+	}
+	else {
+		//just read texture
+		CreateTerrainTextures(m_wsTerrainName.c_str());
+		RESOURCEMGR->CreateInstancingBuffer(name, m_pSpaceContainer->GetSpaceNum(), sizeof(VS_VB_INSTANCE));
+	}
+	//terrain texture create
+
+	//terrain mesh create
+	m_pTerrainRenderContainer = RCSELLER->GetRenderContainer(object_id::OBJECT_TERRAIN);
+	CreateTerrainMesh(m_pSpaceContainer);
+	//terrain mesh create
 
 	m_pSplattingInfoManager = new CSplattingInfoManager();
 	m_pSplattingInfoManager->Begin();
 	//m_pSplattingInfoManager->CreateSplattingInfo(L"../slide.bmp", L"../../Assets/Detail_Texture_9.jpg");
 
-	m_pStempManager = new CStempManager();
 	//모든 stemp제작
-	m_pStempManager->Begin();
+	m_pStempManager = CStempManager::CreateStempManager(m_pSpaceContainer->GetSpaceSize());
 
-	//global object 제작
-	//m_pGlobalTerrain = new CGlobalTerrain();
-	////global object set, Update
-	//m_pGlobalTerrain->Begin(fOneSpaceSize, fOneSideSpaceNum, fHeightScale);
+	//global buffer 제작
 	m_pGlobalTerrainBuffer = RESOURCEMGR->GetGlobalBuffer("TerrainGB");
 	
+	//global buf set
+	m_pGlobalTerrainData = new TERRAIN_GLOBAL_VALUE;
 	float fOneSpaceSize = (float)m_pSpaceContainer->GetOneSpaceSize();
 	float fOneSideSpaceNum = (float)m_pSpaceContainer->GetOneSideSpaceNum();
-	m_pGlobalTerrainData = new TERRAIN_GLOBAL_VALUE;
 	m_pGlobalTerrainData->OneSideSpaceNum = fOneSideSpaceNum;
 	m_pGlobalTerrainData->OneSideSpaceNumRcp = 1.0f / fOneSideSpaceNum;
 	m_pGlobalTerrainData->OneSpaceSizeRcp = 1.0f / fOneSpaceSize;
 	m_pGlobalTerrainData->HeightScale = m_xmf3Scale.y;
-	
+	//global buf set
+
 	//터레인 제작
-	//terrain
+	//te`rrain
 	CTerrain* pTerrain = nullptr;
-	for (int j = 0; j < ONESIDE_SPACE_NUM; ++j) {
-		for (int i = 0; i < ONESIDE_SPACE_NUM; ++i) {
-			pTerrain = new CTerrain();
-			pTerrain->Begin();
-			pTerrain->SetTerrainContainer(this);
-			pTerrain->SetPosition(XMVectorSet(i*ONESPACE_SIZE, 0.f, j*ONESPACE_SIZE, 0.f));
-			m_pSpaceContainer->AddObject(pTerrain);
+	for (int j = 0; j < m_pSpaceContainer->GetOneSideSpaceNum(); ++j) {
+		for (int i = 0; i < m_pSpaceContainer->GetOneSideSpaceNum(); ++i) {
+			pTerrain = CTerrain::CreateTerrain(this, i, j);
 			m_vpTerrain.push_back(pTerrain);
 		}
 	}
@@ -63,53 +98,76 @@ void CTerrainContainer::Begin() {
 	descRasterizer.CullMode = D3D11_CULL_NONE;
 	GLOBALVALUEMGR->GetDevice()->CreateRasterizerState(&descRasterizer, &m_pd3dSpaceRSState);
 	//RS
-
-	m_pTerrainRenderContainer = RCSELLER->GetRenderContainer(object_id::OBJECT_TERRAIN);
-	//height map data init
 }
 
 bool CTerrainContainer::End() {
+	//TWBARMGR->DeleteBar("TerrainController");
+	//TWBARMGR->DeleteVar("TOOL_MODE", "SetStemp");
+	//TWBARMGR->DeleteVar("TOOL_MODE", "IndeStemp");
+	//TWBARMGR->DeleteVar("TOOL_MODE", "TerrainHeightScale");
+
+	if (m_pTerrainRenderContainer) m_pTerrainRenderContainer = nullptr;
+
 	if (m_pHeightData) delete[] m_pHeightData;
+	m_pHeightData = nullptr;
+	if (m_pNormalData) delete[] m_pNormalData;
+	m_pNormalData = nullptr;
 	if (m_pBaseTexture) m_pBaseTexture->End();
+	m_pBaseTexture = nullptr;
 	if (m_pHeightMapTexture) m_pHeightMapTexture->End();
-
-	//if (m_pGlobalTerrain) delete m_pGlobalTerrain;
-
+	m_pHeightMapTexture = nullptr;
+	if (m_pNormalTexture) m_pNormalTexture->End();
+	m_pNormalTexture = nullptr;
+	
+	if (m_pGlobalTerrainBuffer) m_pGlobalTerrainBuffer = nullptr;
 	if (m_pGlobalTerrainData) delete m_pGlobalTerrainData;
+	m_pGlobalTerrainData = nullptr;
 	if (m_pStempManager) {
 		m_pStempManager->End();
 		delete m_pStempManager;
+		m_pStempManager = nullptr;
 	}
 
 	if (m_pSplattingInfoManager) {
 		m_pSplattingInfoManager->End();
 		delete m_pSplattingInfoManager;
+		m_pSplattingInfoManager = nullptr;
+	}
+
+	//terrain object remove
+	for (auto pTerrain : m_vpTerrain) {
+		m_pSpaceContainer->RemoveObject(pTerrain);
 	}
 	m_vpTerrain.clear();
 
 	if(m_pd3dSpaceRSState)m_pd3dSpaceRSState->Release();
 	if(m_pd3dTempRSState)m_pd3dTempRSState->Release();
-	return false;
+	return true;
 }
 
 void CTerrainContainer::Render(shared_ptr<CCamera> pCamera){
-	ReadyHeightMap();
-	SetBufferInfo();
-	m_pBaseTexture->SetShaderState();
-	m_pHeightMapTexture->SetShaderState();
-	m_pNormalTexture->SetShaderState();
-	m_pStempManager->SetShaderState();
-	m_pGlobalTerrainBuffer->SetShaderState();
-	/////////////////////////////////////////이부분을 루프돌것임
-	m_pSplattingInfoManager->SetShaderState();//splatting
-	m_pTerrainRenderContainer->Render(pCamera);//render
-	m_pSplattingInfoManager->CleanShaderState();//splatting
-	/////////////////////////////////////////
-	m_pBaseTexture->CleanShaderState();
-	m_pHeightMapTexture->CleanShaderState();
-	m_pNormalTexture->SetShaderState();
-	m_pStempManager->CleanShaderState();
-	m_pGlobalTerrainBuffer->CleanShaderState();
+	if (m_bActive) {
+		if (GLOBALVALUEMGR->GetToolMode() == TOOL_MODE_TERRAIN && (INPUTMGR->MouseLeftDown() || INPUTMGR->MouseRightDown())) {
+			ReadyHeightMap();
+		}
+		SetBufferInfo();
+		m_pBaseTexture->SetShaderState();
+		m_pHeightMapTexture->SetShaderState();
+		m_pNormalTexture->SetShaderState();
+		m_pStempManager->SetShaderState();
+		m_pGlobalTerrainBuffer->SetShaderState();
+		/////////////////////////////////////////이부분을 루프돌것임
+		m_pSplattingInfoManager->SetShaderState();//splatting
+		m_pTerrainRenderContainer->Render(pCamera);//render
+		m_pSplattingInfoManager->CleanShaderState();//splatting
+		/////////////////////////////////////////
+		m_pBaseTexture->CleanShaderState();
+		m_pHeightMapTexture->CleanShaderState();
+		m_pNormalTexture->SetShaderState();
+		m_pStempManager->CleanShaderState();
+		m_pGlobalTerrainBuffer->CleanShaderState();
+	}
+	//m_pTerrainRenderContainer->ClearObjectList();
 }
 
 float CTerrainContainer::GetHeight(XMVECTOR xmvPos){
@@ -122,8 +180,8 @@ float CTerrainContainer::GetHeight(XMVECTOR xmvPos){
 }
 
 float CTerrainContainer::GetHeight(XMFLOAT2 xmf2Pos){
-	float fx = SPACE_SIZE - xmf2Pos.x;
-	float fz = SPACE_SIZE - xmf2Pos.y;
+	float fx = m_pSpaceContainer->GetSpaceSize() - xmf2Pos.x;
+	float fz = m_pSpaceContainer->GetSpaceSize() - xmf2Pos.y;
 
 	fx = fx / m_xmf3Scale.x;
 	fz = fz / m_xmf3Scale.z;
@@ -174,68 +232,77 @@ float CTerrainContainer::GetHeight(XMFLOAT2 xmf2Pos){
 void CTerrainContainer::SetPicpos(float x, float y){
 	m_xmf2CurPickPos.x = x;
 	m_xmf2CurPickPos.y = y;
-	m_pStempManager->SetPickPos(XMFLOAT2(x / SPACE_SIZE, y / SPACE_SIZE));
+	m_pStempManager->SetPickPos(XMFLOAT2(x / m_pSpaceContainer->GetSpaceSize(), y / m_pSpaceContainer->GetSpaceSize()));
 }
 
 void CTerrainContainer::SetRenderRadius(float r){
-	m_pStempManager->SetExtent(r / SPACE_SIZE);
+	m_pStempManager->SetExtent(r / m_pSpaceContainer->GetSpaceSize());
 }
 
 void CTerrainContainer::Update(shared_ptr<CCamera> pCamera) {
 
 	if (!pCamera) return;
-	POINT p = INPUTMGR->GetMousePoint();
+	if (m_bActive) {
+		POINT p = INPUTMGR->GetMousePoint();
 
-	//Get screen pos -> Camera pos
-	XMFLOAT4X4 xmf4x4Projection;
-	XMStoreFloat4x4(&xmf4x4Projection, pCamera->GetProjectionMtx());
-	D3D11_VIEWPORT d3dViewport = pCamera->GetViewport();
+		//Get screen pos -> Camera pos
+		XMFLOAT4X4 xmf4x4Projection;
+		XMStoreFloat4x4(&xmf4x4Projection, pCamera->GetProjectionMtx());
+		D3D11_VIEWPORT d3dViewport = pCamera->GetViewport();
 
-	//음 이건 화면을 찍은 점의 카메라 좌표계의 녀석이고
-	XMFLOAT3 xmf3PickPosition;
-	xmf3PickPosition.x = (((2.0f * p.x) / d3dViewport.Width) - 1) / xmf4x4Projection._11;
-	xmf3PickPosition.y = -(((2.0f * p.y) / d3dViewport.Height) - 1) / xmf4x4Projection._22;
-	xmf3PickPosition.z = 1.0f;
+		//음 이건 화면을 찍은 점의 카메라 좌표계의 녀석이고
+		XMFLOAT3 xmf3PickPosition;
+		xmf3PickPosition.x = (((2.0f * p.x) / d3dViewport.Width) - 1) / xmf4x4Projection._11;
+		xmf3PickPosition.y = -(((2.0f * p.y) / d3dViewport.Height) - 1) / xmf4x4Projection._22;
+		xmf3PickPosition.z = 1.0f;
 
-	XMVECTOR xmvPickPosition;
-	xmvPickPosition = XMLoadFloat3(&xmf3PickPosition);
-	XMMATRIX xmMtxViewInverse;
-	xmMtxViewInverse = XMMatrixInverse(nullptr, pCamera->GetViewMtx());
-	//picking pos에 camera inverse를 곱했으니 이건 picking pos의 world pos!
-	xmvPickPosition = XMVector3TransformCoord(xmvPickPosition, xmMtxViewInverse);
-	XMVECTOR xmvRayDir = xmvPickPosition - pCamera->GetPosition();
+		XMVECTOR xmvPickPosition;
+		xmvPickPosition = XMLoadFloat3(&xmf3PickPosition);
+		XMMATRIX xmMtxViewInverse;
+		xmMtxViewInverse = XMMatrixInverse(nullptr, pCamera->GetViewMtx());
+		//picking pos에 camera inverse를 곱했으니 이건 picking pos의 world pos!
+		xmvPickPosition = XMVector3TransformCoord(xmvPickPosition, xmMtxViewInverse);
+		XMVECTOR xmvRayDir = xmvPickPosition - pCamera->GetPosition();
 
-	CGameObject* pNearestObject = NULL;
-	float fHitDistance = FLT_MAX;
-	float fNearDistance = FLT_MAX;
-	pNearestObject = PickObjects(pCamera->GetPosition(), XMVector3Normalize(xmvRayDir), fHitDistance);
-	fNearDistance = fHitDistance;
+		CGameObject* pNearestObject = NULL;
+		float fHitDistance = FLT_MAX;
+		float fNearDistance = FLT_MAX;
+		pNearestObject = PickObjects(pCamera->GetPosition(), XMVector3Normalize(xmvRayDir), fHitDistance);
+		fNearDistance = fHitDistance;
+
+		int mode = m_StempMode;
+		if (mode == STEMP_MODE_SET) {
+			if (INPUTMGR->MouseLeftDown() || INPUTMGR->MouseRightDown()) {
+				SetPickPosHeight();
+			}
+		}
+		else if (mode == STEMP_MODE_INDE) {
+			if (INPUTMGR->MouseLeftDown()) {
+				IncreasePickPosHeight();
+			}
+			else if (INPUTMGR->MouseRightDown()) {
+				DecreasePickPosHeight();
+			}
+		}
+
+		m_pStempManager->UpdateShaderState();
+		m_pSplattingInfoManager->UpdateShaderState();
+
+		//test
+		//DEBUGER->AddTexture(XMFLOAT2(500, 150), XMFLOAT2(750, 300), m_pNormalTexture->GetShaderResourceView());
+		//DEBUGER->AddTexture(XMFLOAT2(500, 150), XMFLOAT2(750, 300), m_pNormalTexture->GetShaderResourceView());
+		if (INPUTMGR->KeyDown(VK_R)) {
+			CreateNormalMap();
+		}
+
+		//registe to renderer
+		//RENDERER->SetTerrainContainer(this);
+		return;
+	}
 	
-	int mode = m_StempMode;
-	if (mode == STEMP_MODE_SET) {
-		if (INPUTMGR->MouseLeftDown() || INPUTMGR->MouseRightDown()) {
-			SetPickPosHeight();
-		}
-	}
-	else if(mode == STEMP_MODE_INDE){
-		if (INPUTMGR->MouseLeftDown()) {
-			IncreasePickPosHeight();
-		}
-		else if (INPUTMGR->MouseRightDown()) {
-			DecreasePickPosHeight();
-		}
-	}
-
-	m_pStempManager->UpdateShaderState();
-	m_pSplattingInfoManager->UpdateShaderState();
-
-	//test
-	DEBUGER->AddTexture(XMFLOAT2(500, 150), XMFLOAT2(750, 300), m_pNormalTexture->GetShaderResourceView());
-	DEBUGER->AddTexture(XMFLOAT2(500, 150), XMFLOAT2(750, 300), m_pNormalTexture->GetShaderResourceView());
-	if (INPUTMGR->KeyDown(VK_R)) {
-		CreateNormalMap();
-	}
-	return;
+	//registe to renderer
+	//RENDERER->SetTerrainContainer(nullptr);
+	
 }
 
 CGameObject * CTerrainContainer::PickObjects(XMVECTOR xmvWorldCameraStartPos, XMVECTOR xmvRayDir, float & distance){
@@ -336,36 +403,36 @@ void CTerrainContainer::CreateNormalMap(){
 			int xIndex = i;
 			int yIndex = j;
 			if ((xIndex -1) > 0 && (yIndex +1) < 255) {
-				XMVECTOR p0 = XMVectorSet(256 - (xIndex), m_pHeightData[(xIndex) + (m_nLength * yIndex)].r, 256 - yIndex, 0.f);
-				XMVECTOR p1 = XMVectorSet(256 - (xIndex - 1), m_pHeightData[(xIndex - 1) + (m_nLength * yIndex)].r, 256 - yIndex, 0.f);
-				XMVECTOR p2 = XMVectorSet(256 - (xIndex), m_pHeightData[(xIndex)+(m_nLength * (yIndex + 1))].r, 256 - (yIndex + 1), 0.f);
+				XMVECTOR p0 = XMVectorSet(256 - (xIndex), m_pHeightData[(xIndex) + (m_nLength * yIndex)].r * m_xmf3Scale.y, 256 - yIndex, 0.f);
+				XMVECTOR p1 = XMVectorSet(256 - (xIndex - 1), m_pHeightData[(xIndex - 1) + (m_nLength * yIndex)].r* m_xmf3Scale.y, 256 - yIndex, 0.f);
+				XMVECTOR p2 = XMVectorSet(256 - (xIndex), m_pHeightData[(xIndex)+(m_nLength * (yIndex + 1))].r* m_xmf3Scale.y, 256 - (yIndex + 1), 0.f);
 				XMVECTOR edge1 = p1 - p0;
 				XMVECTOR edge2 = p2 - p0;
 				xmvSumNormal += XMVector3Normalize(XMVector3Cross(edge1, edge2));
 				nNormal++;
 			}
 			if ((xIndex +1) < 255 && (yIndex +1) < 255) {
-				XMVECTOR p0 = XMVectorSet(256 - (xIndex), m_pHeightData[(xIndex)+(m_nLength * yIndex)].r, 256 - yIndex, 0.f);
-				XMVECTOR p1 = XMVectorSet(256 - (xIndex), m_pHeightData[(xIndex)+(m_nLength * (yIndex + 1))].r, 256 - (yIndex + 1), 0.f);
-				XMVECTOR p2 = XMVectorSet(256 - (xIndex + 1), m_pHeightData[(xIndex + 1) + (m_nLength * yIndex)].r, 256 - yIndex, 0.f);
+				XMVECTOR p0 = XMVectorSet(256 - (xIndex), m_pHeightData[(xIndex)+(m_nLength * yIndex)].r* m_xmf3Scale.y, 256 - yIndex, 0.f);
+				XMVECTOR p1 = XMVectorSet(256 - (xIndex), m_pHeightData[(xIndex)+(m_nLength * (yIndex + 1))].r* m_xmf3Scale.y, 256 - (yIndex + 1), 0.f);
+				XMVECTOR p2 = XMVectorSet(256 - (xIndex + 1), m_pHeightData[(xIndex + 1) + (m_nLength * yIndex)].r* m_xmf3Scale.y, 256 - yIndex, 0.f);
 				XMVECTOR edge1 = p1 - p0;
 				XMVECTOR edge2 = p2 - p0;
 				xmvSumNormal += XMVector3Normalize(XMVector3Cross(edge1, edge2));
 				nNormal++;
 			}
 			if (0 < (xIndex -1) && 0 < (yIndex -1)) {
-				XMVECTOR p0 = XMVectorSet(256 - xIndex, m_pHeightData[(xIndex)+(m_nLength * yIndex)].r, 256 - yIndex, 0.f);
-				XMVECTOR p1 = XMVectorSet(256 - xIndex, m_pHeightData[(xIndex)+(m_nLength * (yIndex - 1))].r, 256 - (yIndex - 1), 0.f);
-				XMVECTOR p2 = XMVectorSet(256 - (xIndex - 1), m_pHeightData[(xIndex - 1) + (m_nLength * yIndex)].r, 256 - yIndex, 0.f);
+				XMVECTOR p0 = XMVectorSet(256 - xIndex, m_pHeightData[(xIndex)+(m_nLength * yIndex)].r* m_xmf3Scale.y, 256 - yIndex, 0.f);
+				XMVECTOR p1 = XMVectorSet(256 - xIndex, m_pHeightData[(xIndex)+(m_nLength * (yIndex - 1))].r* m_xmf3Scale.y, 256 - (yIndex - 1), 0.f);
+				XMVECTOR p2 = XMVectorSet(256 - (xIndex - 1), m_pHeightData[(xIndex - 1) + (m_nLength * yIndex)].r* m_xmf3Scale.y, 256 - yIndex, 0.f);
 				XMVECTOR edge1 = p1 - p0;
 				XMVECTOR edge2 = p2 - p0;
 				xmvSumNormal += XMVector3Normalize(XMVector3Cross(edge1, edge2));
 				nNormal++;
 			}
 			if ((xIndex +1) < 255 && 0 < (yIndex -1)) {
-				XMVECTOR p0 = XMVectorSet(256 - xIndex, m_pHeightData[(xIndex)+(m_nLength * yIndex)].r, 256 - yIndex, 0.f);
-				XMVECTOR p1 = XMVectorSet(256 - (xIndex + 1), m_pHeightData[(xIndex + 1) + (m_nLength * yIndex)].r, 256 - yIndex, 0.f);
-				XMVECTOR p2 = XMVectorSet(256 - xIndex, m_pHeightData[(xIndex)+(m_nLength * (yIndex - 1))].r, 256 - (yIndex - 1), 0.f);
+				XMVECTOR p0 = XMVectorSet(256 - xIndex, m_pHeightData[(xIndex)+(m_nLength * yIndex)].r* m_xmf3Scale.y, 256 - yIndex, 0.f);
+				XMVECTOR p1 = XMVectorSet(256 - (xIndex + 1), m_pHeightData[(xIndex + 1) + (m_nLength * yIndex)].r* m_xmf3Scale.y, 256 - yIndex, 0.f);
+				XMVECTOR p2 = XMVectorSet(256 - xIndex, m_pHeightData[(xIndex)+(m_nLength * (yIndex - 1))].r* m_xmf3Scale.y, 256 - (yIndex - 1), 0.f);
 				XMVECTOR edge1 = p1 - p0;
 				XMVECTOR edge2 = p2 - p0;
 				xmvSumNormal += XMVector3Normalize(XMVector3Cross(edge1, edge2));
@@ -388,7 +455,6 @@ void CTerrainContainer::CreateNormalMap(){
 	wsprintf(path, L"../%sNormalMap.bmp", m_wsTerrainName.c_str());//name
 	EXPORTER->MakeBitmap24(path, m_pNormalData, m_nWidth, m_nLength);
 	m_pNormalTexture = CTexture::CreateTexture(path, RESOURCEMGR->GetSampler("TerrainNormal"), PS_SLOT_NORMALMAP, BIND_PS);
-
 }
 
 CTerrainContainer * CTerrainContainer::CreateTerrainContainer(LPCTSTR pTerrainName, int nWidth, int nLength, float fHeightScale, CSpaceContainer * pSpaceContainer, bool isTool){
@@ -400,17 +466,14 @@ CTerrainContainer * CTerrainContainer::CreateTerrainContainer(LPCTSTR pTerrainNa
 	pTerrainContainer->SetTerrainScale(XMFLOAT3(static_cast<float>(pSpaceContainer->GetSize() / (nWidth)),
 		fHeightScale, static_cast<float>(pSpaceContainer->GetSize() / (nLength))));
 	pTerrainContainer->SetTerrainName(pTerrainName);
-	if (isTool) {
-		//make texture and use
-		pTerrainContainer->CreateResetTextures(pTerrainName);
-	}
-	else {
-		//just read texture
-		pTerrainContainer->CreateTerrainTextures(pTerrainName);
-	}
-
+	pTerrainContainer->SetIsTool(isTool);
+	
 	pTerrainContainer->Begin();
 	return pTerrainContainer;
+}
+
+void CTerrainContainer::SetHeightScale(float scale){
+	m_pGlobalTerrainData->HeightScale = m_xmf3Scale.y = scale;
 }
 
 void CTerrainContainer::CreateTerrainTextures(LPCTSTR pTerrainName){
@@ -422,6 +485,60 @@ void CTerrainContainer::CreateTerrainTextures(LPCTSTR pTerrainName){
 	m_pNormalData = IMPORTER->ReadBitmap24(path);//nomalmap
 	m_pNormalTexture = CTexture::CreateTexture(path, RESOURCEMGR->GetSampler("TerrainNormal"), PS_SLOT_NORMALMAP, BIND_PS);
 	m_pBaseTexture = CTexture::CreateTexture(L"../../Assets/default.jpg", RESOURCEMGR->GetSampler("DEFAULT"), 0);
+}
+
+void CTerrainContainer::CreateTerrainMesh(CSpaceContainer* pSpaceContainer){
+	//convert wstring to string
+	string name{ "" }; name.assign(m_wsTerrainName.begin(), m_wsTerrainName.end());
+
+	//resize instancing buf
+	m_pTerrainRenderContainer->ClearMesh();//기존의 mesh clear
+	m_pTerrainRenderContainer->ClearBuffer();//기존의 buffer clear
+	//resize terrain mesh
+	RESOURCEMGR->CreateTerrainMesh(pSpaceContainer->GetOneSpaceSize(), name);//resource 제작은 resource mgr에게
+	//RESOURCEMGR->CreateInstancingBuffer(name, pSpaceContainer->GetSpaceNum(), sizeof(VS_VB_INSTANCE));
+	//set resource
+	m_pTerrainRenderContainer->AddMesh(RESOURCEMGR->GetMesh(name));//만든 mesh사용
+	m_pTerrainRenderContainer->AddInstanceBuffer(RESOURCEMGR->GetBuffer(name));
+}
+
+void CTerrainContainer::ChangeSpaceData(){
+	//1. space안의 모든 terrain제거
+	//End();
+
+	for (auto pTerrain : m_vpTerrain) {
+		m_pSpaceContainer->RemoveObject(pTerrain);
+	}
+	m_vpTerrain.clear();
+
+	//2. mesh/ buffer새로 제작
+	//Begin();
+	SetTerrainScale(XMFLOAT3(static_cast<float>(m_pSpaceContainer->GetSize() / (m_nWidth)),
+		m_xmf3Scale.y, static_cast<float>(m_pSpaceContainer->GetSize() / (m_nLength))));
+	CreateTerrainMesh(m_pSpaceContainer);
+	
+	//3. terrain data 새로 설정
+	float fOneSpaceSize = (float)m_pSpaceContainer->GetOneSpaceSize();
+	float fOneSideSpaceNum = (float)m_pSpaceContainer->GetOneSideSpaceNum();
+	m_pGlobalTerrainData->OneSideSpaceNum = fOneSideSpaceNum;
+	m_pGlobalTerrainData->OneSideSpaceNumRcp = 1.0f / fOneSideSpaceNum;
+	m_pGlobalTerrainData->OneSpaceSizeRcp = 1.0f / fOneSpaceSize;
+	m_pGlobalTerrainData->HeightScale = m_xmf3Scale.y;
+	
+	//4. terrain 새로 제작
+	//터레인 제작
+	//terrain
+	CTerrain* pTerrain = nullptr;
+	for (int j = 0; j < m_pSpaceContainer->GetOneSideSpaceNum(); ++j) {
+		for (int i = 0; i < m_pSpaceContainer->GetOneSideSpaceNum(); ++i) {
+			pTerrain = CTerrain::CreateTerrain(this, i, j);
+			m_vpTerrain.push_back(pTerrain);
+		}
+	}
+	//terrain
+	
+	//5. stemp의 spacesize 새로 설정
+	m_pStempManager->SetSpaceSize(m_pSpaceContainer->GetSpaceSize());
 }
 
 void CTerrainContainer::CreateResetTextures(LPCTSTR pTerrainName){

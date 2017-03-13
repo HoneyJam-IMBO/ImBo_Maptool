@@ -3,6 +3,8 @@
 #include "SpaceContainer.h"
 
 void CSkyBoxContainer::Begin() {
+	TWBARMGR->AddBoolBar("TOOL_MODE", "SceneObject", "SkyBoxOn/Off", &m_bActive);
+
 	//skybox depth stencil
 	D3D11_DEPTH_STENCIL_DESC descDepth;
 	descDepth.DepthEnable = FALSE;
@@ -22,16 +24,6 @@ void CSkyBoxContainer::Begin() {
 	m_pSkyBox = new CSkyBox();
 	m_pSkyBox->Begin();	
 	//skybox
-	//directional light
-	m_pDirectionalLight = new CDirectionalLight;
-	m_pDirectionalLight->Begin(DIRECTIONAL_AMBIENT_LIGHT{
-		XMFLOAT4(1.0f, -1.0f, 1.0f, 0.0f),XMFLOAT4(0.1f, 0.1f, 0.1f, 0.0f) , XMFLOAT4(1.5f, 1.5f, 1.5f, 1.f),//dir
-		XMFLOAT4(0.1f, 0.1f, 0.1f, 1.f), XMFLOAT4(0.1f, 0.1f, 0.1f, 1.f), XMFLOAT4(0.1f, 0.1f, 0.1f, 1.f), XMFLOAT4(5.1f, 5.1f, 5.1f, 1.f)//ambient
-	});
-	m_pDirectionalLight->SetPosition(XMVectorSet(SPACE_SIZE / 2.f, SPACE_SIZE, SPACE_SIZE / 2.f, 0.f));
-	m_pDirectionalLight->Rotate(30.f, 0.f, 0.f);
-	RENDERER->SetDirectionalLight(m_pDirectionalLight);
-
 }
 
 bool CSkyBoxContainer::End() {
@@ -42,34 +34,51 @@ bool CSkyBoxContainer::End() {
 		m_pSkyBox->End();
 		delete m_pSkyBox;
 	}
-	if (m_pDirectionalLight) {
-		m_pDirectionalLight->End();
-		delete m_pDirectionalLight;
-	}
 	return true;
 }
 void CSkyBoxContainer::Update(shared_ptr<CCamera> pCamera, float fTimeElapsed) {
-	m_pSkyBox->SetCamera(pCamera);
-	//skybox camera 동기화
-	m_pSkyBox->Animate(fTimeElapsed);
-	//sky box 등록
-	m_pSkyBox->RegistToContainer();
-
-	//directional light 등록
-	m_pDirectionalLight->RegistToContainer();
+	if (m_bActive) {
+		m_pSkyBox->SetCamera(pCamera);
+		//skybox camera 동기화
+		m_pSkyBox->Animate(fTimeElapsed);
+		//sky box 등록
+		m_pSkyBox->RegistToContainer();
+		//registe to renderer
+		//RENDERER->SetSkyBoxContainer(this);
+		return;
+	}
+	//RENDERER->SetSkyBoxContainer(nullptr);
 }
-CSkyBoxContainer * CSkyBoxContainer::CreateSkyBoxContainer(){
-	CSkyBoxContainer* pSkyBoxContainer = new CSkyBoxContainer;
+CSkyBoxContainer * CSkyBoxContainer::CreateSkyBoxContainer(LPCTSTR pSkyBoxName, UINT textureIndex, CSpaceContainer * pSpaceContainer){
+	CSkyBoxContainer* pSkyBoxContainer = new CSkyBoxContainer();
+	pSkyBoxContainer->SetSkyBoxName(pSkyBoxName);
+	pSkyBoxContainer->CreateSkyBoxTexture(textureIndex);
+	pSkyBoxContainer->SetSpaceContainer(pSpaceContainer);
 	pSkyBoxContainer->Begin();
 	return pSkyBoxContainer;
 }
+void CSkyBoxContainer::CreateSkyBoxTexture(UINT index){
+	if (m_ptxtSkyBox) m_ptxtSkyBox->End();
+	m_ptxtSkyBox = nullptr;
+
+	//skybox
+	_TCHAR pstrTextureNames[128];
+	_stprintf_s(pstrTextureNames, _T("../../Assets/SkyBox_%d.dds"), index);
+	string name{ "" }; name.assign(m_wsSkyBoxName.begin(), m_wsSkyBoxName.end());
+	m_ptxtSkyBox = CTexture::CreateTexture(pstrTextureNames, RESOURCEMGR->GetSampler("DEFAULT"), PS_SLOT_SKYBOX, BIND_PS);
+}
 void CSkyBoxContainer::Render(shared_ptr<CCamera> pCamera) {
-	//skybox
-	GLOBALVALUEMGR->GetDeviceContext()->OMGetDepthStencilState(&m_pd3dTempDepthStencilState, &m_TempStencil);
-	GLOBALVALUEMGR->GetDeviceContext()->OMSetDepthStencilState(m_pd3dDepthStencilState, 0);
-	m_pSkyboxContainer->Render(pCamera);
-	GLOBALVALUEMGR->GetDeviceContext()->OMSetDepthStencilState(m_pd3dTempDepthStencilState, m_TempStencil);
-	//skybox
+	if (m_bActive) {
+		//skybox
+		GLOBALVALUEMGR->GetDeviceContext()->OMGetDepthStencilState(&m_pd3dTempDepthStencilState, &m_TempStencil);
+		GLOBALVALUEMGR->GetDeviceContext()->OMSetDepthStencilState(m_pd3dDepthStencilState, 0);
+		m_ptxtSkyBox->SetShaderState();
+		m_pSkyboxContainer->Render(pCamera);
+		m_ptxtSkyBox->CleanShaderState();
+		GLOBALVALUEMGR->GetDeviceContext()->OMSetDepthStencilState(m_pd3dTempDepthStencilState, m_TempStencil);
+		//skybox
+	}
+	//m_pSkyboxContainer->ClearObjectList();
 }
 CSkyBoxContainer::CSkyBoxContainer() : CObject("skyboxcontainer") {
 }

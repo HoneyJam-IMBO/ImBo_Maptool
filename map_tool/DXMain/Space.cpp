@@ -32,6 +32,13 @@ void CSpace::Begin(CSpaceContainer * pSpaceContainer, UINT size, int lv, XMVECTO
 		m_index = m_pSpaceContainer->SearchSpace(GetPosition());
 		//space container에 자신을 등록
 		m_pSpaceContainer->AddSpace(m_index, this);
+
+		float fx = static_cast<float>(m_pSpaceContainer->GetOneSpaceSize());
+		float fy = static_cast<float>(m_pSpaceContainer->GetSpaceSize());
+		float fz = static_cast<float>(m_pSpaceContainer->GetOneSpaceSize());
+
+		BoundingBox::CreateFromPoints(m_OriBoundingBox, XMVectorSet(0.f, 0.f, 0.f, 0.f), XMVectorSet(fx, fy, fz, 0.f));
+		
 		//SetRenderContainer(pSeller);//그림을 그릴 수도 있으니 RenderContainer set
 		return;
 	}
@@ -164,6 +171,18 @@ void CSpace::RemoveObject(CGameObject* pObject) {
 	m_mlpObject[pObject->GetTag()].remove_if([&pObject](CGameObject* pO) {
 		return pObject == pO;
 	});
+}
+
+void CSpace::RemoveObject(string name){
+	for (auto data : m_mlpObject) {
+		for (auto pObject : data.second) {
+			if (pObject->GetName() == name) {
+				m_mlpObject[pObject->GetTag()].remove_if([&pObject](CGameObject* pO) {
+					return pObject == pO;
+				});
+			}
+		}
+	}
 }
 
 CGameObject * CSpace::PickObject(XMVECTOR xmvWorldCameraStartPos, XMVECTOR xmvRayDir, float& distance){

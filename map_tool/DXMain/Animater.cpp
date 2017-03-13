@@ -155,7 +155,7 @@ void CAnimater::CreateAnimationUI(){
 	TWBARMGR->SetBarResizable(barName, false);
 	//set param
 
-
+	float SPACE_SIZE = 1000.f;
 	TWBARMGR->AddPositionBar(barName, "MainAABB", "MainAABB Position", GetMainAABB(), 0.f, SPACE_SIZE - 1.0f, 1.0f);
 	TWBARMGR->AddScaleBar(barName, "MainAABB", "MainAABB Scale", GetMainAABB(), 0.1f, 100.f, 0.1f);
 

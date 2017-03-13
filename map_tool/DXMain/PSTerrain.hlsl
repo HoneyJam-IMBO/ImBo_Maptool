@@ -9,7 +9,7 @@ Texture2DArray gtxtDetail : register(t1);
 Texture2DArray gtxtBlendInfo : register(t2);
 texture2D gtxtPicpos : register(t3);
 sampler gssTerrain : register(s0);
-sampler gssPicpos : register(s2);
+//sampler gssPicpos : register(s2);
 
 
 texture2D gtxtNormal : register(t5);
@@ -54,7 +54,7 @@ float4 RenderPickPos(float2 texCoord) {
 	float4 cColor = float4(0.f, 0.f, 0.f, 0.f);
 	if (x & y) {//나의 uv 좌표가 원의 범위 내에 있다면
 		float2 PickPosUV = float2(1 - ((texCoord.x - minPos.x) / (gRenderRadius * 2)), 1 - ((texCoord.y - minPos.y) / (gRenderRadius * 2)));
-		cColor = gtxtPicpos.Sample(gssPicpos, PickPosUV);
+		cColor = gtxtPicpos.Sample(gssTerrain, PickPosUV);
 	}
 	//picpos render
 	return cColor;

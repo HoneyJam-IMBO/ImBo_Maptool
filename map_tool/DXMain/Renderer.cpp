@@ -3,29 +3,7 @@
 #include "Renderer.h"
 
 bool CRenderer::Begin() {
-	const char* barName{ "Effects" };
-	TWBARMGR->AddBar(barName);
-	//set param
-	TWBARMGR->SetBarSize(barName, 250, 250);
-	TWBARMGR->SetBarPosition(barName, 0, 300);
-	TWBARMGR->SetBarColor(barName, 255, 0, 255);
-	TWBARMGR->SetBarContained(barName, true);
-	TWBARMGR->SetBarMovable(barName, false);
-	TWBARMGR->SetBarResizable(barName, false);
-	//set param
-	TWBARMGR->AddMinMaxBarRW(barName, "SSAO", "Radius", &m_SSAO_Radius, 1.0f, 1000.f, 0.5f);
-	TWBARMGR->AddMinMaxBarRW(barName, "SSAO", "OffsetRadius", &m_SSAO_OffsetRadius, 1.0f, 100.f, 0.1f);
-
-	TWBARMGR->AddMinMaxBarRW(barName, "BLOOM", "Threshold", &m_fBloomThreshold, 0.0f, 10.f, 0.001f);
-	TWBARMGR->AddMinMaxBarRW(barName, "BLOOM", "MiddleGrey", &m_fMiddleGrey, 0.0f, 4.f, 0.001f);
-	TWBARMGR->AddMinMaxBarRW(barName, "BLOOM", "White", &m_fWhite, 0.0f, 4.f, 0.001f);
-	TWBARMGR->AddMinMaxBarRW(barName, "BLOOM", "BloomScale", &m_fBloomScale, 0.f, 100.f, 0.1f);
-
-	//float m_fBloomThreshold{ 2.0f };
-	//float m_fMiddleGrey = { 0.0025f };
-	//float m_fWhite = { 1.5f };
-	//float m_fBloomScale{ 0.1f };
-
+	
 	D3D11_DEPTH_STENCIL_DESC descDepth;
 	descDepth.DepthEnable = TRUE;
 	descDepth.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
@@ -128,8 +106,8 @@ void CRenderer::Render(shared_ptr<CCamera> pCamera) {
 
 	//OBJECT RENDER
 	//terrain/ skybox render
-	if (m_pSkyBoxContainer) m_pSkyBoxContainer->Render(pCamera);
-	if(m_pTerrainContainer) m_pTerrainContainer->Render(pCamera);
+	if (m_pFramework->GetCurScene()->GetSkyBoxContainer()) m_pFramework->GetCurScene()->GetSkyBoxContainer()->Render(pCamera);
+	if(m_pFramework->GetCurScene()->GetTerrainContainer()) m_pFramework->GetCurScene()->GetTerrainContainer()->Render(pCamera);
 	//object
 	m_pObjectRenderer->Excute(pCamera);
 	//debuge
@@ -143,7 +121,9 @@ void CRenderer::Render(shared_ptr<CCamera> pCamera) {
 	for (auto texture : m_vObjectLayerResultTexture) {
 		texture->SetShaderState();
 	}	
-	ID3D11ShaderResourceView* pAmbientOcclution = m_pAORenderer->Excute(pCamera, m_SSAO_OffsetRadius, m_SSAO_Radius);
+	float SSAO_OffsetRadius = m_pFramework->GetCurScene()->GetSSAOOffsetRadius();
+	float SSAO_Radius = m_pFramework->GetCurScene()->GetSSAORadius();
+	ID3D11ShaderResourceView* pAmbientOcclution = m_pAORenderer->Excute(pCamera, SSAO_OffsetRadius, SSAO_Radius);
 	pAmbientOcclution  = m_p4to1Blur->Excute(pAmbientOcclution);
 	GLOBALVALUEMGR->GetDeviceContext()->PSSetShaderResources(4, 1, &pAmbientOcclution);
 	//SSAO
@@ -157,16 +137,23 @@ void CRenderer::Render(shared_ptr<CCamera> pCamera) {
 
 	//SSLR
 	if (GLOBALVALUEMGR->GetSSLR()) {
-		if (m_pDirectionalLIght) {
+		if (m_pFramework->GetCurScene()->GetSpaceContainer()->GetDirectionalLight()) {
 			D3D11_VIEWPORT oldvp;
 			UINT num = 1;
 			GLOBALVALUEMGR->GetDeviceContext()->RSGetViewports(&num, &oldvp);
 			ID3D11RasterizerState* pPrevRSState;
 			GLOBALVALUEMGR->GetDeviceContext()->RSGetState(&pPrevRSState);
 
-			XMVECTOR xmvSunDir = m_pDirectionalLIght->GetLook();
-			XMFLOAT3 xmf3Color = m_pDirectionalLIght->GetColor();
-			m_pSSLR->Excute(pCamera, m_pd3drtvLight, pAmbientOcclution, xmvSunDir, xmf3Color);
+			XMVECTOR xmvSunDir = m_pFramework->GetCurScene()->GetSpaceContainer()->GetDirectionalLight()->GetLook();
+			XMFLOAT3 xmf3Color = m_pFramework->GetCurScene()->GetSpaceContainer()->GetDirectionalLight()->GetColor();
+			float fOffsetSunPos = m_pFramework->GetCurScene()->GetSSLROffsetSunPos();
+			float fMaxSunDist = m_pFramework->GetCurScene()->GetSSLRMaxSunDist();
+			float fInitDecay = m_pFramework->GetCurScene()->GetSSLRInitDecay();
+			float fDistDecay = m_pFramework->GetCurScene()->GetSSLRDistDecay();
+			float fMaxDeltaLen = m_pFramework->GetCurScene()->GetSSLRMaxDeltaLen();
+
+			m_pSSLR->Excute(pCamera, m_pd3drtvLight, pAmbientOcclution, xmvSunDir, xmf3Color,
+				fOffsetSunPos, fMaxSunDist, fInitDecay, fDistDecay, fMaxDeltaLen);
 
 			// Restore the states
 			GLOBALVALUEMGR->GetDeviceContext()->RSSetViewports(num, &oldvp);
@@ -192,11 +179,11 @@ void CRenderer::Render(shared_ptr<CCamera> pCamera) {
 
 		//if(testBotton){
 		//DEBUGER->AddTexture(XMFLOAT2(100, 100), XMFLOAT2(250, 250), m_pd3dsrvColorSpecInt);
-		DEBUGER->AddTexture(XMFLOAT2(500, 0), XMFLOAT2(750, 150), m_pd3dsrvNormal);
+		//DEBUGER->AddTexture(XMFLOAT2(500, 0), XMFLOAT2(750, 150), m_pd3dsrvNormal);
 		//DEBUGER->AddTexture(XMFLOAT2(100, 400), XMFLOAT2(250, 550), m_pd3dsrvLight);
 		//DEBUGER->AddTexture(XMFLOAT2(100, 100), XMFLOAT2(500, 500), m_pd3dsrvDepthStencil);
 		//debug
-		//DEBUGER->AddTexture(XMFLOAT2(500, 0), XMFLOAT2(750, 150), pAmbientOcclution);
+		DEBUGER->AddTexture(XMFLOAT2(500, 0), XMFLOAT2(750, 150), pAmbientOcclution);
 		//DEBUGER->AddTexture(XMFLOAT2(0, 0), XMFLOAT2(1000, 500), pAmbientOcclution);
 
 		//이건 꼭 여기서 해줘야함.
@@ -215,21 +202,33 @@ void CRenderer::Render(shared_ptr<CCamera> pCamera) {
 	//UI
 
 	//PRESENT
-	m_pdxgiSwapChain->Present(0, 0);
+	// If the swap chain already exists, resize it.
+	HRESULT hr = m_pdxgiSwapChain->Present(0, 0);
 	//PRESENT
+	if (hr == DXGI_ERROR_DEVICE_REMOVED || hr == DXGI_ERROR_DEVICE_RESET)
+	{
+		DEBUGER->DebugMessageBox("explosion", "d");
+		return;
+	}
+	
 }
 void CRenderer::Update(float fTimeElapsed) {
 	m_pBloomDownScale->SetAdaptation(fTimeElapsed);
 }
 void CRenderer::PostProcessing(shared_ptr<CCamera> pCamera) {
-	m_pBloomDownScale->Excute(pCamera, m_fBloomThreshold);
+	float fBloomThreshold = m_pFramework->GetCurScene()->GetBLOOMThreshold();
+	float fMiddleGrey = m_pFramework->GetCurScene()->GetBLOOMMiddleGrey();
+	float fWhite = m_pFramework->GetCurScene()->GetBLOOMWhite();
+	float fBloomScale = m_pFramework->GetCurScene()->GetBLOOMScale();
+
+	m_pBloomDownScale->Excute(pCamera, fBloomThreshold);
 	ID3D11ShaderResourceView* pBloomImage = m_pBloom->Excute(pCamera);
 	pBloomImage = m_p16to1Blur->Excute(pBloomImage);
 
 	GLOBALVALUEMGR->GetDeviceContext()->PSSetShaderResources(2, 1, &pBloomImage);
 
 	//rtv에 풀스크린 드로우 
-	m_pPostProcessingFinalPass->Excute(pCamera, m_fMiddleGrey, m_fWhite, m_fBloomScale);
+	m_pPostProcessingFinalPass->Excute(pCamera, fMiddleGrey, fWhite, fBloomScale);
 
 	//적응을 하기위한 이전avgLum과 지금 계산한 avgLum을 교환
 	m_pBloomDownScale->SwapAdaptationBuff();

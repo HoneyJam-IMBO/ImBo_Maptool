@@ -44,13 +44,14 @@ ID3D11ShaderResourceView* CBlur::Excute(ID3D11ShaderResourceView* pSRVDest) {
 	m_pHorBlurComputeShader->ExcuteShaderState((UINT)ceil((m_nWidth) / (128.0f - 12.0f)), (UINT)ceil(m_nHeight), 1);
 
 	//clean
-	ID3D11UnorderedAccessView *pClenUAVs[1] = { nullptr };
-	GLOBALVALUEMGR->GetDeviceContext()->CSSetUnorderedAccessViews(0, 1, pClenUAVs, (UINT*)(&pClenUAVs));
+	ID3D11ShaderResourceView* pCleanSRVs[1] = { nullptr };
+	GLOBALVALUEMGR->GetDeviceContext()->CSSetShaderResources(0, 1, pCleanSRVs);
+	ID3D11UnorderedAccessView *pCleanUAVs[1] = { nullptr };
+	GLOBALVALUEMGR->GetDeviceContext()->CSSetUnorderedAccessViews(0, 1, pCleanUAVs, (UINT*)(&pCleanUAVs));
 
 	//blur2
 	pBlurTargetSRVs[0] = { m_pd3dsrvTempBlur };
 	GLOBALVALUEMGR->GetDeviceContext()->CSSetShaderResources(0, 1, pBlurTargetSRVs);
-
 	ID3D11UnorderedAccessView* pBlurResultUAVs[1] = { m_pd3duavBloom };
 	GLOBALVALUEMGR->GetDeviceContext()->CSSetUnorderedAccessViews(0, 1, pBlurResultUAVs, (UINT*)(&pBlurResultUAVs));
 
@@ -58,8 +59,10 @@ ID3D11ShaderResourceView* CBlur::Excute(ID3D11ShaderResourceView* pSRVDest) {
 
 	//짜잔 이제 bloom blur이미지가 완성되었다.
 	//test
-	ID3D11UnorderedAccessView* pUAVs[1] = { nullptr };
-	GLOBALVALUEMGR->GetDeviceContext()->CSSetUnorderedAccessViews(0, 1, pUAVs, (UINT*)(&pUAVs));
+	pCleanUAVs[0] = { nullptr };
+	GLOBALVALUEMGR->GetDeviceContext()->CSSetUnorderedAccessViews(0, 1, pCleanUAVs, (UINT*)(&pCleanUAVs));
+	pCleanSRVs[0] = { nullptr };
+	GLOBALVALUEMGR->GetDeviceContext()->CSSetShaderResources(0, 1, pCleanSRVs);
 
 	//DEBUGER->AddTexture(XMFLOAT2(100, 100), XMFLOAT2(250, 250), m_pd3dsrvTempBlur);
 	//DEBUGER->AddTexture(XMFLOAT2(100, 250), XMFLOAT2(250, 400), m_pd3dsrvBloom);
