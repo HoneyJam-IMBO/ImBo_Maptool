@@ -149,6 +149,24 @@ void TW_CALL SMIndeButtonCallback(void * clientData) {
 	if (pData->GetTerrainContainer())
 		pData->GetTerrainContainer()->SetStempMode(STEMP_MODE_INDE);
 }
+void TW_CALL FCSaveButtonCallback(void * clientData) {
+	CSceneMain* pData = (CSceneMain*)clientData;
+	pData->SaveScene();
+}
+void TW_CALL FCLoadButtonCallback(void * clientData) {
+	CSceneMain* pData = (CSceneMain*)clientData;
+	pData->CreateSceneListUI();
+}
+void TW_CALL LoadSceneButtonCallback(void * clientData) {
+	LoadFileStruct* pLFS = reinterpret_cast<LoadFileStruct*>(clientData);
+	
+	//pLFS->m_pScene->End();
+	pLFS->m_pScene->LoadScene(pLFS->Filename);
+
+	const char* barName{ "LoadScene" };
+	TWBARMGR->DeleteBar(barName);
+	//string s = pLFS;
+}
 void CSceneMain::CreatePositioningObject() {
 	CPointLight *pPositioningPointLight = CPointLight::CreatePointLight(100.f, XMFLOAT3(rand() % 5, rand() % 5, rand() % 5));
 	m_vpObjectList.push_back(pPositioningPointLight);
@@ -158,6 +176,201 @@ void CSceneMain::CreatePositioningObject() {
 
 	CSpotLight* pPositioningSpotLight = CSpotLight::CreateSpotLight(500.f, XMFLOAT3(0.1f, 0.1f, 0.1f), 30.f, 15.f);
 	m_vpObjectList.push_back(pPositioningSpotLight);
+}
+void CSceneMain::SaveScene(){
+	//cin>>scene name;
+	//cin>>path
+	//scene name
+	wstring wsSceneName = L"test";
+	wstring wsOutputPath{ L"../outputdata/" };
+	EXPORTER->Begin(L"../outputdata/scene.txt");
+
+	//scene name
+	EXPORTER->WriteWstring(wsSceneName);
+	EXPORTER->WriteEnter();
+	//output path
+	EXPORTER->WriteWstring(wsOutputPath);
+	EXPORTER->WriteEnter();
+	//space info
+	EXPORTER->WriteFloat(m_space_size); EXPORTER->WriteSpace();
+	EXPORTER->WriteFloat(m_space_lv);
+	EXPORTER->WriteEnter();
+	//terrain onoff/ skybox onoff
+	bool bTerrainContainer = m_pTerrainContainer != nullptr;
+	bool bSkyBoxContainer = m_pSkyBoxContainer != nullptr;
+	EXPORTER->WriteBool(bTerrainContainer); EXPORTER->WriteSpace();
+	EXPORTER->WriteBool(bSkyBoxContainer); 
+	EXPORTER->WriteEnter();
+	//effect info
+	//ssao
+	EXPORTER->WriteFloat(m_fSSAORadius); EXPORTER->WriteSpace();
+	EXPORTER->WriteFloat(m_fSSAOOffsetRadius);
+	EXPORTER->WriteEnter();
+	//bloom
+	EXPORTER->WriteFloat(m_fBLOOMThreshold); EXPORTER->WriteSpace();
+	EXPORTER->WriteFloat(m_fBLOOMMiddleGrey); EXPORTER->WriteSpace();
+	EXPORTER->WriteFloat(m_fBLOOMWhite); EXPORTER->WriteSpace();
+	EXPORTER->WriteFloat(m_fBLOOMScale); 
+	EXPORTER->WriteEnter();
+	//sslr
+	EXPORTER->WriteBool(m_bSSLROnOff); EXPORTER->WriteSpace();
+	EXPORTER->WriteFloat(m_fSSLROffsetSunPos); EXPORTER->WriteSpace();
+	EXPORTER->WriteFloat(m_fSSLRMaxSunDist); EXPORTER->WriteSpace();
+	EXPORTER->WriteFloat(m_fSSLRInitDecay); EXPORTER->WriteSpace();
+	EXPORTER->WriteFloat(m_fSSLRDistDecay); EXPORTER->WriteSpace();
+	EXPORTER->WriteFloat(m_fSSLRMaxDeltaLen);
+	EXPORTER->WriteEnter();
+
+	//object info save
+	//m_pSpaceContainer->WriteObjects();
+	//EXPORTER->WriteEnter();
+
+	if(bTerrainContainer){//terrain container가 있다면..
+		//base texture path
+		XMFLOAT3 xmf3Scale = m_pTerrainContainer->GetTerrainScale();
+		EXPORTER->WriteFloat(xmf3Scale.x); EXPORTER->WriteSpace();
+		EXPORTER->WriteFloat(xmf3Scale.y); EXPORTER->WriteSpace();
+		EXPORTER->WriteFloat(xmf3Scale.z); EXPORTER->WriteSpace();
+		EXPORTER->WriteEnter();
+		EXPORTER->WriteCHAR(m_pTerrainContainer->GetBaseTexture()->GetsPath().c_str()); 
+		EXPORTER->WriteEnter();
+		//height map texture name
+		wstring wsHeightDataName = wsOutputPath + wsSceneName + L"HeightMap.bmp";
+		EXPORTER->MakeBitmap24(wsHeightDataName.c_str(), m_pTerrainContainer->GetHeightData(), 256,256);
+		//normal map texture name
+		wstring wsNormalDataName = wsOutputPath + wsSceneName + L"NormalMap.bmp";
+		EXPORTER->MakeBitmap24(wsNormalDataName.c_str(), m_pTerrainContainer->GetNormalData(), 256, 256);
+		//이 두개는 scene name을 가지고 가공
+		//[scene name] + height map 이렇게
+
+		int nSplatting = m_pTerrainContainer->GetSplattingInfoManager()->GetSplattingInfos().size();
+		EXPORTER->WriteInt(nSplatting); 
+		EXPORTER->WriteEnter();
+		for(int i = 0; i<nSplatting; ++i){
+			//splatting의 detail texture는 path로 받는다.
+			wstring path = m_pTerrainContainer->GetSplattingInfoManager()->GetSplattingInfos()[i]->GetDetailTexturePath();
+			EXPORTER->WriteWstring(path);
+			EXPORTER->WriteEnter();
+			//splatting의 blending info는 [scene name]이름을 토대로 가공한다.
+			//[scene name] + [splatting blending info] + [index]
+			WCHAR splattingName[256];
+			wsprintf(splattingName, L"%s%sBlendInfo%d.bmp", wsOutputPath.c_str(), wsSceneName.c_str(), i);
+			EXPORTER->MakeBitmap24(splattingName, m_pTerrainContainer->GetSplattingInfoManager()->GetSplattingInfos()[i]->GetBlendInfo(), 256, 256);
+		}
+		//splatting texture name
+	}
+	EXPORTER->End();
+
+	/*
+		3. height map image / /[scene name] + height map
+		4. normal map image / /[scene name] + normal map
+		5. splatting blending images [scene name] + [splatting blending info] + [index]
+	*/
+	//EXPORTER->MakeBitmap24();
+}
+void CSceneMain::LoadScene(string path){
+	IMPORTER->Begin(path);
+	//scene name
+	wstring wsSceneName = IMPORTER->ReadWstring();
+	m_sName.assign(wsSceneName.cbegin(), wsSceneName.cend());
+
+	//output path
+	wstring wsOutputPath = IMPORTER->ReadWstring();
+	
+	//space info
+	float space_size = IMPORTER->ReadFloat();
+	float space_lv = IMPORTER->ReadFloat();
+	m_pSpaceContainer->SetSpaceSize(space_size);
+	m_pSpaceContainer->SetSpaceLevel(space_lv);
+	m_pSpaceContainer->ChangeSpaceData();
+
+	//terrain onoff/ skybox onoff
+	bool bTerrainContainer = IMPORTER->ReadBool();
+	m_pTerrainContainer->SetActive(bTerrainContainer);
+	bool bSkyBoxContainer = IMPORTER->ReadBool();
+	m_pSkyBoxContainer->SetActive(bSkyBoxContainer);
+
+	//effect info
+	//ssao
+	float fSSAORadius = IMPORTER->ReadFloat();
+	SetSSAORadius(fSSAORadius);
+	float fSSAOOffsetRadius = IMPORTER->ReadFloat();
+	SetSSAOOffsetRadius(fSSAOOffsetRadius);
+
+	//bloom
+	float fBLOOMThreshold = IMPORTER->ReadFloat();
+	SetBLOOMThreshold(fBLOOMThreshold);
+	float fBLOOMMiddleGrey = IMPORTER->ReadFloat();
+	SetBLOOMMiddleGrey(fBLOOMMiddleGrey);
+	float fBLOOMWhite = IMPORTER->ReadFloat();
+	SetBLOOMWhite(fBLOOMWhite);
+	float fBLOOMScale = IMPORTER->ReadFloat();
+	SetBLOOMScale(fBLOOMScale);
+	//sslr
+	bool bSSLROnOff = IMPORTER->ReadBool();
+	SetSSLROnOff(bSSLROnOff);
+	float fSSLROffsetSunPos = IMPORTER->ReadFloat();
+	SetSSLROffsetSunPos(fSSLROffsetSunPos);
+	float fSSLRMaxSunDist = IMPORTER->ReadFloat();
+	SetSSLRMaxSunDist(fSSLRMaxSunDist);
+	float fSSLRInitDecay = IMPORTER->ReadFloat();
+	SetSSLRInitDecay(fSSLRInitDecay);
+	float fSSLRDistDecay = IMPORTER->ReadFloat();
+	SetSSLRDistDecay(fSSLRDistDecay);
+	float fSSLRMaxDeltaLen = IMPORTER->ReadFloat();
+	SetSSLRMaxDeltaLen(fSSLRMaxDeltaLen);
+	//object info save
+	//m_pSpaceContainer->WriteObjects();
+	//EXPORTER->WriteEnter();
+
+	if (bTerrainContainer) {//terrain container가 있다면..
+		//base texture path
+		//m_pTerrainContainer->End();
+		//m_pTerrainContainer = CTerrainContainer::CreateTerrainContainer(m_pSpaceContainer, wsOutputPath, wsSceneName);
+	}
+	IMPORTER->End();
+
+}
+void CSceneMain::CreateSceneListUI(){
+	m_LoadFileStruct.clear();
+
+	const char* barName{ "LoadScene" };
+	TWBARMGR->AddBar(barName);
+
+	vector<wstring> vFile;
+	DIRECTORYFINDER->GetFiles(vFile, L"../outputdata", true, true, L".scn");
+	DIRECTORYFINDER->GetFiles(vFile, L"../outputdata", true, true, L".SCN");
+	//test
+	DIRECTORYFINDER->GetFiles(vFile, L"../outputdata", true, true, L".txt");
+
+	//const char* groupName = "File";
+	char menuName[64];
+	int cnt{ 0 };
+	m_LoadFileStruct.resize(vFile.size());
+	for (auto data : vFile) {
+		//file directory store;
+		data = DIRECTORYFINDER->ReplaceString(data, L"\\", L"/");
+		string filsDirectory{ "" };
+		filsDirectory.assign(data.cbegin(), data.cend());
+		m_LoadFileStruct[cnt] = LoadFileStruct{ this, filsDirectory };
+
+		//menu name = file name
+		string menuNameString{ "" };
+		menuNameString.assign(data.cbegin(), data.cend());
+		sprintf(menuName, "%s", menuNameString.c_str());
+
+		//group name = directory name
+		data = DIRECTORYFINDER->ReplaceString(data, L"/", L"\\");
+		LPWSTR str = (LPWSTR)data.c_str();
+		PathRemoveFileSpec(str);
+
+		wstring wGroupName{ str };
+		string groupName;
+		groupName.assign(wGroupName.cbegin(), wGroupName.cend());
+		TWBARMGR->AddButtonCB(barName, groupName.c_str(), menuName, LoadSceneButtonCallback, &m_LoadFileStruct[cnt]);
+		cnt++;
+	}
+
 }
 bool CSceneMain::Begin() {
 	//모든 positioning이 가능한 객체를 미리 제작해 둔다.
@@ -188,6 +401,12 @@ bool CSceneMain::Begin() {
 	TWBARMGR->AddButtonCB(barName, "TerrainControll", "CreateSplatting", MCCreateSplattingButtonCallback, this);
 	TWBARMGR->AddButtonCB(barName, "TerrainControll", "BaseTextureSelect", MCBaseTextureSelectButtonCallback, this);
 	
+	TWBARMGR->AddButtonCB(barName, "FileControll", "Save", FCSaveButtonCallback, this);
+	TWBARMGR->AddButtonCB(barName, "FileControll", "Load", FCLoadButtonCallback, this);
+	//test
+	//TWBARMGR->AddBoolBarCB(barName, "Test", "TerrainOnOff", SetTerrainOnOffCallback, GetTerrainOnOffCallback, this);
+	//test
+
 	barName = "Effects";
 	TWBARMGR->AddBar(barName);
 	//set param

@@ -62,6 +62,10 @@ public:
 
 	CTestObject* GetFBXObject() { return m_pFBXObject; }
 	void CreatePositioningObject();
+
+	void SaveScene();
+	void LoadScene(string path);
+	void CreateSceneListUI();
 private:
 	//tool 변수
 	//모든 생성 가능한 객체를 벡터로 미리 만들어 둔다.

@@ -41,19 +41,22 @@ bool CSpaceContainer::End(){
 		pObject->End();
 		delete pObject;
 	}
+	m_lpBlockObject.clear();
 
 	//all space end
 	//+ delete space pointer
 	m_pStartSpace->End();
+	m_pStartSpace = nullptr;
 
 	//directional light
 	if (m_pDirectionalLight) {
 		m_pDirectionalLight->End();
 		delete m_pDirectionalLight;
 	}
+	m_pDirectionalLight = nullptr;
 	//directional light
 	delete m_ppSpace;
-
+	m_ppSpace = nullptr;
 	return false;
 }
 

@@ -74,13 +74,16 @@ bool CAnimationInfo::Begin(shared_ptr<CAnimater> pAnimater){
 bool CAnimationInfo::End(){
 	m_pAnimationData->End();
 	delete m_pAnimationData;
+	m_pAnimationData = nullptr;
 
 	m_pAnimBuffer->End();
+	m_pAnimBuffer = nullptr;
 
 	for (auto data : m_lActiveBoundingBox) {
 		data->End();
 		delete data;
 	}
+	m_lActiveBoundingBox.clear();
 	//int MeshNum = m_mMeshIndexJoints.size();
 	//for (int i = 0; i<MeshNum; ++i) {
 	//	m_mMeshIndexJoints[i].clear();

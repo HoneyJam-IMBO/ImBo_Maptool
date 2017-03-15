@@ -10,15 +10,7 @@ void TW_CALL SplattingDetailTextureSelectCallback(void* clientData) {
 	pData->m_pSplatting->SetDetailTextuePath(pData->path.c_str());
 }
 void CSplattingInfo::Begin(){
-	SetIndex(m_pSplattingInfoManager->GetSplattingInfos().size());
-
-	m_pBlendInfo = new Pixel24[BLEND_DATA_NUM];
-	ZeroMemory(m_pBlendInfo, sizeof(Pixel24) * BLEND_DATA_NUM);
-	//blend data init
 	
-	EXPORTER->MakeBitmap24(m_pBlendInfoTexturePath.c_str(), m_pBlendInfo, BLEND_WIDTH, BLEND_HEIGHT);
-	m_pBlendInfo = IMPORTER->ReadBitmap24(m_pBlendInfoTexturePath.c_str());
-	//m_pBlendInfoTexture = CTexture::CreateTexture(L"../slide.bmp", RESOURCEMGR->GetSampler("DEFAULT"), 2, BIND_PS);
 }
 
 bool CSplattingInfo::End(){
@@ -44,18 +36,45 @@ void CSplattingInfo::UpdateShaderState(){
 CSplattingInfo * CSplattingInfo::CreateSplattingInfo(CSplattingInfoManager* pSplattingManager, const WCHAR * pDetailTextureName){
 	CSplattingInfo* pSplattingInfo = new CSplattingInfo;
 
+	pSplattingInfo->SetIndex(pSplattingManager->GetSplattingInfos().size());
 	pSplattingInfo->SetSplattingManager(pSplattingManager);
 	pSplattingInfo->SetDetailTextuePath(pDetailTextureName);
+
+	WCHAR pathBlendInfo[256];
+	wsprintf(pathBlendInfo, L"../outputdata/SplattingBlendInfo/BlendInfo%d.bmp", pSplattingInfo->GetIndex());
+	pSplattingInfo->SetBlendInfoTextuePath(pathBlendInfo);
+
+	//blend data init
+	Pixel24* pBlendInfo = new Pixel24[BLEND_DATA_NUM];
+	ZeroMemory(pBlendInfo, sizeof(Pixel24) * BLEND_DATA_NUM);
+	//blend data init
+
+	EXPORTER->MakeBitmap24(pathBlendInfo, pBlendInfo, BLEND_WIDTH, BLEND_HEIGHT);
 	
+	pSplattingInfo->SetBlendInfo(pBlendInfo);
+	pSplattingInfo->Begin();
+	return pSplattingInfo;
+}
+
+CSplattingInfo * CSplattingInfo::CreateSplattingInfo(CSplattingInfoManager * pSplattingManager, const WCHAR * pDetailTextureName, const WCHAR * pBlendInfoTextureName){
+	CSplattingInfo* pSplattingInfo = new CSplattingInfo;
+
+	pSplattingInfo->SetIndex(pSplattingManager->GetSplattingInfos().size());
+	pSplattingInfo->SetSplattingManager(pSplattingManager);
+	pSplattingInfo->SetDetailTextuePath(pDetailTextureName);
+	pSplattingInfo->SetBlendInfoTextuePath(pBlendInfoTextureName);
+
+	//blend data init
+	Pixel24* pBlendInfo = IMPORTER->ReadBitmap24(pBlendInfoTextureName);
+	//blend data init
+
+	pSplattingInfo->SetBlendInfo(pBlendInfo);
 	pSplattingInfo->Begin();
 	return pSplattingInfo;
 }
 
 void CSplattingInfo::SetIndex(UINT index){
 	m_nIndex = index; 
-	WCHAR path[256];
-	wsprintf(path, L"../outputdata/SplattingBlendInfo/BlendInfo%d.bmp", m_nIndex);
-	SetBlendInfoTextuePath(path);
 }
 
 void CSplattingInfo::CreateControllUI(){

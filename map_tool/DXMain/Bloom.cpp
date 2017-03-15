@@ -10,6 +10,8 @@ bool CBloom::Begin() {
 bool CBloom::End() {
 	ReleaseBuffer();
 	m_pBloomComputeShader->End();
+	delete m_pBloomComputeShader;
+	m_pBloomComputeShader = nullptr;
 	return true;
 }
 

@@ -12,9 +12,17 @@ void CSplattingInfoManager::Begin(){
 }
 
 bool CSplattingInfoManager::End(){
+	const char* barName = "SplattingControll";
+	TWBARMGR->DeleteBar(barName);
+	barName = "SPLATTING_INFO_LIST";
+	TWBARMGR->DeleteBar(barName);
+
 	if (m_pDetailTextures)m_pDetailTextures->End();
+	m_pDetailTextures = nullptr;
 	if (m_pBlendInfoTextures)m_pBlendInfoTextures->End();
+	m_pBlendInfoTextures = nullptr;
 	if (m_pSplattingInfoBuffer) m_pSplattingInfoBuffer->End();
+	m_pSplattingInfoBuffer = nullptr;
 	return true;
 }
 

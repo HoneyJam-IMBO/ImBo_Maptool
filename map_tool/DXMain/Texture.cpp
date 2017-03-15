@@ -7,6 +7,7 @@ bool CTexture::Begin(){
 }
 
 bool CTexture::End() {
+	m_pSampler = nullptr;
 	//sampler
 	//if (m_pSampler) {
 	//	m_pSampler->End();
@@ -15,9 +16,11 @@ bool CTexture::End() {
 	if (m_pConstantBuffer) {
 		m_pConstantBuffer->End();
 	}
+	m_pConstantBuffer = nullptr;
 
 	//texture
-		if (m_pd3dsrvTexture) m_pd3dsrvTexture->Release();
+	if (m_pd3dsrvTexture) m_pd3dsrvTexture->Release();
+	m_pd3dsrvTexture = nullptr;
 
 	return true;
 }

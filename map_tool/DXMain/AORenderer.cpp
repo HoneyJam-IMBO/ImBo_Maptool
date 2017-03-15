@@ -17,11 +17,17 @@ bool CAORenderer::End() {
 		m_pCSAONormalDepthDownScale->End();
 		delete m_pCSAONormalDepthDownScale;
 	}
+	m_pCSAONormalDepthDownScale = nullptr;
+
 	if (m_pCSSSAOCompute) {
 		m_pCSSSAOCompute->End();
 		delete m_pCSSSAOCompute;
 	}
+	m_pCSSSAOCompute = nullptr;
+
 	if (m_pTDoownscaleCB) delete m_pTDoownscaleCB;
+	m_pTDoownscaleCB = nullptr;
+
 	if (m_pd3dbufAOConstantBuffer)m_pd3dbufAOConstantBuffer->Release();
 	m_pd3dbufAOConstantBuffer = nullptr;
 

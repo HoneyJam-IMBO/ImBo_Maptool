@@ -26,8 +26,10 @@ bool CStempManager::End(){
 	//TWBARMGR->DeleteVar("TOOL_MODE", "STEMP_INDEX");
 
 	if (m_pPicposRenderInfo) delete m_pPicposRenderInfo;
-	if (m_pPicposRenderInfo) m_pPicposRenderInfoBuffer->End();
-	
+	m_pPicposRenderInfo = nullptr;
+	if (m_pPicposRenderInfoBuffer) m_pPicposRenderInfoBuffer->End();
+	m_pPicposRenderInfoBuffer = nullptr;
+
 	for (auto pStemp : m_vStemp) {
 		delete pStemp;
 	}

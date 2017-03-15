@@ -2,6 +2,12 @@
 #include "Scene.h"
 #include "DirectXFramework.h"
 
+bool CScene::Begin(string path){
+
+
+	return true;
+}
+
 bool CScene::End(){
 	//space
 	if (m_pSpaceContainer) {

@@ -57,10 +57,12 @@ void CDirectXFramework::End() {
 	if (m_pCamera) {
 		m_pCamera->End();
 	}
+	m_pCamera = nullptr;
 
 	//scene end
 	for (int i = 0; i < m_nScene; ++i) {
 		m_stackScene.top()->End();
+		delete m_stackScene.top();
 		m_stackScene.pop();
 	}
 

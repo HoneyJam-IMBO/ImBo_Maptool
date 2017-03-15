@@ -8,6 +8,7 @@ void CStemp::Begin(){
 
 bool CStemp::End(){
 	m_pStempTexture->End();
+	m_pStempTexture = nullptr;
 
 	return true;
 }

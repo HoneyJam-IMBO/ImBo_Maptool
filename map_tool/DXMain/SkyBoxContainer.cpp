@@ -34,6 +34,7 @@ bool CSkyBoxContainer::End() {
 		m_pSkyBox->End();
 		delete m_pSkyBox;
 	}
+	m_pSkyBox = nullptr;
 	return true;
 }
 void CSkyBoxContainer::Update(shared_ptr<CCamera> pCamera, float fTimeElapsed) {

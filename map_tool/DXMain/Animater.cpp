@@ -31,10 +31,14 @@ bool CAnimater::End(){
 		m_pMainBoundingBox->End();
 		delete m_pMainBoundingBox;
 	}
+	m_pMainBoundingBox = nullptr;
+
 	m_pSkeletonData->End();
 	delete m_pSkeletonData;
+	m_pSkeletonData = nullptr;
 
 	m_pAnimBuffer->End();
+	m_pAnimBuffer = nullptr;
 
 	return true;
 }

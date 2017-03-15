@@ -42,23 +42,37 @@ bool CBloomDownScale::Begin() {
 
 bool CBloomDownScale::End() {
 	if (m_pFirstPassCB) m_pFirstPassCB->Release();
+	m_pFirstPassCB = nullptr;
 	if (m_pFirstPassBuffer) m_pFirstPassBuffer->Release();
+	m_pFirstPassBuffer = nullptr;
 	if (m_pFirstPassAvgLumSRV) m_pFirstPassAvgLumSRV->Release();
+	m_pFirstPassAvgLumSRV = nullptr;
 	if (m_pFirstPassAvgLumUAV) m_pFirstPassAvgLumUAV->Release();
+	m_pFirstPassAvgLumUAV = nullptr;
 
 	//1
 	if (m_pd3dtxtDownCasting) m_pd3dtxtDownCasting->Release();
+	m_pd3dtxtDownCasting = nullptr;
 	if (m_pd3dsrvDownCasting) m_pd3dsrvDownCasting->Release();
+	m_pd3dsrvDownCasting = nullptr;
 	if (m_pd3duavDownCasting) m_pd3duavDownCasting->Release();
+	m_pd3duavDownCasting = nullptr;
 
 
 	//second pass
 	if (m_pSecondPassBuffer) m_pSecondPassBuffer->Release();
+	m_pSecondPassBuffer = nullptr;
 	if (m_pSecondPassUAV) m_pSecondPassUAV->Release();
+	m_pSecondPassUAV = nullptr;
 	if (m_pSecondPassSRV) m_pSecondPassSRV->Release();
+	m_pSecondPassSRV = nullptr;
 
 	m_pFirstPassComputeShader->End();
+	delete m_pFirstPassComputeShader;
+	m_pFirstPassComputeShader = nullptr;
 	m_pSecondPassComputeShader->End();
+	delete m_pSecondPassComputeShader;
+	m_pSecondPassComputeShader = nullptr;
 	return true;
 }
 

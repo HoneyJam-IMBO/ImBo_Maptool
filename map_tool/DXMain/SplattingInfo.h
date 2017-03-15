@@ -30,7 +30,9 @@ public:
 	void SetDetailTextuePath(const WCHAR* path) { m_pDetailTexturePath = path; }
 	const WCHAR* GetDetailTexturePath() { return m_pDetailTexturePath.c_str(); }
 	Pixel24* GetBlendInfo() { return m_pBlendInfo; }
+	void SetBlendInfo(Pixel24* pData) { m_pBlendInfo = pData; }
 	static CSplattingInfo* CreateSplattingInfo(CSplattingInfoManager* pSplattingManager, const WCHAR* pDetailTextureName);
+	static CSplattingInfo* CreateSplattingInfo(CSplattingInfoManager* pSplattingManager, const WCHAR* pDetailTextureName, const WCHAR* pBlendInfoTextureName);
 
 	void SetSplattingManager(CSplattingInfoManager* pSplattingManager) { m_pSplattingInfoManager = pSplattingManager; }
 	CSplattingInfoManager* GetSplattingManager() { return m_pSplattingInfoManager; }

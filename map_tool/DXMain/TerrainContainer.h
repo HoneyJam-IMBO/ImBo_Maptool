@@ -39,6 +39,8 @@ public:
 
 	void SetStempMode(STEMP_MODE mode) { m_StempMode = mode; }
 	void SetBaseTexture(wstring path);
+	void SetHeightMapTexture(wstring path);
+	CTexture* GetBaseTexture() { return m_pBaseTexture.get(); };
 
 	void CreateSplattingInfo();
 	CSplattingInfoManager* GetSplattingInfoManager() { return m_pSplattingInfoManager; }
@@ -52,14 +54,20 @@ public:
 	void SetTerrainWidth(int nWidth) { m_nWidth = nWidth; }
 	void SetTerrainLength(int nLength) { m_nLength = nLength; }
 	void SetHeightScale(float scale);
+	void SetScale(XMFLOAT3 xmf3Scale) { m_xmf3Scale = xmf3Scale; }
 	float GetHeightScale() { return m_xmf3Scale.y; }
 	void SetTerrainScale(XMFLOAT3 xmf3Scale) { m_xmf3Scale = xmf3Scale; }
+	XMFLOAT3 GetTerrainScale() { return m_xmf3Scale; }
 	void SetSpaceContainer(CSpaceContainer* pSpaceContainer) { m_pSpaceContainer = pSpaceContainer; }
 	CSpaceContainer* GetSpaceContainer() { return m_pSpaceContainer; }
-	void SetTerrainName(wstring name) { m_wsTerrainName = name; }
-	wstring GetTerrainName() { return m_wsTerrainName; }
+	void SetSceneName(wstring name) { m_wsSceneName = name; }
+	wstring GetSceneName() { return m_wsSceneName; }
+	void SetOutputPath(wstring name) { m_wsOutputPath = name; }
+	wstring GetOutputPath() { return m_wsOutputPath; }
 	void SetIsTool(bool b) { m_bIsTool = b; }
 	bool GetIsTool() { return m_bIsTool; }
+	Pixel24* GetHeightData() { return m_pHeightData; }
+	Pixel24* GetNormalData() { return m_pNormalData; }
 	void CreateResetTextures(LPCTSTR pTerrainName);
 	void CreateTerrainTextures(LPCTSTR pTerrainName);
 	void CreateTerrainMesh(CSpaceContainer* pSpaceContainer);
@@ -70,7 +78,8 @@ public:
 private:
 	bool m_bIsTool{ false };
 	bool m_bActive{ true };
-	wstring m_wsTerrainName;
+	wstring m_wsSceneName;
+	wstring m_wsOutputPath;
 	XMFLOAT2 m_xmf2CurPickPos{ 0.f, 0.f };
 	STEMP_MODE m_StempMode{ STEMP_MODE_SET };
 

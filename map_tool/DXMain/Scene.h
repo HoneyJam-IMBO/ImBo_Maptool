@@ -17,6 +17,7 @@ class CScene{
 public:
 	//begin end
 	virtual bool Begin() { return true; };
+	virtual bool Begin(string path);
 	virtual bool End();
 	//begin end
 	//animate

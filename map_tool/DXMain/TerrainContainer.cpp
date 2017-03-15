@@ -40,15 +40,15 @@ void CTerrainContainer::Begin() {
 	//TWBARMGR->AddButtonCB("TerrainController", "MainControll", "CreateSplatting", MCCreateSplattingButtonCallback, this);
 
 	//terrain texture create
-	string name{ "" }; name.assign(m_wsTerrainName.begin(), m_wsTerrainName.end());
+	string name{ "" }; name.assign(m_wsSceneName.begin(), m_wsSceneName.end());
 	if (m_bIsTool) {
 		//make texture and use
-		CreateResetTextures(m_wsTerrainName.c_str());
+		CreateResetTextures(m_wsSceneName.c_str());
 		RESOURCEMGR->CreateInstancingBuffer(name, 256, sizeof(VS_VB_INSTANCE));
 	}
 	else {
 		//just read texture
-		CreateTerrainTextures(m_wsTerrainName.c_str());
+		CreateTerrainTextures(m_wsSceneName.c_str());
 		RESOURCEMGR->CreateInstancingBuffer(name, m_pSpaceContainer->GetSpaceNum(), sizeof(VS_VB_INSTANCE));
 	}
 	//terrain texture create
@@ -325,10 +325,11 @@ CGameObject * CTerrainContainer::PickObjects(XMVECTOR xmvWorldCameraStartPos, XM
 
 void CTerrainContainer::ReadyHeightMap(){
 	m_pHeightMapTexture->End();
-	
+	m_pHeightMapTexture = nullptr;
+
 	//height map data init
 	WCHAR path[256];
-	wsprintf(path, L"../%sHeightMap.bmp", m_wsTerrainName.c_str());//name
+	wsprintf(path, L"../%sHeightMap.bmp", m_wsSceneName.c_str());//name
 	EXPORTER->MakeBitmap24(path, m_pHeightData, m_nWidth, m_nLength);
 	m_pHeightMapTexture = CTexture::CreateTexture(path, RESOURCEMGR->GetSampler("TerrainHeightMap"), 1, BIND_DS);
 }
@@ -380,6 +381,15 @@ void CTerrainContainer::SetBaseTexture(wstring path){
 	m_pBaseTexture = CTexture::CreateTexture(path, RESOURCEMGR->GetSampler("DEFAULT"), 0);
 }
 
+void CTerrainContainer::SetHeightMapTexture(wstring path){
+	if (m_pHeightData) delete[]m_pHeightData;
+	m_pHeightData = nullptr;
+	if (m_pHeightMapTexture)m_pHeightMapTexture->End();
+	m_pHeightMapTexture = nullptr;
+
+
+}
+
 void CTerrainContainer::CreateSplattingInfo(){
 	//m_pSplattingInfoManager->CreateSplattingInfo(L"../outputdata/SplattingBlendInfo/BlendInfo0.bmp", L"../../Assets/Detail_Texture_9.jpg");
 	m_pSplattingInfoManager->CreateSplattingInfo(L"../../Assets/Detail_Texture/Detail_Texture_Default.jpg");
@@ -393,6 +403,7 @@ void CTerrainContainer::CreateNormalMap(){
 	//4. normal을 계산한다.
 	//끝
 	m_pNormalTexture->End();
+	m_pNormalTexture = nullptr;
 
 	//calculate normal
 	XMVECTOR xmvSumNormal = XMVectorSet(0.f,0.f,0.f,0.f);
@@ -452,7 +463,7 @@ void CTerrainContainer::CreateNormalMap(){
 	}
 	//height map data init
 	WCHAR path[256];
-	wsprintf(path, L"../%sNormalMap.bmp", m_wsTerrainName.c_str());//name
+	wsprintf(path, L"../%sNormalMap.bmp", m_wsSceneName.c_str());//name
 	EXPORTER->MakeBitmap24(path, m_pNormalData, m_nWidth, m_nLength);
 	m_pNormalTexture = CTexture::CreateTexture(path, RESOURCEMGR->GetSampler("TerrainNormal"), PS_SLOT_NORMALMAP, BIND_PS);
 }
@@ -465,13 +476,12 @@ CTerrainContainer * CTerrainContainer::CreateTerrainContainer(LPCTSTR pTerrainNa
 	pTerrainContainer->SetTerrainLength(nLength);
 	pTerrainContainer->SetTerrainScale(XMFLOAT3(static_cast<float>(pSpaceContainer->GetSize() / (nWidth)),
 		fHeightScale, static_cast<float>(pSpaceContainer->GetSize() / (nLength))));
-	pTerrainContainer->SetTerrainName(pTerrainName);
+	pTerrainContainer->SetSceneName(pTerrainName);
 	pTerrainContainer->SetIsTool(isTool);
 	
 	pTerrainContainer->Begin();
 	return pTerrainContainer;
 }
-
 void CTerrainContainer::SetHeightScale(float scale){
 	m_pGlobalTerrainData->HeightScale = m_xmf3Scale.y = scale;
 }
@@ -486,10 +496,27 @@ void CTerrainContainer::CreateTerrainTextures(LPCTSTR pTerrainName){
 	m_pNormalTexture = CTexture::CreateTexture(path, RESOURCEMGR->GetSampler("TerrainNormal"), PS_SLOT_NORMALMAP, BIND_PS);
 	m_pBaseTexture = CTexture::CreateTexture(L"../../Assets/default.jpg", RESOURCEMGR->GetSampler("DEFAULT"), 0);
 }
-
+void CTerrainContainer::CreateResetTextures(LPCTSTR pTerrainName) {
+	//texture 제작
+	//height map data init
+	WCHAR path[256];
+	wsprintf(path, L"../%sHeightMap.bmp", pTerrainName);//name
+	m_pHeightData = new Pixel24[(m_nWidth) * (m_nLength)];//pixel data
+	ZeroMemory(m_pHeightData, sizeof(Pixel24) * (m_nWidth) * (m_nLength));
+	EXPORTER->MakeBitmap24(path, m_pHeightData, m_nWidth, m_nLength);
+	m_pHeightMapTexture = CTexture::CreateTexture(path, RESOURCEMGR->GetSampler("TerrainHeightMap"), 1, BIND_DS);
+	m_pBaseTexture = CTexture::CreateTexture(L"../../Assets/default.jpg", RESOURCEMGR->GetSampler("DEFAULT"), 0);
+	//normal
+	wsprintf(path, L"../%sNormalMap.bmp", pTerrainName);
+	m_pNormalData = new Pixel24[(m_nWidth) * (m_nLength)];
+	ZeroMemory(m_pNormalData, sizeof(Pixel24) * m_nWidth * m_nLength);
+	EXPORTER->MakeBitmap24(path, m_pNormalData, m_nWidth, m_nLength);
+	m_pNormalTexture = CTexture::CreateTexture(path, RESOURCEMGR->GetSampler("TerrainNormal"), PS_SLOT_NORMALMAP, BIND_PS);
+	CreateNormalMap();
+}
 void CTerrainContainer::CreateTerrainMesh(CSpaceContainer* pSpaceContainer){
 	//convert wstring to string
-	string name{ "" }; name.assign(m_wsTerrainName.begin(), m_wsTerrainName.end());
+	string name{ "" }; name.assign(m_wsSceneName.begin(), m_wsSceneName.end());
 
 	//resize instancing buf
 	m_pTerrainRenderContainer->ClearMesh();//기존의 mesh clear
@@ -540,26 +567,6 @@ void CTerrainContainer::ChangeSpaceData(){
 	//5. stemp의 spacesize 새로 설정
 	m_pStempManager->SetSpaceSize(m_pSpaceContainer->GetSpaceSize());
 }
-
-void CTerrainContainer::CreateResetTextures(LPCTSTR pTerrainName){
-	//texture 제작
-	//height map data init
-	WCHAR path[256];
-	wsprintf(path, L"../%sHeightMap.bmp", pTerrainName);//name
-	m_pHeightData = new Pixel24[(m_nWidth) * (m_nLength)];//pixel data
-	ZeroMemory(m_pHeightData, sizeof(Pixel24) * (m_nWidth) * (m_nLength));
-	EXPORTER->MakeBitmap24(path, m_pHeightData, m_nWidth, m_nLength);
-	m_pHeightMapTexture = CTexture::CreateTexture(path, RESOURCEMGR->GetSampler("TerrainHeightMap"), 1, BIND_DS);
-	m_pBaseTexture = CTexture::CreateTexture(L"../../Assets/default.jpg", RESOURCEMGR->GetSampler("DEFAULT"), 0);
-	//normal
-	wsprintf(path, L"../%sNormalMap.bmp", pTerrainName);
-	m_pNormalData = new Pixel24[(m_nWidth) * (m_nLength)];
-	ZeroMemory(m_pNormalData, sizeof(Pixel24) * m_nWidth * m_nLength);
-	EXPORTER->MakeBitmap24(path, m_pNormalData, m_nWidth, m_nLength);
-	m_pNormalTexture = CTexture::CreateTexture(path, RESOURCEMGR->GetSampler("TerrainNormal"), PS_SLOT_NORMALMAP, BIND_PS);
-	CreateNormalMap();
-}
-
 CTerrainContainer::CTerrainContainer() : CObject("terraincontainer") {
 }
 

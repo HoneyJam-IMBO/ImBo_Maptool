@@ -21,6 +21,8 @@ public:
 	void CreateSkyBoxTexture(UINT index);
 	void SetSpaceContainer(CSpaceContainer* pSpaceContainer) { m_pSpaceContainer = pSpaceContainer; }
 
+	void SetActive(bool b) { m_bActive = b; }
+	bool GetActive() { return m_bActive; }
 private:
 	bool m_bActive{ true };
 	wstring m_wsSkyBoxName;

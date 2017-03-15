@@ -79,9 +79,11 @@ bool CSpace::End(){
 	if (m_ppChildSpace) {
 		for (int i = 0; i < 4; ++i) {
 			m_ppChildSpace[i]->End();
+			m_ppChildSpace[i] = nullptr;
 		}
 	}
-	
+	m_ppChildSpace = nullptr;
+
 	delete this;
 
 	return true;
