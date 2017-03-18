@@ -12,12 +12,16 @@ public:
 	virtual bool End();
 	//----------------------------dxobject-----------------------------
 	void SetTerrainContainer(CTerrainContainer* pTerrainContainer);
+
+	virtual void RegistToContainer();
+	void RegistToContainer2();
 	virtual void PickingProc() {};
 	virtual bool CheckPickObject(XMVECTOR xmvWorldCameraStartPos, XMVECTOR xmvRayDir, float& distance);
 	static CTerrain* CreateTerrain(CTerrainContainer* pTerrainContainer, int x, int y);
 private:
 	CTerrainContainer* m_pTerrainContainer{ nullptr };
 
+	bool m_bRender{ false };
 public:
 	CTerrain();
 	~CTerrain();

@@ -13,6 +13,7 @@ void CDirectXFramework::Begin(HINSTANCE hInstance, HWND hWnd)
 	INPUTMGR->Begin();
 	RENDERER->Begin();
 	RENDERER->SetFramework(this);
+	UPDATER->Begin();
 	//singleton Init
 
 	_tcscpy_s(m_pszBuffer, _T("DXMAIN ("));
@@ -72,6 +73,7 @@ void CDirectXFramework::End() {
 	RCSELLER->End();
 	DEBUGER->End();
 	INPUTMGR->End();
+	UPDATER->End();
 	//singleton End
 
 	//	//ui
@@ -109,13 +111,15 @@ void CDirectXFramework::Update(float fTimeElapsed) {
 
 	//postprocessinglayer 적응값 set
 	//m_pPostProcessingLayer->SetAdaptation(fTimeElapsed);
-
-	m_pCamera->Update(fTimeElapsed);
 	ProcessInput(fTimeElapsed);
 
+	UPDATER->PreUpdate(fTimeElapsed);
 	//-----------------------------현재 씬 실행--------------------------------------
 	m_stackScene.top()->Animate(fTimeElapsed);
 	//-----------------------------현재 씬 실행--------------------------------------
+	UPDATER->Update(fTimeElapsed);
+	UPDATER->PhisicsUpdate(fTimeElapsed);
+
 
 	INPUTMGR->SetWheel(WHEEL_NON);
 

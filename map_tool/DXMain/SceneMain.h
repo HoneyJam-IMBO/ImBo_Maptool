@@ -57,8 +57,8 @@ public:
 	void CreateSceneContainers();
 	void CreateTerrainContainer();
 	void CreateSkyBoxContainer();
-	void DeleteTerrainContainer();
-	void DeleteSkyBoxContainer();
+	//void DeleteTerrainContainer();
+	//void DeleteSkyBoxContainer();
 
 	CTestObject* GetFBXObject() { return m_pFBXObject; }
 	void CreatePositioningObject();

@@ -8,7 +8,7 @@ void TW_CALL BaseTextureSelectCallback(void * clientData) {
 
 	wstring ws = { L"" };
 	ws.assign(pLFS->Filename.cbegin(), pLFS->Filename.cend());
-	pLFS->m_pScene->GetTerrainContainer()->SetBaseTexture(ws);
+	UPDATER->GetTerrainContainer()->SetBaseTexture(ws);
 	const char* barName{ "LoadFile" };
 	TWBARMGR->DeleteBar(barName);
 	//string s = pLFS;
@@ -84,70 +84,69 @@ void TW_CALL OPCreatePositioningObjectButtonCallback(void * clientData) {
 	CGameObject* pObject = (CGameObject*)clientData;
 	GLOBALVALUEMGR->SetPositioningObject(pObject);
 }
-void TW_CALL SetTerrainOnOffCallback(const void * value, void * clientData) {
-	if (nullptr == clientData) return;
-	CSceneMain* pScene = reinterpret_cast<CSceneMain*>(clientData);
-	bool val = (*static_cast<const bool *>(value));
-	if (val) {
-		pScene->CreateTerrainContainer();
-	}
-	else {
-		pScene->DeleteTerrainContainer();
-	}
-}
+//void TW_CALL SetTerrainOnOffCallback(const void * value, void * clientData) {
+//	if (nullptr == clientData) return;
+//	CSceneMain* pScene = reinterpret_cast<CSceneMain*>(clientData);
+//	bool val = (*static_cast<const bool *>(value));
+//	if (val) {
+//		pScene->CreateTerrainContainer();
+//	}
+//	else {
+//		pScene->DeleteTerrainContainer();
+//	}
+//}
 
 void TW_CALL GetTerrainOnOffCallback(void * value, void * clientData) {
 	if (nullptr == clientData) return;
 	CSceneMain* pScene = reinterpret_cast<CSceneMain*>(clientData);
-	*static_cast<bool *>(value) = (nullptr != pScene->GetTerrainContainer());
+	*static_cast<bool *>(value) = (nullptr != UPDATER->GetTerrainContainer());
 }
-void TW_CALL SetSkyBoxOnOffCallback(const void * value, void * clientData) {
-	if (nullptr == clientData) return;
-	CSceneMain* pScene = reinterpret_cast<CSceneMain*>(clientData);
-	bool val = (*static_cast<const bool *>(value));
-	if (val) {
-		pScene->CreateSkyBoxContainer();
-	}
-	else {
-		pScene->DeleteSkyBoxContainer();
-	}
-}
+//void TW_CALL SetSkyBoxOnOffCallback(const void * value, void * clientData) {
+//	if (nullptr == clientData) return;
+//	CSceneMain* pScene = reinterpret_cast<CSceneMain*>(clientData);
+//	bool val = (*static_cast<const bool *>(value));
+//	if (val) {
+//		pScene->CreateSkyBoxContainer();
+//	}
+//	else {
+//		pScene->DeleteSkyBoxContainer();
+//	}
+//}
 
 void TW_CALL GetSkyBoxOnOffCallback(void * value, void * clientData) {
 	if (nullptr == clientData) return;
 	CSceneMain* pScene = reinterpret_cast<CSceneMain*>(clientData);
-	*static_cast<bool *>(value) = (nullptr != pScene->GetSkyBoxContainer());
+	*static_cast<bool *>(value) = (nullptr != UPDATER->GetSkyBoxContainer());
 }
 
 
 void TW_CALL MCTerrainHeightScaleGetCallback(void * value, void * clientData) {
 	if (nullptr == clientData) return;
 	CSceneMain* pData = reinterpret_cast<CSceneMain*>(clientData);
-	if(pData->GetTerrainContainer())
-		*static_cast<float *>(value) = pData->GetTerrainContainer()->GetHeightScale();
+	if(UPDATER->GetTerrainContainer())
+		*static_cast<float *>(value) = UPDATER->GetTerrainContainer()->GetHeightScale();
 }
 void TW_CALL MCTerrainHeightScaleSetCallback(const void * value, void * clientData) {
 	if (nullptr == clientData) return;
 	CSceneMain* pData = reinterpret_cast<CSceneMain*>(clientData);
-	if (pData->GetTerrainContainer())
-		pData->GetTerrainContainer()->SetHeightScale(*static_cast<const float *>(value));
+	if (UPDATER->GetTerrainContainer())
+		UPDATER->GetTerrainContainer()->SetHeightScale(*static_cast<const float *>(value));
 }
 void TW_CALL MCCreateSplattingButtonCallback(void * clientData) {
 	CSceneMain* pData = (CSceneMain*)clientData;
-	if (pData->GetTerrainContainer()) {
-		pData->GetTerrainContainer()->CreateSplattingInfo();
-		pData->GetTerrainContainer()->GetSplattingInfoManager()->CreateSplattingListUI();
+	if (UPDATER->GetTerrainContainer()) {
+		UPDATER->GetTerrainContainer()->CreateSplattingInfo();
 	}
 }
 void TW_CALL SMSetButtonCallback(void * clientData) {
 	CSceneMain*  pData = (CSceneMain*)clientData;
-	if (pData->GetTerrainContainer())
-		pData->GetTerrainContainer()->SetStempMode(STEMP_MODE_SET);
+	if (UPDATER->GetTerrainContainer())
+		UPDATER->GetTerrainContainer()->SetStempMode(STEMP_MODE_SET);
 }
 void TW_CALL SMIndeButtonCallback(void * clientData) {
 	CSceneMain* pData = (CSceneMain*)clientData;
-	if (pData->GetTerrainContainer())
-		pData->GetTerrainContainer()->SetStempMode(STEMP_MODE_INDE);
+	if (UPDATER->GetTerrainContainer())
+		UPDATER->GetTerrainContainer()->SetStempMode(STEMP_MODE_INDE);
 }
 void TW_CALL FCSaveButtonCallback(void * clientData) {
 	CSceneMain* pData = (CSceneMain*)clientData;
@@ -167,6 +166,7 @@ void TW_CALL LoadSceneButtonCallback(void * clientData) {
 	TWBARMGR->DeleteBar(barName);
 	//string s = pLFS;
 }
+
 void CSceneMain::CreatePositioningObject() {
 	CPointLight *pPositioningPointLight = CPointLight::CreatePointLight(100.f, XMFLOAT3(rand() % 5, rand() % 5, rand() % 5));
 	m_vpObjectList.push_back(pPositioningPointLight);
@@ -192,33 +192,33 @@ void CSceneMain::SaveScene(){
 	EXPORTER->WriteWstring(wsOutputPath);
 	EXPORTER->WriteEnter();
 	//space info
-	EXPORTER->WriteFloat(m_space_size); EXPORTER->WriteSpace();
-	EXPORTER->WriteFloat(m_space_lv);
+	EXPORTER->WriteFloat(UPDATER->GetSpaceContainer()->GetSpaceSize()); EXPORTER->WriteSpace();
+	EXPORTER->WriteFloat(UPDATER->GetSpaceContainer()->GetSpaceLevel());
 	EXPORTER->WriteEnter();
 	//terrain onoff/ skybox onoff
-	bool bTerrainContainer = m_pTerrainContainer != nullptr;
-	bool bSkyBoxContainer = m_pSkyBoxContainer != nullptr;
+	bool bTerrainContainer = UPDATER->GetTerrainContainer() != nullptr;
+	bool bSkyBoxContainer = UPDATER->GetSkyBoxContainer() != nullptr;
 	EXPORTER->WriteBool(bTerrainContainer); EXPORTER->WriteSpace();
 	EXPORTER->WriteBool(bSkyBoxContainer); 
 	EXPORTER->WriteEnter();
 	//effect info
 	//ssao
-	EXPORTER->WriteFloat(m_fSSAORadius); EXPORTER->WriteSpace();
-	EXPORTER->WriteFloat(m_fSSAOOffsetRadius);
+	EXPORTER->WriteFloat(RENDERER->GetSSAORadius()); EXPORTER->WriteSpace();
+	EXPORTER->WriteFloat(RENDERER->GetSSAOOffsetRadius());
 	EXPORTER->WriteEnter();
 	//bloom
-	EXPORTER->WriteFloat(m_fBLOOMThreshold); EXPORTER->WriteSpace();
-	EXPORTER->WriteFloat(m_fBLOOMMiddleGrey); EXPORTER->WriteSpace();
-	EXPORTER->WriteFloat(m_fBLOOMWhite); EXPORTER->WriteSpace();
-	EXPORTER->WriteFloat(m_fBLOOMScale); 
+	EXPORTER->WriteFloat(RENDERER->GetBLOOMThreshold()); EXPORTER->WriteSpace();
+	EXPORTER->WriteFloat(RENDERER->GetBLOOMMiddleGrey()); EXPORTER->WriteSpace();
+	EXPORTER->WriteFloat(RENDERER->GetBLOOMWhite()); EXPORTER->WriteSpace();
+	EXPORTER->WriteFloat(RENDERER->GetBLOOMScale()); 
 	EXPORTER->WriteEnter();
 	//sslr
-	EXPORTER->WriteBool(m_bSSLROnOff); EXPORTER->WriteSpace();
-	EXPORTER->WriteFloat(m_fSSLROffsetSunPos); EXPORTER->WriteSpace();
-	EXPORTER->WriteFloat(m_fSSLRMaxSunDist); EXPORTER->WriteSpace();
-	EXPORTER->WriteFloat(m_fSSLRInitDecay); EXPORTER->WriteSpace();
-	EXPORTER->WriteFloat(m_fSSLRDistDecay); EXPORTER->WriteSpace();
-	EXPORTER->WriteFloat(m_fSSLRMaxDeltaLen);
+	EXPORTER->WriteBool(RENDERER->GetSSLROnOff()); EXPORTER->WriteSpace();
+	EXPORTER->WriteFloat(RENDERER->GetSSLROffsetSunPos()); EXPORTER->WriteSpace();
+	EXPORTER->WriteFloat(RENDERER->GetSSLRMaxSunDist()); EXPORTER->WriteSpace();
+	EXPORTER->WriteFloat(RENDERER->GetSSLRInitDecay()); EXPORTER->WriteSpace();
+	EXPORTER->WriteFloat(RENDERER->GetSSLRDistDecay()); EXPORTER->WriteSpace();
+	EXPORTER->WriteFloat(RENDERER->GetSSLRMaxDeltaLen());
 	EXPORTER->WriteEnter();
 
 	//object info save
@@ -227,35 +227,37 @@ void CSceneMain::SaveScene(){
 
 	if(bTerrainContainer){//terrain container가 있다면..
 		//base texture path
-		XMFLOAT3 xmf3Scale = m_pTerrainContainer->GetTerrainScale();
-		EXPORTER->WriteFloat(xmf3Scale.x); EXPORTER->WriteSpace();
-		EXPORTER->WriteFloat(xmf3Scale.y); EXPORTER->WriteSpace();
-		EXPORTER->WriteFloat(xmf3Scale.z); EXPORTER->WriteSpace();
+		float fHeightScale = UPDATER->GetTerrainContainer()->GetHeightScale();
+		int width = UPDATER->GetTerrainContainer()->GetTerrainWidth();
+		int length = UPDATER->GetTerrainContainer()->GetTerrainLength();
+		EXPORTER->WriteInt(width); EXPORTER->WriteSpace();
+		EXPORTER->WriteInt(length); EXPORTER->WriteSpace();
+		EXPORTER->WriteFloat(fHeightScale); EXPORTER->WriteSpace();
 		EXPORTER->WriteEnter();
-		EXPORTER->WriteCHAR(m_pTerrainContainer->GetBaseTexture()->GetsPath().c_str()); 
+		EXPORTER->WriteCHAR(UPDATER->GetTerrainContainer()->GetBaseTexture()->GetsPath().c_str());
 		EXPORTER->WriteEnter();
 		//height map texture name
 		wstring wsHeightDataName = wsOutputPath + wsSceneName + L"HeightMap.bmp";
-		EXPORTER->MakeBitmap24(wsHeightDataName.c_str(), m_pTerrainContainer->GetHeightData(), 256,256);
+		EXPORTER->MakeBitmap24(wsHeightDataName.c_str(), UPDATER->GetTerrainContainer()->GetHeightData(), 256,256);
 		//normal map texture name
 		wstring wsNormalDataName = wsOutputPath + wsSceneName + L"NormalMap.bmp";
-		EXPORTER->MakeBitmap24(wsNormalDataName.c_str(), m_pTerrainContainer->GetNormalData(), 256, 256);
+		EXPORTER->MakeBitmap24(wsNormalDataName.c_str(), UPDATER->GetTerrainContainer()->GetNormalData(), 256, 256);
 		//이 두개는 scene name을 가지고 가공
 		//[scene name] + height map 이렇게
 
-		int nSplatting = m_pTerrainContainer->GetSplattingInfoManager()->GetSplattingInfos().size();
+		int nSplatting = UPDATER->GetTerrainContainer()->GetSplattingInfoManager()->GetSplattingInfos().size();
 		EXPORTER->WriteInt(nSplatting); 
 		EXPORTER->WriteEnter();
 		for(int i = 0; i<nSplatting; ++i){
 			//splatting의 detail texture는 path로 받는다.
-			wstring path = m_pTerrainContainer->GetSplattingInfoManager()->GetSplattingInfos()[i]->GetDetailTexturePath();
+			wstring path = UPDATER->GetTerrainContainer()->GetSplattingInfoManager()->GetSplattingInfos()[i]->GetDetailTexturePath();
 			EXPORTER->WriteWstring(path);
 			EXPORTER->WriteEnter();
 			//splatting의 blending info는 [scene name]이름을 토대로 가공한다.
 			//[scene name] + [splatting blending info] + [index]
 			WCHAR splattingName[256];
 			wsprintf(splattingName, L"%s%sBlendInfo%d.bmp", wsOutputPath.c_str(), wsSceneName.c_str(), i);
-			EXPORTER->MakeBitmap24(splattingName, m_pTerrainContainer->GetSplattingInfoManager()->GetSplattingInfos()[i]->GetBlendInfo(), 256, 256);
+			EXPORTER->MakeBitmap24(splattingName, UPDATER->GetTerrainContainer()->GetSplattingInfoManager()->GetSplattingInfos()[i]->GetBlendInfo(), 256, 256);
 		}
 		//splatting texture name
 	}
@@ -280,53 +282,91 @@ void CSceneMain::LoadScene(string path){
 	//space info
 	float space_size = IMPORTER->ReadFloat();
 	float space_lv = IMPORTER->ReadFloat();
-	m_pSpaceContainer->SetSpaceSize(space_size);
-	m_pSpaceContainer->SetSpaceLevel(space_lv);
-	m_pSpaceContainer->ChangeSpaceData();
+	UPDATER->GetSpaceContainer()->SetSpaceSize(space_size);
+	UPDATER->GetSpaceContainer()->SetSpaceLevel(space_lv);
+	UPDATER->GetSpaceContainer()->ChangeSpaceData();
 
 	//terrain onoff/ skybox onoff
 	bool bTerrainContainer = IMPORTER->ReadBool();
-	m_pTerrainContainer->SetActive(bTerrainContainer);
+	UPDATER->GetTerrainContainer()->SetActive(bTerrainContainer);
+	UPDATER->GetTerrainContainer()->ChangeSpaceData();
+	
 	bool bSkyBoxContainer = IMPORTER->ReadBool();
-	m_pSkyBoxContainer->SetActive(bSkyBoxContainer);
+	UPDATER->GetSkyBoxContainer()->SetActive(bSkyBoxContainer);
 
 	//effect info
 	//ssao
 	float fSSAORadius = IMPORTER->ReadFloat();
-	SetSSAORadius(fSSAORadius);
+	RENDERER->SetSSAORadius(fSSAORadius);
 	float fSSAOOffsetRadius = IMPORTER->ReadFloat();
-	SetSSAOOffsetRadius(fSSAOOffsetRadius);
+	RENDERER->SetSSAOOffsetRadius(fSSAOOffsetRadius);
 
 	//bloom
 	float fBLOOMThreshold = IMPORTER->ReadFloat();
-	SetBLOOMThreshold(fBLOOMThreshold);
+	RENDERER->SetBLOOMThreshold(fBLOOMThreshold);
 	float fBLOOMMiddleGrey = IMPORTER->ReadFloat();
-	SetBLOOMMiddleGrey(fBLOOMMiddleGrey);
+	RENDERER->SetBLOOMMiddleGrey(fBLOOMMiddleGrey);
 	float fBLOOMWhite = IMPORTER->ReadFloat();
-	SetBLOOMWhite(fBLOOMWhite);
+	RENDERER->SetBLOOMWhite(fBLOOMWhite);
 	float fBLOOMScale = IMPORTER->ReadFloat();
-	SetBLOOMScale(fBLOOMScale);
+	RENDERER->SetBLOOMScale(fBLOOMScale);
 	//sslr
 	bool bSSLROnOff = IMPORTER->ReadBool();
-	SetSSLROnOff(bSSLROnOff);
+	RENDERER->SetSSLROnOff(bSSLROnOff);
 	float fSSLROffsetSunPos = IMPORTER->ReadFloat();
-	SetSSLROffsetSunPos(fSSLROffsetSunPos);
+	RENDERER->SetSSLROffsetSunPos(fSSLROffsetSunPos);
 	float fSSLRMaxSunDist = IMPORTER->ReadFloat();
-	SetSSLRMaxSunDist(fSSLRMaxSunDist);
+	RENDERER->SetSSLRMaxSunDist(fSSLRMaxSunDist);
 	float fSSLRInitDecay = IMPORTER->ReadFloat();
-	SetSSLRInitDecay(fSSLRInitDecay);
+	RENDERER->SetSSLRInitDecay(fSSLRInitDecay);
 	float fSSLRDistDecay = IMPORTER->ReadFloat();
-	SetSSLRDistDecay(fSSLRDistDecay);
+	RENDERER->SetSSLRDistDecay(fSSLRDistDecay);
 	float fSSLRMaxDeltaLen = IMPORTER->ReadFloat();
-	SetSSLRMaxDeltaLen(fSSLRMaxDeltaLen);
+	RENDERER->SetSSLRMaxDeltaLen(fSSLRMaxDeltaLen);
 	//object info save
 	//m_pSpaceContainer->WriteObjects();
 	//EXPORTER->WriteEnter();
 
 	if (bTerrainContainer) {//terrain container가 있다면..
+		
+		//m_pTerrainContainer->SetSceneName(wsSceneName);//이름은 나중에 바꾸도록 한다.
 		//base texture path
-		//m_pTerrainContainer->End();
-		//m_pTerrainContainer = CTerrainContainer::CreateTerrainContainer(m_pSpaceContainer, wsOutputPath, wsSceneName);
+		XMFLOAT3 xmf3Scale;
+		//이렇게 되어야 함
+		int width = IMPORTER->ReadInt();
+		UPDATER->GetTerrainContainer()->SetTerrainWidth(width);
+		int length = IMPORTER->ReadInt();
+		UPDATER->GetTerrainContainer()->SetTerrainLength(length);
+		float fHeightScale = IMPORTER->ReadFloat();
+		UPDATER->GetTerrainContainer()->SetHeightScale(fHeightScale);
+		
+		wstring wsBaseTexturePath = IMPORTER->ReadWstring();
+		UPDATER->GetTerrainContainer()->SetBaseTexture(wsBaseTexturePath);
+		//height map texture name
+		wstring wsHeightDataName = wsOutputPath + wsSceneName + L"HeightMap.bmp";
+		UPDATER->GetTerrainContainer()->SetHeightData(IMPORTER->ReadBitmap24(wsHeightDataName.c_str()));//heightmap
+		UPDATER->GetTerrainContainer()->SetHeightMapTexture(CTexture::CreateTexture(wsHeightDataName.c_str(), RESOURCEMGR->GetSampler("TerrainHeightMap"), 1, BIND_DS));
+
+		//normal map texture name
+		wstring wsNormalDataName = wsOutputPath + wsSceneName + L"NormalMap.bmp";
+		UPDATER->GetTerrainContainer()->SetNormalData(IMPORTER->ReadBitmap24(wsNormalDataName.c_str()));//nomalmap
+		UPDATER->GetTerrainContainer()->SetNormalMapTexture(CTexture::CreateTexture(wsNormalDataName.c_str(), RESOURCEMGR->GetSampler("TerrainNormal"), PS_SLOT_NORMALMAP, BIND_PS));
+
+		//create splatting info
+		int nSplatting = IMPORTER->ReadInt();
+		UPDATER->GetTerrainContainer()->GetSplattingInfoManager()->ClearSplattingInfo();
+		for (int i = 0; i<nSplatting; ++i) {
+			//splatting의 detail texture는 path로 받는다.
+			wstring wsDetailTexturePath = IMPORTER->ReadWstring();
+
+			//splatting의 blending info는 [scene name]이름을 토대로 가공한다.
+			//[scene name] + [splatting blending info] + [index]
+			WCHAR wcBlendinfoPath[256];
+			wsprintf(wcBlendinfoPath, L"%s%sBlendInfo%d.bmp", wsOutputPath.c_str(), wsSceneName.c_str(), i);
+
+			UPDATER->GetTerrainContainer()->GetSplattingInfoManager()->CreateSplattingInfo(wsDetailTexturePath.c_str(), wcBlendinfoPath);
+		}
+		//create splatting info
 	}
 	IMPORTER->End();
 
@@ -370,7 +410,6 @@ void CSceneMain::CreateSceneListUI(){
 		TWBARMGR->AddButtonCB(barName, groupName.c_str(), menuName, LoadSceneButtonCallback, &m_LoadFileStruct[cnt]);
 		cnt++;
 	}
-
 }
 bool CSceneMain::Begin() {
 	//모든 positioning이 가능한 객체를 미리 제작해 둔다.
@@ -407,46 +446,19 @@ bool CSceneMain::Begin() {
 	//TWBARMGR->AddBoolBarCB(barName, "Test", "TerrainOnOff", SetTerrainOnOffCallback, GetTerrainOnOffCallback, this);
 	//test
 
-	barName = "Effects";
-	TWBARMGR->AddBar(barName);
-	//set param
-	TWBARMGR->SetBarSize(barName, 250, 250);
-	TWBARMGR->SetBarPosition(barName, 0, 300);
-	TWBARMGR->SetBarColor(barName, 255, 0, 255);
-	TWBARMGR->SetBarContained(barName, true);
-	TWBARMGR->SetBarMovable(barName, false);
-	TWBARMGR->SetBarResizable(barName, false);
-	//set param
-	//ssao
-	TWBARMGR->AddMinMaxBarRW(barName, "SSAO", "Radius", &m_fSSAORadius, 1.0f, 1000.f, 0.5f);
-	TWBARMGR->AddMinMaxBarRW(barName, "SSAO", "OffsetRadius", &m_fSSAOOffsetRadius, 1.0f, 100.f, 0.1f);
-	//ssao
-	//bloom
-	TWBARMGR->AddMinMaxBarRW(barName, "BLOOM", "Threshold", &m_fBLOOMThreshold, 0.0f, 10.f, 0.001f);
-	TWBARMGR->AddMinMaxBarRW(barName, "BLOOM", "MiddleGrey", &m_fBLOOMMiddleGrey, 0.0f, 4.f, 0.001f);
-	TWBARMGR->AddMinMaxBarRW(barName, "BLOOM", "White", &m_fBLOOMWhite, 0.0f, 4.f, 0.001f);
-	TWBARMGR->AddMinMaxBarRW(barName, "BLOOM", "BloomScale", &m_fBLOOMScale, 0.f, 100.f, 0.1f);
-	//bloom
-	//sslr
-	TWBARMGR->AddMinMaxBarRW(barName, "SSLR", "OffsetSunPos", &m_fSSLROffsetSunPos, -1000, -0.1f, 0.01f);
-	TWBARMGR->AddMinMaxBarRW(barName, "SSLR", "MaxSunDist", &m_fSSLRMaxSunDist, 0.0f, 1000.f, 0.01f);
-	TWBARMGR->AddMinMaxBarRW(barName, "SSLR", "InitDecay", &m_fSSLRInitDecay, 0.0f, 4.f, 0.001f);
-	TWBARMGR->AddMinMaxBarRW(barName, "SSLR", "DistDecay", &m_fSSLRDistDecay, 0.f, 4, 0.001f);
-	TWBARMGR->AddMinMaxBarRW(barName, "SSLR", "MaxDeltaLen", &m_fSSLRMaxDeltaLen, 0.001f, 0.05, 0.0001f);
-	TWBARMGR->AddBoolBar(barName, "SSLR", "on/off", &GLOBALVALUEMGR->GetSSLR());
-	//sslr
 	//m_pPlayer = new CPlayer;
 	//m_pPlayer->Begin();
 	//----------------------------------camera-------------------------------------
 	m_pCamera = m_pFrameWork->GetCamera();
+	UPDATER->SetCamera(m_pCamera);
 	//----------------------------------camera-------------------------------------
 
-	CreateSceneContainers();
+	//CreateSceneContainers();
 	
 
 	//--------------------------------객체 제작------------------------
 	int nMaxObjects = 1;
-	int space_size = static_cast<int>(m_pSpaceContainer->GetSpaceSize());
+	int space_size = static_cast<int>(UPDATER->GetSpaceContainer()->GetSpaceSize());
 
 	//for (int i = 0; i < 10; ++i) {
 	//	for (int j = 0; j < 10; ++j) {
@@ -561,20 +573,25 @@ bool CSceneMain::End() {
 
 void CSceneMain::Animate(float fTimeElapsed) {
 	CScene::Animate(fTimeElapsed);
+
 	//--------------------------전역 객체 animate / regist-------------------------
+	UPDATER->SetCamera(m_pCamera);
+	//UPDATER->GetSpaceContainer()->SetSpaceSize(m_space_size);
+	//UPDATER->GetSpaceContainer()->SetSpaceLevel(m_space_lv);
+
 	//object positioning 객체 랜더
 	if (GLOBALVALUEMGR->GetToolMode() == TOOL_MODE_OBJECTPOSITIONING) {
 		
 		if (GLOBALVALUEMGR->GetPositioningObject()) {
-			if (m_pTerrainContainer) {
-				XMFLOAT2 xmf2CurPicPos = m_pTerrainContainer->GetCurPickPos();
-				float fHeight = m_pTerrainContainer->GetHeight(xmf2CurPicPos);
+			if (UPDATER->GetTerrainContainer()) {
+				XMFLOAT2 xmf2CurPicPos = UPDATER->GetTerrainContainer()->GetCurPickPos();
+				float fHeight = UPDATER->GetTerrainContainer()->GetHeight(xmf2CurPicPos);
 
 				GLOBALVALUEMGR->GetPositioningObject()->SetPosition(XMVectorSet(xmf2CurPicPos.x, fHeight, xmf2CurPicPos.y, 1.0));
 				GLOBALVALUEMGR->GetPositioningObject()->RegistToContainer();
 			}
 			else {
-				GLOBALVALUEMGR->GetPositioningObject()->SetPosition(XMVectorSet(m_pSpaceContainer->GetSpaceSize()/2.f, 0, m_pSpaceContainer->GetSpaceSize() / 2.f, 1.0));
+				GLOBALVALUEMGR->GetPositioningObject()->SetPosition(XMVectorSet(UPDATER->GetSpaceContainer()->GetSpaceSize()/2.f, 0, UPDATER->GetSpaceContainer()->GetSpaceSize() / 2.f, 1.0));
 				GLOBALVALUEMGR->GetPositioningObject()->RegistToContainer();
 			}
 		}
@@ -672,7 +689,7 @@ CGameObject* CSceneMain::PickObjectPointedByCursor(int xClient, int yClient){
 	CGameObject* pNearestObject = NULL;
 	float fHitDistance = FLT_MAX;
 	float fNearDistance = FLT_MAX;
-	pNearestObject = m_pSpaceContainer->PickObject(m_pCamera->GetPosition(), XMVector3Normalize(xmvRayDir), fHitDistance);
+	pNearestObject = UPDATER->GetSpaceContainer()->PickObject(m_pCamera->GetPosition(), XMVector3Normalize(xmvRayDir), fHitDistance);
 	fNearDistance = fHitDistance;
 	
 	return(pNearestObject);
@@ -696,8 +713,8 @@ void CSceneMain::CreateControllObject(string path){
 	m_pFBXObject = new CTestObject();
 	m_pFBXObject->Begin();
 	//pObject->SetTerrainContainer(m_pTerrainContainer);
-	m_pFBXObject->SetPosition(XMLoadFloat3(&XMFLOAT3(m_pSpaceContainer->GetSpaceSize() / 2.f, 0, m_pSpaceContainer->GetSpaceSize() / 2.f)));
-	m_pSpaceContainer->AddObject(m_pFBXObject);
+	m_pFBXObject->SetPosition(XMLoadFloat3(&XMFLOAT3(UPDATER->GetSpaceContainer()->GetSpaceSize() / 2.f, 0, UPDATER->GetSpaceContainer()->GetSpaceSize() / 2.f)));
+	UPDATER->GetSpaceContainer()->AddObject(m_pFBXObject);
 //객체 제작
 	//ui pop up!
 	m_pFBXObject->PickingProc();
@@ -805,7 +822,7 @@ void CSceneMain::CreateAddInfoUI(){
 
 void CSceneMain::ClearAllFBXObject(){
 	if (m_pFBXObject) {
-		m_pSpaceContainer->RemoveObject(m_pFBXObject);
+		UPDATER->GetSpaceContainer()->RemoveObject(m_pFBXObject);
 		m_pFBXObject->GetRenderContainer()->ClearMesh();
 		m_pFBXObject->GetRenderContainer()->ClearAnimater();
 		m_pFBXObject->End();
@@ -899,55 +916,47 @@ void CSceneMain::ObjectPositioning(){
 	if (GLOBALVALUEMGR->GetPositioningObject()->GetName() == "pointlight") {
 		CPointLight *pPositioningPointLight = CPointLight::CreatePointLight(100.f, XMFLOAT3(rand() % 5, rand() % 5, rand() % 5));
 		pPositioningPointLight->SetPosition(GLOBALVALUEMGR->GetPositioningObject()->GetPosition());
-		m_pSpaceContainer->AddObject(pPositioningPointLight);
+		UPDATER->GetSpaceContainer()->AddObject(pPositioningPointLight);
 	}
 	else if (GLOBALVALUEMGR->GetPositioningObject()->GetName() == "spotlight") {
 		CSpotLight* pPositioningSpotLight = CSpotLight::CreateSpotLight(500.f, XMFLOAT3(0.1f, 0.1f, 0.1f), 30.f, 15.f);
 		//CSpotLight* pPositioningSpotLight = new CSpotLight;
 		//pPositioningSpotLight->Begin(SPOT_LIGHT{ 500.f, XMFLOAT3(rand() % 100, rand() % 100, rand() % 100), 30.f, 15.f });
 		pPositioningSpotLight->SetPosition(GLOBALVALUEMGR->GetPositioningObject()->GetPosition());
-		m_pSpaceContainer->AddObject(pPositioningSpotLight);
+		UPDATER->GetSpaceContainer()->AddObject(pPositioningSpotLight);
 	}
 	else if (GLOBALVALUEMGR->GetPositioningObject()->GetName() == "capsulelight") {
 		CCapsuleLight* pPositioningCapsuleLight = CCapsuleLight::CreateCapsuleLight(100.f, XMFLOAT3(rand() % 5, rand() % 5, rand() % 5), 50.f);
 		pPositioningCapsuleLight->SetPosition(GLOBALVALUEMGR->GetPositioningObject()->GetPosition());
-		m_pSpaceContainer->AddObject(pPositioningCapsuleLight);
+		UPDATER->GetSpaceContainer()->AddObject(pPositioningCapsuleLight);
 	}
 }
 
 void CSceneMain::CreateSceneContainers(){
-	//--------------------------------------space-------------------------------------
-	//space
-	m_pSpaceContainer = CSpaceContainer::CreateSpaceContainer(this, 512, 2);
-	//terrain
-	m_pTerrainContainer = CTerrainContainer::CreateTerrainContainer(L"Temp", 256, 256, 0.5, m_pSpaceContainer, true);
-	//skybox
-	m_pSkyBoxContainer = CSkyBoxContainer::CreateSkyBoxContainer(L"Temp", 0, m_pSpaceContainer);
-	//-------------------------------------space-------------------------------------
+	
 }
 
 void CSceneMain::CreateTerrainContainer(){
 	//terrain
-	m_pTerrainContainer = CTerrainContainer::CreateTerrainContainer(L"Temp", 256, 256, 0.5, m_pSpaceContainer, true);
-
+	UPDATER->SetTerrainContainer(CTerrainContainer::CreateTerrainContainer(L"Temp", 256, 256, 0.5, UPDATER->GetSpaceContainer(), true));
 }
 
-void CSceneMain::DeleteTerrainContainer(){
-	m_pTerrainContainer->End();
-	delete m_pTerrainContainer;
-	m_pTerrainContainer = nullptr;
-}
+//void CSceneMain::DeleteTerrainContainer(){
+//	m_pTerrainContainer->End();
+//	delete m_pTerrainContainer;
+//	m_pTerrainContainer = nullptr;
+//}
 
 void CSceneMain::CreateSkyBoxContainer(){
 	//skybox
-	m_pSkyBoxContainer = CSkyBoxContainer::CreateSkyBoxContainer(L"Temp", 0, m_pSpaceContainer);
+	UPDATER->SetSkyBoxContainer(CSkyBoxContainer::CreateSkyBoxContainer(L"Temp", 0, UPDATER->GetSpaceContainer()));
 }
 
-void CSceneMain::DeleteSkyBoxContainer(){
-	m_pSkyBoxContainer->End();
-	delete m_pSkyBoxContainer;
-	m_pSkyBoxContainer = nullptr;
-}
+//void CSceneMain::DeleteSkyBoxContainer(){
+//	m_pSkyBoxContainer->End();
+//	delete m_pSkyBoxContainer;
+//	m_pSkyBoxContainer = nullptr;
+//}
 
 CSceneMain::CSceneMain(CDirectXFramework* pFrameWork) : CScene("Main") {
 	m_pFrameWork = pFrameWork;

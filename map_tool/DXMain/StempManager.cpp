@@ -39,13 +39,11 @@ bool CStempManager::End(){
 }
 
 void CStempManager::SetShaderState(){
-	m_pPicposRenderInfoBuffer->SetShaderState();
+	RENDERER->GetTerrainRenderContainer()->AddVolatileBuffer(m_pPicposRenderInfoBuffer);
 	m_vStemp[m_nCurStemp]->SetShaderState();
 }
 
 void CStempManager::CleanShaderState(){
-	m_pPicposRenderInfoBuffer->CleanShaderState();
-	m_vStemp[m_nCurStemp]->CleanShaderState();
 }
 
 void CStempManager::UpdateShaderState(){
@@ -79,9 +77,10 @@ void CStempManager::CreateStemp(wstring name){
 	m_vStemp.push_back(pStemp);
 }
 
-CStempManager * CStempManager::CreateStempManager(float fSpaceSize){
+CStempManager * CStempManager::CreateStempManager(float fSpaceSize, CTerrainContainer* pTerrainContainer){
 	CStempManager* pStempManager = new CStempManager;
 	pStempManager->SetSpaceSize(fSpaceSize);
+	pStempManager->SetTerrainContainer(pTerrainContainer);
 	pStempManager->Begin();
 	return pStempManager;
 }

@@ -8,7 +8,7 @@ public:
 	void Begin();
 	bool End();
 
-	void Render(shared_ptr<CCamera> pCamera);
+	void PrepareRender();
 	void Update(shared_ptr<CCamera> pCamera, float fTimeElapsed);
 
 	void SetSkyBox(CSkyBox* pSkyBox) { m_pSkyBox = pSkyBox; }
@@ -26,11 +26,7 @@ public:
 private:
 	bool m_bActive{ true };
 	wstring m_wsSkyBoxName;
-	ID3D11DepthStencilState* m_pd3dDepthStencilState{ nullptr };
-	ID3D11DepthStencilState* m_pd3dTempDepthStencilState{ nullptr };
-	UINT m_TempStencil{ 0 };
-
-	CRenderContainer* m_pSkyboxContainer{ nullptr };
+	
 	CSpaceContainer* m_pSpaceContainer{ nullptr };
 	//global object
 	CSkyBox* m_pSkyBox{ nullptr };

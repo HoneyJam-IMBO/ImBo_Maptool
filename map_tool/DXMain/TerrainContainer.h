@@ -22,7 +22,7 @@ public:
 	void Begin();
 	bool End();
 
-	void Render(shared_ptr<CCamera> pCamera);
+	void PrepareRender();
 	float GetHeight(XMVECTOR xmvPos);
 	float GetHeight(XMFLOAT2 xmf2Pos);
 
@@ -45,14 +45,19 @@ public:
 	void CreateSplattingInfo();
 	CSplattingInfoManager* GetSplattingInfoManager() { return m_pSplattingInfoManager; }
 	CStempManager* GetStempManager() { return m_pStempManager; }
+	//CRenderContainer* GetTerrainRenderContainer() { return m_pTerrainRenderContainer; }
 
 	XMFLOAT2 GetCurPickPos() { return m_xmf2CurPickPos; }
 
 	void CreateNormalMap();
 
-	static CTerrainContainer* CreateTerrainContainer(LPCTSTR pTerrainName, int nWidth, int nLength, float HeightScale, CSpaceContainer* pSpaceContainer, bool isTool = false);
+	static CTerrainContainer* CreateTerrainContainer(LPCTSTR pSceneName, int nWidth, int nLength, float HeightScale, CSpaceContainer* pSpaceContainer, bool isTool = false);
+	static CTerrainContainer* CreateTerrainContainer(wstring wsOutputPath, wstring SceneName, int nWidth, int nLength, CSpaceContainer* pSpaceContainer, bool isTool = false);
+
 	void SetTerrainWidth(int nWidth) { m_nWidth = nWidth; }
+	int GetTerrainWidth() { return m_nWidth; }
 	void SetTerrainLength(int nLength) { m_nLength = nLength; }
+	int GetTerrainLength() { return m_nLength; }
 	void SetHeightScale(float scale);
 	void SetScale(XMFLOAT3 xmf3Scale) { m_xmf3Scale = xmf3Scale; }
 	float GetHeightScale() { return m_xmf3Scale.y; }
@@ -68,6 +73,11 @@ public:
 	bool GetIsTool() { return m_bIsTool; }
 	Pixel24* GetHeightData() { return m_pHeightData; }
 	Pixel24* GetNormalData() { return m_pNormalData; }
+	void SetHeightData(Pixel24* pHeightData);
+	void SetNormalData(Pixel24* pNormalData);
+	void SetHeightMapTexture(shared_ptr<CTexture> pHeightMapTexture);
+	void SetNormalMapTexture(shared_ptr<CTexture> pNormalMapTexture);
+
 	void CreateResetTextures(LPCTSTR pTerrainName);
 	void CreateTerrainTextures(LPCTSTR pTerrainName);
 	void CreateTerrainMesh(CSpaceContainer* pSpaceContainer);
@@ -92,7 +102,7 @@ private:
 	
 	CSpaceContainer* m_pSpaceContainer{ nullptr };
 	//CGlobalTerrain* m_pGlobalTerrain{ nullptr };
-	CRenderContainer* m_pTerrainRenderContainer{ nullptr };
+	//CRenderContainer* m_pTerrainRenderContainer{ nullptr };
 	
 	int m_nWidth{ 0 };
 	int m_nLength{ 0 };
@@ -100,8 +110,8 @@ private:
 
 	Pixel24* m_pHeightData{ nullptr };
 	Pixel24* m_pNormalData{ nullptr };
-	shared_ptr<CTexture> m_pHeightMapTexture{ nullptr };
 	shared_ptr<CTexture> m_pBaseTexture{ nullptr };
+	shared_ptr<CTexture> m_pHeightMapTexture{ nullptr };
 	shared_ptr<CTexture> m_pNormalTexture{ nullptr };
 	vector<CTerrain*> m_vpTerrain;//pick object를 위한 녀석
 	//안의 terrain들은 space에서 관리되고 사라지니까 end 및 delete할 필요가 없다.

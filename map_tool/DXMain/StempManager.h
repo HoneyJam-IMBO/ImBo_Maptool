@@ -10,6 +10,7 @@ struct TERRAIN_PICPOS_RENDER_INFO {
 
 struct Pixel24;
 class CBuffer;
+class CTerrainContainer;
 
 class CStempManager : public DXObject {
 public:
@@ -31,12 +32,15 @@ public:
 	TERRAIN_PICPOS_RENDER_INFO* GetTerrainPickPosRenderInfo() { return m_pPicposRenderInfo; }
 	vector<CStemp*>& GetStemps() { return m_vStemp; }
 
+	void SetTerrainContainer(CTerrainContainer* pTerrainContainer) { m_pTerrainContainer = pTerrainContainer; }
+	CTerrainContainer* GetTerrainContainer() { return m_pTerrainContainer; }
 	void SetCurStempIndex(int index);
 	void CreateStemp(wstring name);
 
 	void SetSpaceSize(float fSize) { m_fSpaceSize = fSize; }
-	static CStempManager* CreateStempManager(float fSpaceSize);
+	static CStempManager* CreateStempManager(float fSpaceSize, CTerrainContainer* pTerrainContainer);
 private:
+	CTerrainContainer* m_pTerrainContainer{ nullptr };
 	float m_fExtent{ 50.f };
 	TERRAIN_PICPOS_RENDER_INFO* m_pPicposRenderInfo{ nullptr };
 	shared_ptr<CBuffer> m_pPicposRenderInfoBuffer{ nullptr };

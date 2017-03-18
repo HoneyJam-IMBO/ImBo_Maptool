@@ -3,14 +3,10 @@
 #include "SceneMain.h"
 
 void TW_CALL SCAdaptationButtonCallback(void* clientData) {
-	CSceneMain* pScene = (CSceneMain*)clientData;
-	pScene->ChangeSceneContainers();
+	UPDATER->ChangeSceneContainers();
 }
 
 void CSpaceContainer::Begin(){
-	TWBARMGR->AddMinMaxBarRW("TOOL_MODE", "SpaceControll", "SpaceSize", &m_size, 256.f, 4096.f, 256.f);
-	TWBARMGR->AddMinMaxBarRW("TOOL_MODE", "SpaceControll", "SpaceLevel", &m_level, 0.f, 4.f, 1.f);
-	TWBARMGR->AddButtonCB("TOOL_MODE", "SpaceControll", "Adaptation", SCAdaptationButtonCallback, m_pScene);
 
 	//한 사이드에 있는 공간의 개수
 	m_oneSideSpaceNum = static_cast<int>(pow(2, m_level));
@@ -34,6 +30,11 @@ void CSpaceContainer::Begin(){
 	});
 	m_pDirectionalLight->SetPosition(XMVectorSet(m_size / 2.f, m_size, m_size / 2.f, 0.f));
 	m_pDirectionalLight->Rotate(30.f, 0.f, 0.f);
+
+
+	TWBARMGR->AddMinMaxBarRW("TOOL_MODE", "SpaceControll", "SpaceSize", &m_size, 256.f, 4096.f, 256.f);
+	TWBARMGR->AddMinMaxBarRW("TOOL_MODE", "SpaceControll", "SpaceLevel", &m_level, 0.f, 4.f, 1.f);
+	TWBARMGR->AddButtonCB("TOOL_MODE", "SpaceControll", "Adaptation", SCAdaptationButtonCallback, nullptr);
 }
 
 bool CSpaceContainer::End(){
@@ -191,10 +192,11 @@ void CSpaceContainer::ChangeSpaceData(){
 	m_pStartSpace = new CSpace();
 	m_pStartSpace->Begin(this, m_size, m_level, XMVectorSet(0.f, 0.f, 0.f, 0.f));
 
-	//4. 임시객체 재 배치
+	//4. 임시객체 재배치
 	for (auto pObject : m_vTempObjects) {
 		AddObject(pObject);
 	}
+	m_vTempObjects.clear();
 }
 
 CGameObject * CSpaceContainer::PickObject(XMVECTOR xmvWorldCameraStartPos, XMVECTOR xmvRayDir, float& distanse){
@@ -223,11 +225,10 @@ CGameObject * CSpaceContainer::PickObject(XMVECTOR xmvWorldCameraStartPos, XMVEC
 	return pNearObj;
 }
 
-CSpaceContainer * CSpaceContainer::CreateSpaceContainer(CScene* pScene, int size, int lv){
+CSpaceContainer * CSpaceContainer::CreateSpaceContainer(int size, int lv){
 	CSpaceContainer* pSpaceContainer = new CSpaceContainer();
 	pSpaceContainer->SetSpaceSize(size);
 	pSpaceContainer->SetSpaceLevel(lv);
-	pSpaceContainer->SetScene(pScene);
 	pSpaceContainer->Begin();
 	return pSpaceContainer;
 }

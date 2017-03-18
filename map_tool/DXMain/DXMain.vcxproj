@@ -267,6 +267,7 @@
     <ClInclude Include="Texture.h" />
     <ClInclude Include="ThirdPersonCamera.h" />
     <ClInclude Include="Timer.h" />
+    <ClInclude Include="Updater.h" />
     <ClInclude Include="VertexData.h" />
     <ClInclude Include="SkeletonData.h" />
   </ItemGroup>
@@ -372,6 +373,7 @@
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="ThirdPersonCamera.cpp" />
     <ClCompile Include="Timer.cpp" />
+    <ClCompile Include="Updater.cpp" />
     <ClCompile Include="VertexData.cpp" />
     <ClCompile Include="SkeletonData.cpp" />
   </ItemGroup>

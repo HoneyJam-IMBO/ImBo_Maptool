@@ -6,8 +6,6 @@
 //#include "SceneMain.h"
 //#include "RenderContainerSeller.h"
 
-class CScene;
-
 class CSpaceContainer : public CObject {
 public:
 	void Begin();
@@ -34,14 +32,12 @@ public:
 	CDirectionalLight* GetDirectionalLight() { return m_pDirectionalLight; }
 	//directional light
 
-	static CSpaceContainer* CreateSpaceContainer(CScene* pScene, int size, int lv);
-	void SetScene(CScene* pScene) { m_pScene = pScene; }
+	static CSpaceContainer* CreateSpaceContainer(int size, int lv);
 private:
 	//directional light
 	CDirectionalLight* m_pDirectionalLight{ nullptr };
 	//directional light
 
-	CScene* m_pScene{ nullptr };
 	//space들을 관리한다.
 	CSpace** m_ppSpace{ nullptr };
 	//쿼드 트리의 루트노드에 해당하는 startSpace 관리

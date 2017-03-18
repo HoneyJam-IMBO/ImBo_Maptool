@@ -46,7 +46,11 @@ public:
 	//void AddMesh(shared_ptr<CMesh> pMesh);
 	//void AddShader(shared_ptr<CRenderShader> pShader);
 	void AddTexture(shared_ptr<CTexture> pTexture);
+	//휘발성 texture를 add
+	void AddVolatileTexture(shared_ptr<CTexture> pTexture);
 	void AddBuffer(shared_ptr<CBuffer> pBuffers);
+	//휘발성 buf를 추가합
+	void AddVolatileBuffer(shared_ptr<CBuffer> pBuffers);
 	void AddInstanceBuffer(shared_ptr<CBuffer> pBuffers);
 	void AddMaterial(shared_ptr<CMaterial> pMaterial);
 	
@@ -72,8 +76,11 @@ protected:
 	vector<shared_ptr<CMesh>> m_vpMesh;
 	shared_ptr<CRenderShader> m_pShader;
 	vector<shared_ptr<CTexture>> m_vpTexture;
-	int m_nTexture{ 0 };
+	//휘발성 texture 한번 랜더하면 사라진다. 
+	vector<shared_ptr<CTexture>> m_vpVolatileTexture;
 	vector<shared_ptr<CBuffer>> m_vpBuffer;
+	//휘발성 buf 한번 랜더하면 사라진다. 
+	vector<shared_ptr<CBuffer>> m_vpVolatileBuffer;
 	shared_ptr<CAnimater> m_pAnimater{ nullptr };//animater
 
 	int m_nBuffer{ 0 };

@@ -70,12 +70,19 @@ void CRenderContainer::SetShaderState() {
 	for (auto p : m_vpTexture) {
 		p->SetShaderState();
 	}
+	for (auto p : m_vpVolatileTexture) {
+		p->SetShaderState();
+	}
 	for (auto p : m_vpMaterial) {
 		p->SetShaderState();
 	}
 	for (auto p : m_vpBuffer) {
 		p->SetShaderState();
 	}
+	for (auto p : m_vpVolatileBuffer) {
+		p->SetShaderState();
+	}
+
 	if (m_pAnimater)m_pAnimater->SetShaderState();
 
 }
@@ -98,14 +105,23 @@ void CRenderContainer::CleanShaderState() {
 	for (auto p : m_vpTexture) {
 		p->CleanShaderState();
 	}
+	for (auto p : m_vpVolatileTexture) {
+		p->SetShaderState();
+	}
 	for (auto p : m_vpMaterial) {
 		p->CleanShaderState();
 	}
 	for (auto p : m_vpBuffer) {
 		p->CleanShaderState();
 	}
-
+	for (auto p : m_vpVolatileBuffer) {
+		p->SetShaderState();
+	}
 	if (m_pAnimater)m_pAnimater->CleanShaderState();
+
+
+	m_vpVolatileTexture.clear();
+	m_vpVolatileBuffer.clear();
 	//if (m_pGlobalBuffer) m_pGlobalBuffer->CleanShaderState();//global buffer
 }
 
@@ -181,9 +197,13 @@ void CRenderContainer::SetShader(shared_ptr<CRenderShader> pShader) {
 }
 void CRenderContainer::AddTexture(shared_ptr<CTexture> pTexture) {
 	if (!pTexture)return;
-
-	m_nTexture++;
 	m_vpTexture.emplace_back(pTexture);
+}
+
+void CRenderContainer::AddVolatileTexture(shared_ptr<CTexture> pTexture){
+	if (!pTexture)return;
+
+	m_vpVolatileTexture.emplace_back(pTexture);
 }
 
 //-----------------------------------------buffer-----------------------------------------
@@ -197,6 +217,10 @@ void CRenderContainer::AddBuffer(shared_ptr<CBuffer> pBuffer){
 
 	if (m_ppBufferData) delete[] m_ppBufferData;
 	m_ppBufferData = new void*[m_vpBuffer.size()];
+}
+void CRenderContainer::AddVolatileBuffer(shared_ptr<CBuffer> pBuffer){
+	if (!pBuffer) return;
+	m_vpVolatileBuffer.emplace_back(pBuffer);
 }
 void CRenderContainer::AddInstanceBuffer(shared_ptr<CBuffer> pBuffer){
 	if (!pBuffer) return;

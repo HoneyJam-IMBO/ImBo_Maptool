@@ -32,6 +32,17 @@ void CTerrain::SetTerrainContainer(CTerrainContainer * pTerrainContainer){
 	m_pTerrainContainer = pTerrainContainer;
 }
 
+void CTerrain::RegistToContainer(){
+	m_bRender = true;
+}
+
+void CTerrain::RegistToContainer2(){
+	if(m_bRender){
+		CGameObject::RegistToContainer();
+	}
+	m_bRender = false;
+}
+
 bool CTerrain::CheckPickObject(XMVECTOR xmvWorldCameraStartPos, XMVECTOR xmvRayDir, float & distance){
 	BoundingBox BoundingBox;
 	GetMainBoundingBox(BoundingBox);

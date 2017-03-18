@@ -218,5 +218,8 @@ enum shader_value_num {
 #include "Importer.h"
 #define			IMPORTER	CImporter::GetInstance()
 #include "Renderer.h"
-#define			RENDERER	CRenderer::GetInstance()
+#define			RENDERER    CRenderer::GetInstance()
+#include "Updater.h"
+#define			UPDATER	    CUpdater::GetInstance()
+
 #define USE_ANIM

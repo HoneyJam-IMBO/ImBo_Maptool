@@ -14,11 +14,10 @@ bool CStemp::End(){
 }
 
 void CStemp::SetShaderState(){
-	m_pStempTexture->SetShaderState();
+	RENDERER->GetTerrainRenderContainer()->AddVolatileTexture(m_pStempTexture);
 }
 
 void CStemp::CleanShaderState(){
-	m_pStempTexture->CleanShaderState();
 }
 
 void CStemp::SetStempData(Pixel24* pStempData){

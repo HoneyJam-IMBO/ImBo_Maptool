@@ -5,21 +5,6 @@
 void CSkyBoxContainer::Begin() {
 	TWBARMGR->AddBoolBar("TOOL_MODE", "SceneObject", "SkyBoxOn/Off", &m_bActive);
 
-	//skybox depth stencil
-	D3D11_DEPTH_STENCIL_DESC descDepth;
-	descDepth.DepthEnable = FALSE;
-	descDepth.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
-	descDepth.DepthFunc = D3D11_COMPARISON_LESS;
-	descDepth.StencilEnable = TRUE;
-	descDepth.StencilReadMask = D3D11_DEFAULT_STENCIL_READ_MASK;
-	descDepth.StencilWriteMask = D3D11_DEFAULT_STENCIL_WRITE_MASK;
-	const D3D11_DEPTH_STENCILOP_DESC noSkyStencilOp = { D3D11_STENCIL_OP_KEEP, D3D11_STENCIL_OP_KEEP, D3D11_STENCIL_OP_KEEP, D3D11_COMPARISON_EQUAL };
-	descDepth.FrontFace = noSkyStencilOp;
-	descDepth.BackFace = noSkyStencilOp;
-	GLOBALVALUEMGR->GetDevice()->CreateDepthStencilState(&descDepth, &m_pd3dDepthStencilState);
-	m_pSkyboxContainer = RCSELLER->GetRenderContainer(object_id::OBJECT_SKYBOX);
-	//height map data init
-	
 	//skybox
 	m_pSkyBox = new CSkyBox();
 	m_pSkyBox->Begin();	
@@ -27,8 +12,6 @@ void CSkyBoxContainer::Begin() {
 }
 
 bool CSkyBoxContainer::End() {
-	if (m_pd3dDepthStencilState)m_pd3dDepthStencilState->Release();
-	if (m_pd3dTempDepthStencilState)m_pd3dTempDepthStencilState->Release();
 	//global object
 	if (m_pSkyBox) {
 		m_pSkyBox->End();
@@ -46,6 +29,7 @@ void CSkyBoxContainer::Update(shared_ptr<CCamera> pCamera, float fTimeElapsed) {
 		m_pSkyBox->RegistToContainer();
 		//registe to renderer
 		//RENDERER->SetSkyBoxContainer(this);
+		PrepareRender();
 		return;
 	}
 	//RENDERER->SetSkyBoxContainer(nullptr);
@@ -68,17 +52,17 @@ void CSkyBoxContainer::CreateSkyBoxTexture(UINT index){
 	string name{ "" }; name.assign(m_wsSkyBoxName.begin(), m_wsSkyBoxName.end());
 	m_ptxtSkyBox = CTexture::CreateTexture(pstrTextureNames, RESOURCEMGR->GetSampler("DEFAULT"), PS_SLOT_SKYBOX, BIND_PS);
 }
-void CSkyBoxContainer::Render(shared_ptr<CCamera> pCamera) {
-	if (m_bActive) {
-		//skybox
-		GLOBALVALUEMGR->GetDeviceContext()->OMGetDepthStencilState(&m_pd3dTempDepthStencilState, &m_TempStencil);
-		GLOBALVALUEMGR->GetDeviceContext()->OMSetDepthStencilState(m_pd3dDepthStencilState, 0);
-		m_ptxtSkyBox->SetShaderState();
-		m_pSkyboxContainer->Render(pCamera);
-		m_ptxtSkyBox->CleanShaderState();
-		GLOBALVALUEMGR->GetDeviceContext()->OMSetDepthStencilState(m_pd3dTempDepthStencilState, m_TempStencil);
-		//skybox
-	}
+void CSkyBoxContainer::PrepareRender() {
+	RENDERER->GetSkyBoxRenderContainer()->AddVolatileTexture(m_ptxtSkyBox);
+	//if (m_bActive) {
+	//	//skybox
+	//	GLOBALVALUEMGR->GetDeviceContext()->OMGetDepthStencilState(&m_pd3dTempDepthStencilState, &m_TempStencil);
+	//	GLOBALVALUEMGR->GetDeviceContext()->OMSetDepthStencilState(m_pd3dDepthStencilState, 0);
+	//	
+	//	m_pSkyboxContainer->Render(pCamera);
+	//	GLOBALVALUEMGR->GetDeviceContext()->OMSetDepthStencilState(m_pd3dTempDepthStencilState, m_TempStencil);
+	//	//skybox
+	//}
 	//m_pSkyboxContainer->ClearObjectList();
 }
 CSkyBoxContainer::CSkyBoxContainer() : CObject("skyboxcontainer") {

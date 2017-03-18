@@ -25,6 +25,7 @@ public:
 	void ReadEnter();
 
 	Pixel24* ReadBitmap24(const WCHAR* fileName);
+	Pixel24* ReadBitmap24(const char* fileName);
 	Pixel32* ReadBitmap32(const WCHAR* fileName);
 private:
 	string m_inputPath;

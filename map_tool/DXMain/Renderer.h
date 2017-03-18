@@ -38,12 +38,17 @@ public:
 
 	bool ResizeBuffer();
 	void SetFramework(CDirectXFramework* pFramework) { m_pFramework = pFramework; }
+
+	CRenderContainer* GetTerrainRenderContainer() { return m_pObjectRenderer->GetTerrainRenderContainer(); }
+	CRenderContainer* GetSkyBoxRenderContainer() { return m_pObjectRenderer->GetSkyBoxRenderContainer(); }
 	//void SetTerrainContainer(CTerrainContainer* pTerrainContainer) { m_pTerrainContainer = pTerrainContainer; }
 	//void SetSkyBoxContainer(CSkyBoxContainer* pSkyBoxContainer) { m_pSkyBoxContainer = pSkyBoxContainer; }
 	//void SetDirectionalLight(CDirectionalLight* pDirectionalLight) { m_pDirectionalLIght = pDirectionalLight; }
 private:
 	CDirectXFramework* m_pFramework{ nullptr };
-	
+	CRenderContainer* m_pTerrainRenderContainer{ nullptr };
+	CRenderContainer* m_pSkyBoxRenderContainer{ nullptr };
+
 	IDXGISwapChain			*	m_pdxgiSwapChain{ nullptr };
 	ID3D11RenderTargetView	*	m_pd3dRenderTargetView{ nullptr };
 	
@@ -86,7 +91,55 @@ private:
 	CPostProcessingFinalPass* m_pPostProcessingFinalPass{ nullptr };
 	CSSLR* m_pSSLR{ nullptr };
 	//-------------------------layer-------------------------
+
+	//effects
+	//ssao
+	float m_fSSAORadius{ 0.f };
+	float m_fSSAOOffsetRadius{ 0.f };
+	//bloom
+	float m_fBLOOMThreshold{ 2.f };
+	float m_fBLOOMMiddleGrey{ 0.01f };
+	float m_fBLOOMWhite{ 2.0f };
+	float m_fBLOOMScale{ 2.0f };
+	//sslr
+	bool m_bSSLROnOff;
+	float m_fSSLROffsetSunPos{ -200.f };
+	float m_fSSLRMaxSunDist{ 1000.f };
+	float m_fSSLRInitDecay{ 0.05f };
+	float m_fSSLRDistDecay{ 0.05f };
+	float m_fSSLRMaxDeltaLen{ 0.05f };
+	//effects
 public:
 	CRenderer();
 	virtual ~CRenderer();
+
+//set get
+	//ssao
+	void SetSSAORadius(float fSSAORadius) { m_fSSAORadius = fSSAORadius; };
+	float GetSSAORadius() { return m_fSSAORadius; }
+	void SetSSAOOffsetRadius(float SSAOOffsetRadius) { m_fSSAOOffsetRadius = SSAOOffsetRadius; }
+	float GetSSAOOffsetRadius() { return m_fSSAOOffsetRadius; }
+	//bloom
+	void SetBLOOMThreshold(float BLOOMThreshold) { m_fBLOOMThreshold = BLOOMThreshold; }
+	float GetBLOOMThreshold() { return m_fBLOOMThreshold; }
+	void SetBLOOMMiddleGrey(float BLOOMMiddleGrey) { m_fBLOOMMiddleGrey = BLOOMMiddleGrey; }
+	float GetBLOOMMiddleGrey() { return m_fBLOOMMiddleGrey; }
+	void SetBLOOMWhite(float BLOOMWhith) { m_fBLOOMWhite = BLOOMWhith; }
+	float GetBLOOMWhite() { return m_fBLOOMWhite; }
+	void SetBLOOMScale(float BLOOMScale) { m_fBLOOMScale = BLOOMScale; }
+	float GetBLOOMScale() { return m_fBLOOMScale; }
+	//sslr
+	void SetSSLROnOff(bool SSLROnOff) { m_bSSLROnOff = SSLROnOff; }
+	bool GetSSLROnOff() { return m_bSSLROnOff; }
+	void SetSSLROffsetSunPos(float SSLROffsetSunPos) { m_fSSLROffsetSunPos = SSLROffsetSunPos; }
+	float GetSSLROffsetSunPos() { return m_fSSLROffsetSunPos; }
+	void SetSSLRMaxSunDist(float SSLRMaxSunDist) { m_fSSLRMaxSunDist = SSLRMaxSunDist; }
+	float GetSSLRMaxSunDist() { return m_fSSLRMaxSunDist; }
+	void SetSSLRInitDecay(float SSLRInitDecay) { m_fSSLRInitDecay = SSLRInitDecay; }
+	float GetSSLRInitDecay() { return m_fSSLRInitDecay; }
+	void SetSSLRDistDecay(float SSLRDistDecay) { m_fSSLRDistDecay = SSLRDistDecay; }
+	float GetSSLRDistDecay() { return m_fSSLRDistDecay; }
+	void SetSSLRMaxDeltaLen(float fSSLRMaxDeltaLen) { m_fSSLRMaxDeltaLen = fSSLRMaxDeltaLen; }
+	float GetSSLRMaxDeltaLen() { return m_fSSLRMaxDeltaLen; }
+//set get
 };
