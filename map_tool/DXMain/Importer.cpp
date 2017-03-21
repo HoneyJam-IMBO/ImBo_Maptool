@@ -86,9 +86,9 @@ Pixel24 * CImporter::ReadBitmap24(const WCHAR * fileName){
 	in.open(fileName, ios_base::in | ios_base::binary);
 	in.read((char*)&bf, sizeof(BITMAPFILEHEADER));
 	in.read((char*)&bi, sizeof(BITMAPINFOHEADER));
-	Pixel24* pPixel = new Pixel24[bi.biWidth*bi.biHeight];
-	in.read((char*)pPixel, bi.biSizeImage);
-	UINT BUFSIZE = bi.biWidth*bi.biHeight;
+	UINT BUFSIZE = bi.biWidth *	bi.biHeight;
+	Pixel24* pPixel = new Pixel24[BUFSIZE];
+	in.read((char*)pPixel, BUFSIZE*3);
 	Pixel24* rgbTemp = new Pixel24[BUFSIZE];
 	for (int i = 0; i < BUFSIZE; ++i) {
 		rgbTemp[i].r = pPixel[BUFSIZE - 1 - i].r;

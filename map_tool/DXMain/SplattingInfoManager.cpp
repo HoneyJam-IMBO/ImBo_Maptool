@@ -113,9 +113,11 @@ void CSplattingInfoManager::ClearSplattingInfo(){
 	barName = "SPLATTING_INFO_LIST";
 	TWBARMGR->DeleteBar(barName);
 
-	SPLATTING_INFO* pData = (SPLATTING_INFO*)m_pSplattingInfoBuffer->Map();
-	pData->nSplattingInfo = m_vSplattinfInfo.size();
-	m_pSplattingInfoBuffer->Unmap();
+	if (m_pSplattingInfoBuffer) {
+		SPLATTING_INFO* pData = (SPLATTING_INFO*)m_pSplattingInfoBuffer->Map();
+		pData->nSplattingInfo = m_vSplattinfInfo.size();
+		m_pSplattingInfoBuffer->Unmap();
+	}
 }
 
 void CSplattingInfoManager::CreateSplattingInfo(const WCHAR * pDetailTextureName){
