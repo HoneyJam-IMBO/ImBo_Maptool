@@ -27,7 +27,8 @@ public:
 	//create scene
 	static CScene* CreateScene(string name, CDirectXFramework* pFramework);
 	//create scene
-	
+
+	void LoadScene(string path);
 protected:
 	string m_sName;
 

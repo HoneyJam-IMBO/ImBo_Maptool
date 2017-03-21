@@ -600,6 +600,59 @@ bool CRenderer::ResizeBuffer() {
 	return true;
 }
 
+void CRenderer::SaveEffectInfo(){
+	//ssao
+	EXPORTER->WriteFloat(m_fSSAORadius); EXPORTER->WriteSpace();
+	EXPORTER->WriteFloat(m_fSSAOOffsetRadius);
+	EXPORTER->WriteEnter();
+	//bloom
+	EXPORTER->WriteFloat(m_fBLOOMThreshold); EXPORTER->WriteSpace();
+	EXPORTER->WriteFloat(m_fBLOOMMiddleGrey); EXPORTER->WriteSpace();
+	EXPORTER->WriteFloat(m_fBLOOMWhite); EXPORTER->WriteSpace();
+	EXPORTER->WriteFloat(m_fBLOOMScale);
+	EXPORTER->WriteEnter();
+	//sslr
+	EXPORTER->WriteBool(m_bSSLROnOff); EXPORTER->WriteSpace();
+	EXPORTER->WriteFloat(m_fSSLROffsetSunPos); EXPORTER->WriteSpace();
+	EXPORTER->WriteFloat(m_fSSLRMaxSunDist); EXPORTER->WriteSpace();
+	EXPORTER->WriteFloat(m_fSSLRInitDecay); EXPORTER->WriteSpace();
+	EXPORTER->WriteFloat(m_fSSLRDistDecay); EXPORTER->WriteSpace();
+	EXPORTER->WriteFloat(m_fSSLRMaxDeltaLen);
+	EXPORTER->WriteEnter();
+
+}
+
+void CRenderer::LoadEffectInfo(){
+	//ssao
+	float fSSAORadius = IMPORTER->ReadFloat();
+	SetSSAORadius(fSSAORadius);
+	float fSSAOOffsetRadius = IMPORTER->ReadFloat();
+	SetSSAOOffsetRadius(fSSAOOffsetRadius);
+
+	//bloom
+	float fBLOOMThreshold = IMPORTER->ReadFloat();
+	SetBLOOMThreshold(fBLOOMThreshold);
+	float fBLOOMMiddleGrey = IMPORTER->ReadFloat();
+	SetBLOOMMiddleGrey(fBLOOMMiddleGrey);
+	float fBLOOMWhite = IMPORTER->ReadFloat();
+	SetBLOOMWhite(fBLOOMWhite);
+	float fBLOOMScale = IMPORTER->ReadFloat();
+	SetBLOOMScale(fBLOOMScale);
+	//sslr
+	bool bSSLROnOff = IMPORTER->ReadBool();
+	SetSSLROnOff(bSSLROnOff);
+	float fSSLROffsetSunPos = IMPORTER->ReadFloat();
+	SetSSLROffsetSunPos(fSSLROffsetSunPos);
+	float fSSLRMaxSunDist = IMPORTER->ReadFloat();
+	SetSSLRMaxSunDist(fSSLRMaxSunDist);
+	float fSSLRInitDecay = IMPORTER->ReadFloat();
+	SetSSLRInitDecay(fSSLRInitDecay);
+	float fSSLRDistDecay = IMPORTER->ReadFloat();
+	SetSSLRDistDecay(fSSLRDistDecay);
+	float fSSLRMaxDeltaLen = IMPORTER->ReadFloat();
+	SetSSLRMaxDeltaLen(fSSLRMaxDeltaLen);
+}
+
 CRenderer::CRenderer() :CSingleTonBase<CRenderer>("rendereringleton") {
 
 }

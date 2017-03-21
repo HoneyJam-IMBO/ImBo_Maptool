@@ -32,6 +32,11 @@ public:
 	void SetCamera(shared_ptr<CCamera> pCamera) { m_pCamera = pCamera; }
 	shared_ptr<CCamera> GetCamera() { return m_pCamera; }
 	void ChangeSceneContainers();
+
+	void LoadSpaceInfo();
+	void SaveSpaceInfo();
+	void LoadTerrainInfo(wstring wsOutputPath, wstring wsSceneName);
+	void SaveTerrainInfo(wstring wsOutputPath, wstring wsSceneName);
 private:
 
 	shared_ptr<CCamera> m_pCamera{ nullptr };

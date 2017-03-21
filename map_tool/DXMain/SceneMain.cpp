@@ -176,91 +176,44 @@ void CSceneMain::CreatePositioningObject() {
 
 	CSpotLight* pPositioningSpotLight = CSpotLight::CreateSpotLight(500.f, XMFLOAT3(0.1f, 0.1f, 0.1f), 30.f, 15.f);
 	m_vpObjectList.push_back(pPositioningSpotLight);
+
+
 }
 void CSceneMain::SaveScene(){
+	wcout << L"if you want save input the path, sceneName : " << endl;
+	wcout << L"OutputPath : ";
+	WCHAR wc[128];
+	wcin >> wc;
+	wstring wsOutputPath{(WCHAR*)wc};
+	wcout << L"SceneName : ";
+	wcin >> wc;
+	wstring wsSceneName{ (WCHAR*)wc };
+	wsSceneName = wsSceneName + L".scn";
 	//cin>>scene name;
 	//cin>>path
 	//scene name
-	wstring wsSceneName = L"test";
-	wstring wsOutputPath{ L"../outputdata/" };
-	EXPORTER->Begin(L"../outputdata/scene.txt");
+	//wstring wsSceneName = L"test";
 
-	//scene name
-	EXPORTER->WriteWstring(wsSceneName);
-	EXPORTER->WriteEnter();
+
+	//EXPORTER->Begin(L"../outputdata/scene.txt");
+	EXPORTER->Begin(wsOutputPath + wsSceneName);
+
 	//output path
 	EXPORTER->WriteWstring(wsOutputPath);
 	EXPORTER->WriteEnter();
-	//space info
-	EXPORTER->WriteFloat(UPDATER->GetSpaceContainer()->GetSpaceSize()); EXPORTER->WriteSpace();
-	EXPORTER->WriteFloat(UPDATER->GetSpaceContainer()->GetSpaceLevel());
-	EXPORTER->WriteEnter();
-	//terrain onoff/ skybox onoff
-	bool bTerrainContainer = UPDATER->GetTerrainContainer() != nullptr;
-	bool bSkyBoxContainer = UPDATER->GetSkyBoxContainer() != nullptr;
-	EXPORTER->WriteBool(bTerrainContainer); EXPORTER->WriteSpace();
-	EXPORTER->WriteBool(bSkyBoxContainer); 
-	EXPORTER->WriteEnter();
-	//effect info
-	//ssao
-	EXPORTER->WriteFloat(RENDERER->GetSSAORadius()); EXPORTER->WriteSpace();
-	EXPORTER->WriteFloat(RENDERER->GetSSAOOffsetRadius());
-	EXPORTER->WriteEnter();
-	//bloom
-	EXPORTER->WriteFloat(RENDERER->GetBLOOMThreshold()); EXPORTER->WriteSpace();
-	EXPORTER->WriteFloat(RENDERER->GetBLOOMMiddleGrey()); EXPORTER->WriteSpace();
-	EXPORTER->WriteFloat(RENDERER->GetBLOOMWhite()); EXPORTER->WriteSpace();
-	EXPORTER->WriteFloat(RENDERER->GetBLOOMScale()); 
-	EXPORTER->WriteEnter();
-	//sslr
-	EXPORTER->WriteBool(RENDERER->GetSSLROnOff()); EXPORTER->WriteSpace();
-	EXPORTER->WriteFloat(RENDERER->GetSSLROffsetSunPos()); EXPORTER->WriteSpace();
-	EXPORTER->WriteFloat(RENDERER->GetSSLRMaxSunDist()); EXPORTER->WriteSpace();
-	EXPORTER->WriteFloat(RENDERER->GetSSLRInitDecay()); EXPORTER->WriteSpace();
-	EXPORTER->WriteFloat(RENDERER->GetSSLRDistDecay()); EXPORTER->WriteSpace();
-	EXPORTER->WriteFloat(RENDERER->GetSSLRMaxDeltaLen());
+	//scene name
+	EXPORTER->WriteWstring(wsSceneName);
 	EXPORTER->WriteEnter();
 
+	UPDATER->SaveSpaceInfo();
 	//object info save
 	//m_pSpaceContainer->WriteObjects();
 	//EXPORTER->WriteEnter();
+	UPDATER->SaveTerrainInfo(wsOutputPath, wsSceneName);
 
-	if(bTerrainContainer){//terrain container가 있다면..
-		//base texture path
-		float fHeightScale = UPDATER->GetTerrainContainer()->GetHeightScale();
-		int width = UPDATER->GetTerrainContainer()->GetTerrainWidth();
-		int length = UPDATER->GetTerrainContainer()->GetTerrainLength();
-		EXPORTER->WriteInt(width); EXPORTER->WriteSpace();
-		EXPORTER->WriteInt(length); EXPORTER->WriteSpace();
-		EXPORTER->WriteFloat(fHeightScale); EXPORTER->WriteSpace();
-		EXPORTER->WriteEnter();
-		EXPORTER->WriteCHAR(UPDATER->GetTerrainContainer()->GetBaseTexture()->GetsPath().c_str());
-		EXPORTER->WriteEnter();
-		//height map texture name
-		wstring wsHeightDataName = wsOutputPath + wsSceneName + L"HeightMap.bmp";
-		EXPORTER->MakeBitmap24(wsHeightDataName.c_str(), UPDATER->GetTerrainContainer()->GetHeightData(), 256,256);
-		//normal map texture name
-		wstring wsNormalDataName = wsOutputPath + wsSceneName + L"NormalMap.bmp";
-		EXPORTER->MakeBitmap24(wsNormalDataName.c_str(), UPDATER->GetTerrainContainer()->GetNormalData(), 256, 256);
-		//이 두개는 scene name을 가지고 가공
-		//[scene name] + height map 이렇게
-
-		int nSplatting = UPDATER->GetTerrainContainer()->GetSplattingInfoManager()->GetSplattingInfos().size();
-		EXPORTER->WriteInt(nSplatting); 
-		EXPORTER->WriteEnter();
-		for(int i = 0; i<nSplatting; ++i){
-			//splatting의 detail texture는 path로 받는다.
-			wstring path = UPDATER->GetTerrainContainer()->GetSplattingInfoManager()->GetSplattingInfos()[i]->GetDetailTexturePath();
-			EXPORTER->WriteWstring(path);
-			EXPORTER->WriteEnter();
-			//splatting의 blending info는 [scene name]이름을 토대로 가공한다.
-			//[scene name] + [splatting blending info] + [index]
-			WCHAR splattingName[256];
-			wsprintf(splattingName, L"%s%sBlendInfo%d.bmp", wsOutputPath.c_str(), wsSceneName.c_str(), i);
-			EXPORTER->MakeBitmap24(splattingName, UPDATER->GetTerrainContainer()->GetSplattingInfoManager()->GetSplattingInfos()[i]->GetBlendInfo(), 256, 256);
-		}
-		//splatting texture name
-	}
+	//effect info
+	RENDERER->SaveEffectInfo();
+	
 	EXPORTER->End();
 
 	/*
@@ -271,105 +224,7 @@ void CSceneMain::SaveScene(){
 	//EXPORTER->MakeBitmap24();
 }
 void CSceneMain::LoadScene(string path){
-	IMPORTER->Begin(path);
-	//scene name
-	wstring wsSceneName = IMPORTER->ReadWstring();
-	m_sName.assign(wsSceneName.cbegin(), wsSceneName.cend());
-
-	//output path
-	wstring wsOutputPath = IMPORTER->ReadWstring();
-	
-	//space info
-	float space_size = IMPORTER->ReadFloat();
-	float space_lv = IMPORTER->ReadFloat();
-	UPDATER->GetSpaceContainer()->SetSpaceSize(space_size);
-	UPDATER->GetSpaceContainer()->SetSpaceLevel(space_lv);
-	UPDATER->GetSpaceContainer()->ChangeSpaceData();
-
-	//terrain onoff/ skybox onoff
-	bool bTerrainContainer = IMPORTER->ReadBool();
-	UPDATER->GetTerrainContainer()->SetActive(bTerrainContainer);
-	UPDATER->GetTerrainContainer()->ChangeSpaceData();
-	
-	bool bSkyBoxContainer = IMPORTER->ReadBool();
-	UPDATER->GetSkyBoxContainer()->SetActive(bSkyBoxContainer);
-
-	//effect info
-	//ssao
-	float fSSAORadius = IMPORTER->ReadFloat();
-	RENDERER->SetSSAORadius(fSSAORadius);
-	float fSSAOOffsetRadius = IMPORTER->ReadFloat();
-	RENDERER->SetSSAOOffsetRadius(fSSAOOffsetRadius);
-
-	//bloom
-	float fBLOOMThreshold = IMPORTER->ReadFloat();
-	RENDERER->SetBLOOMThreshold(fBLOOMThreshold);
-	float fBLOOMMiddleGrey = IMPORTER->ReadFloat();
-	RENDERER->SetBLOOMMiddleGrey(fBLOOMMiddleGrey);
-	float fBLOOMWhite = IMPORTER->ReadFloat();
-	RENDERER->SetBLOOMWhite(fBLOOMWhite);
-	float fBLOOMScale = IMPORTER->ReadFloat();
-	RENDERER->SetBLOOMScale(fBLOOMScale);
-	//sslr
-	bool bSSLROnOff = IMPORTER->ReadBool();
-	RENDERER->SetSSLROnOff(bSSLROnOff);
-	float fSSLROffsetSunPos = IMPORTER->ReadFloat();
-	RENDERER->SetSSLROffsetSunPos(fSSLROffsetSunPos);
-	float fSSLRMaxSunDist = IMPORTER->ReadFloat();
-	RENDERER->SetSSLRMaxSunDist(fSSLRMaxSunDist);
-	float fSSLRInitDecay = IMPORTER->ReadFloat();
-	RENDERER->SetSSLRInitDecay(fSSLRInitDecay);
-	float fSSLRDistDecay = IMPORTER->ReadFloat();
-	RENDERER->SetSSLRDistDecay(fSSLRDistDecay);
-	float fSSLRMaxDeltaLen = IMPORTER->ReadFloat();
-	RENDERER->SetSSLRMaxDeltaLen(fSSLRMaxDeltaLen);
-	//object info save
-	//m_pSpaceContainer->WriteObjects();
-	//EXPORTER->WriteEnter();
-
-	if (bTerrainContainer) {//terrain container가 있다면..
-		
-		//m_pTerrainContainer->SetSceneName(wsSceneName);//이름은 나중에 바꾸도록 한다.
-		//base texture path
-		XMFLOAT3 xmf3Scale;
-		//이렇게 되어야 함
-		int width = IMPORTER->ReadInt();
-		UPDATER->GetTerrainContainer()->SetTerrainWidth(width);
-		int length = IMPORTER->ReadInt();
-		UPDATER->GetTerrainContainer()->SetTerrainLength(length);
-		float fHeightScale = IMPORTER->ReadFloat();
-		UPDATER->GetTerrainContainer()->SetHeightScale(fHeightScale);
-		
-		wstring wsBaseTexturePath = IMPORTER->ReadWstring();
-		UPDATER->GetTerrainContainer()->SetBaseTexture(wsBaseTexturePath);
-		//height map texture name
-		wstring wsHeightDataName = wsOutputPath + wsSceneName + L"HeightMap.bmp";
-		UPDATER->GetTerrainContainer()->SetHeightData(IMPORTER->ReadBitmap24(wsHeightDataName.c_str()));//heightmap
-		UPDATER->GetTerrainContainer()->SetHeightMapTexture(CTexture::CreateTexture(wsHeightDataName.c_str(), RESOURCEMGR->GetSampler("TerrainHeightMap"), 1, BIND_DS));
-
-		//normal map texture name
-		wstring wsNormalDataName = wsOutputPath + wsSceneName + L"NormalMap.bmp";
-		UPDATER->GetTerrainContainer()->SetNormalData(IMPORTER->ReadBitmap24(wsNormalDataName.c_str()));//nomalmap
-		UPDATER->GetTerrainContainer()->SetNormalMapTexture(CTexture::CreateTexture(wsNormalDataName.c_str(), RESOURCEMGR->GetSampler("TerrainNormal"), PS_SLOT_NORMALMAP, BIND_PS));
-
-		//create splatting info
-		int nSplatting = IMPORTER->ReadInt();
-		UPDATER->GetTerrainContainer()->GetSplattingInfoManager()->ClearSplattingInfo();
-		for (int i = 0; i<nSplatting; ++i) {
-			//splatting의 detail texture는 path로 받는다.
-			wstring wsDetailTexturePath = IMPORTER->ReadWstring();
-
-			//splatting의 blending info는 [scene name]이름을 토대로 가공한다.
-			//[scene name] + [splatting blending info] + [index]
-			WCHAR wcBlendinfoPath[256];
-			wsprintf(wcBlendinfoPath, L"%s%sBlendInfo%d.bmp", wsOutputPath.c_str(), wsSceneName.c_str(), i);
-
-			UPDATER->GetTerrainContainer()->GetSplattingInfoManager()->CreateSplattingInfo(wsDetailTexturePath.c_str(), wcBlendinfoPath);
-		}
-		//create splatting info
-	}
-	IMPORTER->End();
-
+	CScene::LoadScene(path);
 }
 void CSceneMain::CreateSceneListUI(){
 	m_LoadFileStruct.clear();

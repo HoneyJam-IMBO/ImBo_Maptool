@@ -5,9 +5,9 @@
 
 #pragma once
 
-#ifdef _DEBUG
+//#ifdef _DEBUG
 #pragma comment(linker, "/entry:wWinMainCRTStartup /subsystem:console")
-#endif
+//#endif
 
 #include "targetver.h"
 

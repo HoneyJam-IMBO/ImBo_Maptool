@@ -103,9 +103,19 @@ void CSplattingInfoManager::RemoveSplattingInfoByIndex(UINT index){
 
 void CSplattingInfoManager::ClearSplattingInfo(){
 	for (auto pData : m_vSplattinfInfo) {
+		pData->CleanShaderState();
 		delete pData;
 	}
 	m_vSplattinfInfo.clear();
+
+	const char* barName = "SplattingControll";
+	TWBARMGR->DeleteBar(barName);
+	barName = "SPLATTING_INFO_LIST";
+	TWBARMGR->DeleteBar(barName);
+
+	SPLATTING_INFO* pData = (SPLATTING_INFO*)m_pSplattingInfoBuffer->Map();
+	pData->nSplattingInfo = m_vSplattinfInfo.size();
+	m_pSplattingInfoBuffer->Unmap();
 }
 
 void CSplattingInfoManager::CreateSplattingInfo(const WCHAR * pDetailTextureName){
