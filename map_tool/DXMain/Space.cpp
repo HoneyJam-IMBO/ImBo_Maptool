@@ -5,7 +5,7 @@
 
 void CSpace::Begin(CSpaceContainer * pSpaceContainer, UINT size, int lv, XMVECTOR pos){
 	//object_id set 
-	m_objectID = object_id::OBJECT_SPACE;
+//	m_objectID = object_id::OBJECT_SPACE;
 	CGameObject::Begin();
 	//size를 알아야 할지도 모르니까 일단 저장
 	m_size = size;
@@ -112,6 +112,20 @@ void CSpace::Animate(float fTimeElapsed){
 			}
 			nObject++;
 		}
+		for (auto pObject : m_mlpObject[tag::TAG_ANIMDYNAMIC_OBJECT]) {
+			pObject->Animate(fTimeElapsed);
+			int current_index = m_pSpaceContainer->SearchSpace(pObject->GetPosition());
+			if (pObject->GetSpaceIndex() != current_index) {//이전 공간 index와 현재 index가 다르다면
+				m_pSpaceContainer->AddBlockObjectList(pObject);//block Object list에 등록
+				lpDeleteObject.push_back(pObject);
+			}
+			nObject++;
+		}
+		for (auto pObject : m_mlpObject[tag::TAG_ANIMSTATIC_OBJECT]) {
+			pObject->Animate(fTimeElapsed);
+			nObject++;
+		}
+
 		if(INPUTMGR->GetDebugMode())
 			DEBUGER->AddText(10.0f, 250.0f, static_cast<float>(m_index * 15.f), YT_Color(255, 255, 255), L"space %d object_num : %d", m_index, nObject);
 
@@ -193,19 +207,13 @@ CGameObject * CSpace::PickObject(XMVECTOR xmvWorldCameraStartPos, XMVECTOR xmvRa
 	float fNearHitDistance = FLT_MAX;
 	CGameObject* pObj = nullptr;
 	//자신의 모든 객체에 대해서 검사
-	for (auto pObject : m_mlpObject[tag::TAG_DYNAMIC_OBJECT]) {
-		if (pObject->CheckPickObject(xmvWorldCameraStartPos, xmvRayDir, fHitDistance)) {//ray와 충돌했다면
-			if (fNearHitDistance > fHitDistance) {//이전의 가장 가까운 녀석과 비교
-				distance = fHitDistance;//더 가까우면 가장 가까운 객체 변경
-				pObj = pObject;
-			}
-		}
-	}
-	for (auto pObject : m_mlpObject[tag::TAG_STATIC_OBJECT]) {
-		if (pObject->CheckPickObject(xmvWorldCameraStartPos, xmvRayDir, fHitDistance)) {//ray와 충돌했다면
-			if (fNearHitDistance > fHitDistance) {//이전의 가장 가까운 녀석과 비교
-				distance = fHitDistance;//더 가까우면 가장 가까운 객체 변경
-				pObj = pObject;
+	for (auto Objects : m_mlpObject) {
+		for (auto pObject : Objects.second) {
+			if (pObject->CheckPickObject(xmvWorldCameraStartPos, xmvRayDir, fHitDistance)) {//ray와 충돌했다면
+				if (fNearHitDistance > fHitDistance) {//이전의 가장 가까운 녀석과 비교
+					distance = fHitDistance;//더 가까우면 가장 가까운 객체 변경
+					pObj = pObject;
+				}
 			}
 		}
 	}
@@ -213,7 +221,7 @@ CGameObject * CSpace::PickObject(XMVECTOR xmvWorldCameraStartPos, XMVECTOR xmvRa
 }
 
 
-CSpace::CSpace() : CGameObject("space"){
+CSpace::CSpace() : CGameObject("space", tag::TAG_SPACE){
 
 }
 

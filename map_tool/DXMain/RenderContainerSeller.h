@@ -10,12 +10,15 @@ public:
 	bool Begin();
 	bool End();
 
-	CRenderContainer* GetRenderContainer(object_id objectid);
+	mapTagRenderContainer& GetTagRenderContainer() { return m_mTagRenderContainer; }
+	//mapRenderContainer GetTagRenderContainer(tag t) { return m_mTagRenderContainer[t]; }
+	CRenderContainer* GetRenderContainer(string name);
+	CRenderContainer* GetRenderContainer(tag t, string name);
 
-	//void OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 private:
+	void CreateStempRenderContainer();
 	//이게 진짜 rendercontainer
-	mapRenderContainer m_mRenderContainer;
+	mapTagRenderContainer m_mTagRenderContainer;
 
 public:
 	CRenderContainerSeller() : CSingleTonBase<CRenderContainerSeller>("inputmanagersingleton") {}

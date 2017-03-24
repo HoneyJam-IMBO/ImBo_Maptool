@@ -3,7 +3,7 @@
 
 bool CPointLight::Begin() {
 	m_lightid = light_id::LIGHT_POINT;
-	m_objectID = object_id::OBJECT_POINT_LIGHT;
+//	m_objectID = object_id::OBJECT_POINT_LIGHT;
 
 	m_xmmtxScale = XMMatrixScalingFromVector(XMVECTOR(XMVectorSet(m_PointData.fRange, m_PointData.fRange, m_PointData.fRange, 1.0f)));
 	m_fRangeRcp = 1 / m_PointData.fRange;

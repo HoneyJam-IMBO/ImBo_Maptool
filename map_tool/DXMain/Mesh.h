@@ -6,6 +6,11 @@
 
 #include "BoundingBox.h"
 
+enum mesh_tag {
+	MESH_TAG_DEFAULT,
+	MESH_TAG_MAKE,
+	MESH_TAG_END
+};
 // 꼭짓점별 데이터를 꼭짓점 셰이더로 보내는 데 사용됩니다.
 struct VertexPositionColor
 {

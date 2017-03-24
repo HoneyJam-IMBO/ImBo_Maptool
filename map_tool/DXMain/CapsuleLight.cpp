@@ -3,7 +3,7 @@
 
 bool CCapsuleLight::Begin() {
 	m_lightid = light_id::LIGHT_CAPSULE;
-	m_objectID = object_id::OBJECT_CAPSULE_LIGHT;
+//	m_objectID = object_id::OBJECT_CAPSULE_LIGHT;
 
 	m_fHalfSegmentLen = m_CapsuleData.CapsuleLightLen*0.5f;
 	m_fCapsuleLightRangeRcp = 1 / m_CapsuleData.CapsuleLightRange;

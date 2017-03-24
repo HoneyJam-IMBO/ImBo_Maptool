@@ -100,6 +100,7 @@ void CFbxImporter::SetAnimationNameArray(){
 void CFbxImporter::LoadAnimStack(){
 
 	FbxAnimStack* currAnimStack = m_pScene->GetSrcObject<FbxAnimStack>(0);
+	if (nullptr == currAnimStack) return;
 	FbxString animStackName = currAnimStack->GetName();
 	m_AnimStackData.SetAnimationName(animStackName.Buffer());
 	FbxTakeInfo* takeInfo = m_pScene->GetTakeInfo(animStackName);

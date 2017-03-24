@@ -7,7 +7,7 @@ bool CFbxAnimStackData::Begin(){
 }
 
 bool CFbxAnimStackData::End(){
-	m_pAnimStack->Destroy();
+	if(m_pAnimStack) m_pAnimStack->Destroy();
 	m_pAnimStack = nullptr;
 
 	m_tStart = 0;

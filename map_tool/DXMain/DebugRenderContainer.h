@@ -17,5 +17,5 @@ public:
 
 };
 
-typedef map<object_id, CRenderContainer*> mapRenderContainer;
-typedef pair<object_id, CRenderContainer*> pairRenderContainer;
+typedef map<string, CRenderContainer*> mapRenderContainer;
+typedef pair<string, CRenderContainer*> pairRenderContainer;

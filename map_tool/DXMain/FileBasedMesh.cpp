@@ -13,19 +13,20 @@ bool CFileBasedMesh::End() {
 	return CMesh::End();
 }
 
-shared_ptr<CFileBasedMesh> CFileBasedMesh::CreateMesh(wstring path, UINT index, bool bHasAnimation){
+shared_ptr<CFileBasedMesh> CFileBasedMesh::CreateMesh(wstring path, string name, UINT index, bool bHasAnimation){
 	wstring extention{ PathFindExtension(path.c_str()) };
 	if (L".FBX" == extention || L".fbx" == extention) {
-		return CFileBasedMesh::CreateMeshFromFBXFile(index, bHasAnimation);
+		return CFileBasedMesh::CreateMeshFromFBXFile(name, index, bHasAnimation);
 	}
 	else if (L".GJM" == extention || L".gjm" == extention) {
-		return CFileBasedMesh::CreateMeshFromGJMFile(index, bHasAnimation);
+		return CFileBasedMesh::CreateMeshFromGJMFile(name, index, bHasAnimation);
 	}
 }
 
-shared_ptr<CFileBasedMesh> CFileBasedMesh::CreateMeshFromFBXFile(UINT index, bool bHasAnimation){
+shared_ptr<CFileBasedMesh> CFileBasedMesh::CreateMeshFromFBXFile(string name, UINT index, bool bHasAnimation){
 	shared_ptr<CFileBasedMesh> pFileBasedMesh;
 	pFileBasedMesh = make_shared<CFileBasedMesh>();
+	pFileBasedMesh->SetName(name);
 	//set mesh name, index
 	pFileBasedMesh->SetMeshIndex(index);
 	
@@ -130,7 +131,7 @@ shared_ptr<CFileBasedMesh> CFileBasedMesh::CreateMeshFromFBXFile(UINT index, boo
 	return nullptr;
 }
 
-shared_ptr<CFileBasedMesh> CFileBasedMesh::CreateMeshFromGJMFile(UINT index, bool bHasAnimation){
+shared_ptr<CFileBasedMesh> CFileBasedMesh::CreateMeshFromGJMFile(string name, UINT index, bool bHasAnimation){
 	/*
 	test
 	*/
@@ -138,6 +139,7 @@ shared_ptr<CFileBasedMesh> CFileBasedMesh::CreateMeshFromGJMFile(UINT index, boo
 
 	shared_ptr<CFileBasedMesh> pFileBasedMesh;
 	pFileBasedMesh = make_shared<CFileBasedMesh>();
+	pFileBasedMesh->SetName(name);
 	//set mesh name, index
 	pFileBasedMesh->SetMeshIndex(index);
 	
@@ -147,6 +149,7 @@ shared_ptr<CFileBasedMesh> CFileBasedMesh::CreateMeshFromGJMFile(UINT index, boo
 		int MeshTextureCnt = IMPORTER->ReadInt();
 		if (MeshTextureCnt <= 0) {
 			pFileBasedMesh->AddMeshTexture(RESOURCEMGR->GetTexture("DEFAULT"));
+			pFileBasedMesh->AddMeshTexture(RESOURCEMGR->GetTexture("DEFAULTSPEC"));
 		}
 		for (int i = 0; i < MeshTextureCnt; ++i) {
 			//char name[64];
@@ -155,9 +158,11 @@ shared_ptr<CFileBasedMesh> CFileBasedMesh::CreateMeshFromGJMFile(UINT index, boo
 			path = IMPORTER->Readstring();
 			wstring wPath{ L"" };
 			wPath.assign(path.cbegin(), path.cend());
-			pFileBasedMesh->AddMeshTexture(RESOURCEMGR->CreateTexture(path.c_str(), (WCHAR*)wPath.c_str(), RESOURCEMGR->GetSampler("DEFAULT")));
-			pFileBasedMesh->SetMeshMaterial(RESOURCEMGR->GetMaterial("DEFAULT"));
+			char cName[64];
+			sprintf(cName, "%s_%d_%d", name.c_str(), index, i);
+			pFileBasedMesh->AddMeshTexture(RESOURCEMGR->CreateTexture(cName, (WCHAR*)wPath.c_str(), RESOURCEMGR->GetSampler("DEFAULT"), i));
 		}
+		pFileBasedMesh->SetMeshMaterial(RESOURCEMGR->GetMaterial("DEFAULT"));
 		//mesh texture
 
 		//1. 전체 정점의 수를 구한다.

@@ -3,7 +3,7 @@
 
 bool CSpotLight::Begin() {
 	m_lightid = light_id::LIGHT_SPOT;
-	m_objectID = object_id::OBJECT_SPOT_LIGHT;
+//	m_objectID = object_id::OBJECT_SPOT_LIGHT;
 
 	//미리 계산 가능한 것은 계산 해 놓는다.
 	float fCosInnerCone = cosf(XM_PI * m_SpotData.fInnerAngle / 180.0f);

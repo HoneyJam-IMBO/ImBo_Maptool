@@ -177,7 +177,14 @@ void CSceneMain::CreatePositioningObject() {
 	CSpotLight* pPositioningSpotLight = CSpotLight::CreateSpotLight(500.f, XMFLOAT3(0.1f, 0.1f, 0.1f), 30.f, 15.f);
 	m_vpObjectList.push_back(pPositioningSpotLight);
 
-
+	for (auto vStempMesh : RESOURCEMGR->GetAllStempMesh()) {
+		string name = vStempMesh.second[0]->GetName();
+		bool bAnimation = true;// vStempMesh.second[0]->GetbAnimation();
+		//animation 정보가 없으면 setting가능한 객체이다.
+		CGameObject* pObject = new CGameObject(name);
+		pObject->Begin();
+		m_vpObjectList.push_back(pObject);
+	}
 }
 void CSceneMain::SaveScene(){
 	wcout << L"if you want save input the path, sceneName : " << endl;
@@ -554,13 +561,13 @@ void CSceneMain::CreateControllObject(string path){
 //resource 제작	
 	m_MeshCnt = RESOURCEMGR->CreateMultiMesh(path, "Test");
 	//m_MeshCnt = RESOURCEMGR->CreateMultiMesh("../outputata/text.txt", "Test");
-	RCSELLER->GetRenderContainer(object_id::OBJECT_FBX_ELF)->ClearMesh();
+	RCSELLER->GetRenderContainer("fbx")->ClearMesh();
 	char pName[20];
 	for (int i = 0; i < m_MeshCnt; ++i) {
 		sprintf(pName, "%s%d", "Test", i);
-		RCSELLER->GetRenderContainer(object_id::OBJECT_FBX_ELF)->AddMesh(RESOURCEMGR->GetMesh(pName));
+		RCSELLER->GetRenderContainer("fbx")->AddMesh(RESOURCEMGR->GetMesh(pName, i));
 	}
-	RCSELLER->GetRenderContainer(object_id::OBJECT_FBX_ELF)->SetAnimater(RESOURCEMGR->GetAnimater("Test"));
+	RCSELLER->GetRenderContainer("fbx")->SetAnimater(RESOURCEMGR->GetAnimater("Test"));
 //resource 제작	
 
 
@@ -689,7 +696,7 @@ void CSceneMain::ClearAllFBXObject(){
 		const char* name = "Test";
 		for (int i = 0; i < m_MeshCnt; ++i) {
 			sprintf(MeshName, "%s%d", name, i);
-			RESOURCEMGR->ReleaseMesh(MeshName);
+			RESOURCEMGR->ReleaseStempMesh(MeshName);
 		}
 		RESOURCEMGR->ReleaseAnimater(name);
 		m_MeshCnt = 0;
@@ -784,6 +791,12 @@ void CSceneMain::ObjectPositioning(){
 		CCapsuleLight* pPositioningCapsuleLight = CCapsuleLight::CreateCapsuleLight(100.f, XMFLOAT3(rand() % 5, rand() % 5, rand() % 5), 50.f);
 		pPositioningCapsuleLight->SetPosition(GLOBALVALUEMGR->GetPositioningObject()->GetPosition());
 		UPDATER->GetSpaceContainer()->AddObject(pPositioningCapsuleLight);
+	}
+	else {
+		CGameObject* pObject = new CGameObject(GLOBALVALUEMGR->GetPositioningObject()->GetName());
+		pObject->Begin();
+		pObject->SetPosition(GLOBALVALUEMGR->GetPositioningObject()->GetPosition());
+		UPDATER->GetSpaceContainer()->AddObject(pObject);
 	}
 }
 

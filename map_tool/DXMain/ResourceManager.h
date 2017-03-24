@@ -69,7 +69,12 @@ public:
 	shared_ptr<CTexture> GetTexture(string name) { return m_mTexture[name]; }
 	shared_ptr<CSampler> GetSampler(string name) { return m_mSampler[name]; }
 	shared_ptr<CRenderShader> GetRenderShader(string name) { return m_mRenderShader[name]; }
-	shared_ptr<CMesh> GetMesh(string name) { return m_mMesh[name]; }
+	//shared_ptr<CMesh> GetMesh(string name, int index = 0) { return m_mvMesh[name][index]; }
+	vector<shared_ptr<CMesh>> GetvMesh(string name) { return m_mvMesh[name]; }
+	shared_ptr<CMesh> GetMesh(string name, int index) { return m_mvMesh[name][index]; }
+	map<string, vector<shared_ptr<CMesh>>> GetAllStempMesh() { return m_mvStempMesh; }
+	vector<shared_ptr<CMesh>> GetvStempMesh(string name) { return m_mvStempMesh[name]; }
+	shared_ptr<CMesh> GetStempMesh(string name, int index) { return m_mvStempMesh[name][index]; }
 	shared_ptr<CBuffer> GetBuffer(string name) { return m_mBuffer[name]; }
 	shared_ptr<CBuffer> GetGlobalBuffer(string name) { return m_mGlobalBuffer[name]; }
 	shared_ptr<CMaterial> GetMaterial(string name) { return m_mMaterial[name]; }
@@ -77,12 +82,14 @@ public:
 	
 
 	void ReleaseMesh(string name);
+	void ReleaseStempMesh(string name);
 	void ReleaseAnimater(string name);
 private:
 	//begin func
 	void CreateTextures();
 	void CreateRenderShaders();
 	void CreateMeshs();
+	void CreateStempMeshs();
 	void CreateBuffers();
 	void CreateGlobalBuffers();
 	void CreateMaterials();
@@ -94,6 +101,7 @@ private:
 	void ReleaseTextures();
 	void ReleaseRenderShaders();
 	void ReleaseMeshs();
+	void ReleaseStempMeshs();
 	void ReleaseBuffers();
 	void ReleaseGlobalBuffers();
 	void ReleaseMaterials();
@@ -106,7 +114,10 @@ private:
 	using pairTexture = pair<string, shared_ptr<CTexture>>;
 	map<string, shared_ptr<CRenderShader>> m_mRenderShader;
 	using pairShader = pair<string, shared_ptr<CRenderShader>>;
-	map<string, shared_ptr<CMesh>> m_mMesh;
+
+	//object 이름 string을 가지고, mesh vector를 넣는다.
+	map<string, vector<shared_ptr<CMesh>>> m_mvMesh;
+	map<string, vector<shared_ptr<CMesh>>> m_mvStempMesh;
 	using pairMesh = pair<string, shared_ptr<CMesh>>;
 	map<string, shared_ptr<CBuffer>> m_mBuffer;
 	map<string, shared_ptr<CBuffer>> m_mGlobalBuffer;

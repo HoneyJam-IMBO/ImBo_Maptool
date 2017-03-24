@@ -32,6 +32,6 @@ protected:
 	light_id m_lightid{ light_id::LIGHT_END };
 
 public:
-	CLight(string name):CGameObject(name, tag::TAG_DYNAMIC_OBJECT) { m_lightid = light_id::LIGHT_END; }
+	CLight(string name):CGameObject(name, tag::TAG_LIGHT) { m_lightid = light_id::LIGHT_END; }
 	virtual ~CLight() {}
 };

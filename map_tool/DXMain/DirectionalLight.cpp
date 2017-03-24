@@ -3,7 +3,7 @@
 
 bool CDirectionalLight::Begin(DIRECTIONAL_AMBIENT_LIGHT& light_info) {
 	m_lightid = light_id::LIGHT_DIRECTIONAL;
-	m_objectID = object_id::OBJECT_DIRECTIONAL_LIGHT;
+//	m_objectID = object_id::OBJECT_DIRECTIONAL_LIGHT;
 
 	//SetLook(XMLoadFloat4(&m_Directional_AmbientData.m_DirToLight));
 

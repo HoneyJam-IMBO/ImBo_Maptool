@@ -64,7 +64,7 @@ bool CGameObject::Begin() {
 
 	XMStoreFloat4x4(&m_xmf4x4World, XMMatrixIdentity());
 
-	m_pRenderContainer = RCSELLER->GetRenderContainer(m_objectID);
+	m_pRenderContainer = RCSELLER->GetRenderContainer(m_name);
 	if (m_pRenderContainer->GetMesh())//mesh가 있으면
 	{//aabb 해당 mesh에서 aabb를 얻어온다.
 		m_OriBoundingBox = m_pRenderContainer->GetMesh()->GetAABB();
@@ -317,6 +317,10 @@ void CGameObject::SetBufferInfo(void** ppMappedResources, int& nInstance, shared
 	VS_VB_INSTANCE *pnInstances = (VS_VB_INSTANCE *)ppMappedResources[0];
 	
 	//transpose 이후 정보 주입
+	if (m_pAnimater) {
+		pnInstances[nInstance].m_xmmtxWorld = XMMatrixTranspose(m_pAnimater->GetMeshOffsetMtx()*GetWorldMtx());
+		return;
+	}
 	pnInstances[nInstance].m_xmmtxWorld = XMMatrixTranspose(GetWorldMtx());
 
 }
@@ -361,6 +365,8 @@ void CGameObject::GetMainBoundingBox(BoundingBox& out){
 	out = m_OriBoundingBox;
 	if (m_pAnimater) {
 		out = m_pAnimater->GetMainAABB()->GetAABB();
+		out.Transform(out, m_pAnimater->GetMeshOffsetMtx()*GetWorldMtx());
+		return;
 	}
 
 	out.Transform(out, GetWorldMtx());

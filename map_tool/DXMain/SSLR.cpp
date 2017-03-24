@@ -9,8 +9,8 @@ bool CSSLR::Begin(){
 	m_pRayTraceCB = CBuffer::CreateConstantBuffer(1, sizeof(CB_LIGHT_RAYS), 0, BIND_PS);
 
 	m_pMakeOcclussionComputeShader = CComputeShader::CreateComputeShader(TEXT("Occlussion.cso"));
-	m_pLayTraceRenderContainer = RCSELLER->GetRenderContainer(object_id::OBJECT_LAYTRACE);
-	m_pConmbineRenderContainer = RCSELLER->GetRenderContainer(object_id::OBJECT_COMBINE);
+	m_pLayTraceRenderContainer = RCSELLER->GetRenderContainer("laytrace");
+	m_pConmbineRenderContainer = RCSELLER->GetRenderContainer("combine");
 
 	// Create the additive blend state
 	D3D11_BLEND_DESC descBlend;

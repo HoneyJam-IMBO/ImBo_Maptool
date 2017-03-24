@@ -31,7 +31,7 @@ public:
 	virtual bool End();
 	//----------------------------object-----------------------------
 
-	object_id GetObjectID() { return m_objectID; }
+	//object_id GetObjectID() { return m_objectID; }
 
 	void SetActive(bool b) { m_bActive = b; }
 	bool& GetActive() { return m_bActive; }
@@ -136,7 +136,7 @@ protected:
 
 	CRenderContainer* m_pRenderContainer{ nullptr };
 	//object_id
-	object_id m_objectID{ object_id::OBJECT_END };
+	//object_id m_objectID{ object_id::OBJECT_END };
 
 	//space
 	int m_spaceIndex{ 0 };

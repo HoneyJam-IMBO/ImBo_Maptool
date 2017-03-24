@@ -2,16 +2,16 @@
 #include "TerrainContainer.h"
 #include "SpaceContainer.h"
 
-//void TW_CALL MCTerrainHeightScaleGetCallback(void * value, void * clientData) {
-//	if (nullptr == clientData) return;
-//	CTerrainContainer* pTerrainContainer = reinterpret_cast<CTerrainContainer*>(clientData);
-//	*static_cast<float *>(value) = pTerrainContainer->GetHeightScale();
-//}
-//void TW_CALL MCTerrainHeightScaleSetCallback(const void * value, void * clientData) {
-//	if (nullptr == clientData) return;
-//	CTerrainContainer* pTerrainContainer = reinterpret_cast<CTerrainContainer*>(clientData);
-//	pTerrainContainer->SetHeightScale(*static_cast<const float *>(value));
-//}
+void TW_CALL MCTerrainOnOffGetCallback(void * value, void * clientData) {
+	if (nullptr == clientData) return;
+	CTerrainContainer* pTerrainContainer = reinterpret_cast<CTerrainContainer*>(clientData);
+	*static_cast<bool *>(value) = pTerrainContainer->GetActive();
+}
+void TW_CALL MCTerrainOnOffSetCallback(const void * value, void * clientData) {
+	if (nullptr == clientData) return;
+	CTerrainContainer* pTerrainContainer = reinterpret_cast<CTerrainContainer*>(clientData);
+	pTerrainContainer->SetActive(*static_cast<const bool*>(value));
+}
 //void TW_CALL MCCreateSplattingButtonCallback(void * clientData) {
 //	CTerrainContainer* pData = (CTerrainContainer*)clientData;
 //	pData->CreateSplattingInfo();
@@ -26,10 +26,13 @@
 //	CTerrainContainer* pData = (CTerrainContainer*)clientData;
 //	pData->SetStempMode(STEMP_MODE_INDE);
 //}
+void TW_CALL SetTerrainOnOff(void* cliendData) {
+
+}
 #define TEXTURE_SIZE 257
 
 void CTerrainContainer::Begin() {
-	TWBARMGR->AddBoolBar("TOOL_MODE", "SceneObject", "TerrainOn/Off", &m_bActive);
+	TWBARMGR->AddBoolBarCB("TOOL_MODE", "SceneObject", "TerrainOn/Off", MCTerrainOnOffSetCallback, MCTerrainOnOffGetCallback, this);
 
 	//TWBARMGR->DeleteBar("TerrainController");
 	//TWBARMGR->AddBar("TerrainController");
@@ -584,7 +587,7 @@ void CTerrainContainer::CreateTerrainMesh(CSpaceContainer* pSpaceContainer){
 	RESOURCEMGR->CreateTerrainMesh(pSpaceContainer->GetOneSpaceSize(), name);//resource 제작은 resource mgr에게
 	//RESOURCEMGR->CreateInstancingBuffer(name, pSpaceContainer->GetSpaceNum(), sizeof(VS_VB_INSTANCE));
 	//set resource
-	RENDERER->GetTerrainRenderContainer()->AddMesh(RESOURCEMGR->GetMesh(name));//만든 mesh사용
+	RENDERER->GetTerrainRenderContainer()->AddMesh(RESOURCEMGR->GetMesh(name, 0));//만든 mesh사용
 	RENDERER->GetTerrainRenderContainer()->AddInstanceBuffer(RESOURCEMGR->GetBuffer(name));
 }
 
@@ -625,6 +628,12 @@ void CTerrainContainer::ChangeSpaceData(){
 	
 	//5. stemp의 spacesize 새로 설정
 	m_pStempManager->SetSpaceSize(m_pSpaceContainer->GetSpaceSize());
+}
+void CTerrainContainer::SetActive(bool b){
+	for (auto pTerrain : m_vpTerrain) {
+		pTerrain->SetActive(b);
+	}
+	m_bActive = b;
 }
 CTerrainContainer::CTerrainContainer() : CObject("terraincontainer") {
 }
