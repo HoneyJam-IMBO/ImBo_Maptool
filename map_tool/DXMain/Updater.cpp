@@ -10,6 +10,15 @@ bool CUpdater::Begin() {
 	SetTerrainContainer(CTerrainContainer::CreateTerrainContainer(L"Temp", 256, 256, 0.5, UPDATER->GetSpaceContainer(), true));
 	//skybox
 	SetSkyBoxContainer(CSkyBoxContainer::CreateSkyBoxContainer(L"Temp", 0, UPDATER->GetSpaceContainer()));
+
+	//directional light
+	m_pDirectionalLight = new CDirectionalLight;
+	m_pDirectionalLight->Begin(DIRECTIONAL_AMBIENT_LIGHT{
+		XMFLOAT4(1.0f, -1.0f, 1.0f, 0.0f),XMFLOAT4(0.1f, 0.1f, 0.1f, 0.0f) , XMFLOAT4(1.5f, 1.5f, 1.5f, 1.f),//dir
+		XMFLOAT4(0.1f, 0.1f, 0.1f, 1.f), XMFLOAT4(0.1f, 0.1f, 0.1f, 1.f), XMFLOAT4(0.1f, 0.1f, 0.1f, 1.f), XMFLOAT4(5.1f, 5.1f, 5.1f, 1.f)//ambient
+	});
+	m_pDirectionalLight->SetPosition(XMVectorSet(m_pSpaceContainer->GetSize() / 2.f, m_pSpaceContainer->GetSize(), m_pSpaceContainer->GetSize() / 2.f, 0.f));
+	m_pDirectionalLight->Rotate(30.f, 0.f, 0.f);
 	//-------------------------------------space-------------------------------------
 	return true;
 }
@@ -30,6 +39,14 @@ bool CUpdater::End() {
 		m_pSpaceContainer->End();
 		delete m_pSpaceContainer;
 	}
+
+	//directional light
+	if (m_pDirectionalLight) {
+		m_pDirectionalLight->End();
+		delete m_pDirectionalLight;
+	}
+	m_pDirectionalLight = nullptr;
+
 	return true;
 }
 
@@ -39,6 +56,9 @@ void CUpdater::PreUpdate(float fTimeElapsed){
 
 void CUpdater::Update(float fTimeElapsed) {
 	//-----------------------------------space------------------------------
+	//directional light 등록
+	m_pDirectionalLight->RegistToContainer();
+
 	m_pSpaceContainer->Animate(fTimeElapsed);
 	m_pSpaceContainer->PrepareRender(m_pCamera);
 	if (m_pTerrainContainer)m_pTerrainContainer->Update(m_pCamera);//이건 사실 할 필요가 없는것.
@@ -53,10 +73,16 @@ void CUpdater::PhisicsUpdate(float fTimeElapsed){
 void CUpdater::ChangeSceneContainers() {
 	if (m_pSpaceContainer)m_pSpaceContainer->ChangeSpaceData();
 	if (m_pTerrainContainer) m_pTerrainContainer->ChangeSpaceData();
+
+	//directional light
+	m_pDirectionalLight->SetPosition(XMVectorSet(m_pSpaceContainer->GetSize() / 2.f, m_pSpaceContainer->GetSize(), m_pSpaceContainer->GetSize() / 2.f, 0.f));
 	//if(m_pSkyBoxContainer)m_pSkyBoxContainer->ChangeSpaceData();
 }
 
 void CUpdater::LoadSpaceInfo(){
+	//clear all objects
+	m_pSpaceContainer->ClearAllObjects();
+
 	//space info
 	float space_size = IMPORTER->ReadFloat();
 	float space_lv = IMPORTER->ReadFloat();
@@ -107,12 +133,12 @@ void CUpdater::LoadTerrainInfo(wstring wsOutputPath, wstring wsSceneName){
 		//height map texture name
 		wstring wsHeightDataName = wsOutputPath + wsSceneName + L"HeightMap.bmp";
 		UPDATER->GetTerrainContainer()->SetHeightData(IMPORTER->ReadBitmap24(wsHeightDataName.c_str()));//heightmap
-		UPDATER->GetTerrainContainer()->SetHeightMapTexture(CTexture::CreateTexture(wsHeightDataName.c_str(), RESOURCEMGR->GetSampler("TerrainHeightMap"), 1, BIND_DS));
+		UPDATER->GetTerrainContainer()->SetHeightMapTexture(CTexture::CreateTexture(wsHeightDataName.c_str(), 1, BIND_DS));
 
 		//normal map texture name
 		wstring wsNormalDataName = wsOutputPath + wsSceneName + L"NormalMap.bmp";
 		UPDATER->GetTerrainContainer()->SetNormalData(IMPORTER->ReadBitmap24(wsNormalDataName.c_str()));//nomalmap
-		UPDATER->GetTerrainContainer()->SetNormalMapTexture(CTexture::CreateTexture(wsNormalDataName.c_str(), RESOURCEMGR->GetSampler("TerrainNormal"), PS_SLOT_NORMALMAP, BIND_PS));
+		UPDATER->GetTerrainContainer()->SetNormalMapTexture(CTexture::CreateTexture(wsNormalDataName.c_str(), PS_SLOT_NORMALMAP, BIND_PS));
 
 		//create splatting info
 		int nSplatting = IMPORTER->ReadInt();
@@ -171,6 +197,32 @@ void CUpdater::SaveTerrainInfo(wstring wsOutputPath, wstring wsSceneName){
 		//splatting texture name
 	}
 
+}
+
+void CUpdater::LoadObjectsInfo(){
+	m_pDirectionalLight->LoadInfo();
+	m_pSpaceContainer->LoadObjectInfos();
+}
+
+void CUpdater::SaveObjectsInfo(){
+	m_pDirectionalLight->SaveInfo();
+	m_pSpaceContainer->SaveObjectInfos();
+}
+
+CGameObject * CUpdater::PickObject(XMVECTOR xmvWorldCameraStartPos, XMVECTOR xmvRayDir, float & distanse){
+	float fHitDistance = FLT_MAX;
+	float fNearHitDistance = FLT_MAX;
+	CGameObject* pNearObj = nullptr;
+
+	pNearObj = m_pSpaceContainer->PickObject(xmvWorldCameraStartPos, xmvRayDir, fNearHitDistance);
+	
+	if (m_pDirectionalLight->CheckPickObject(xmvWorldCameraStartPos, xmvRayDir, fHitDistance)) {
+		if (fNearHitDistance > fHitDistance) {
+			pNearObj = m_pDirectionalLight;
+		}
+	}
+
+	return pNearObj;
 }
 
 CUpdater::CUpdater() :CSingleTonBase<CUpdater>("updatersingleton") {

@@ -22,6 +22,8 @@ bool CRenderContainer::End() {
 
 //--------------------------container---------------------------------
 void CRenderContainer::UpdateShaderState(shared_ptr<CCamera> pCamera) {
+	if(m_pAnimater) m_pAnimater->Update(TIMEMGR->GetTimeElapsed());
+
 	m_pShader->UpdateShaderState();
 	for (auto p : m_vpTexture) {
 		p->UpdateShaderState();
@@ -87,6 +89,11 @@ void CRenderContainer::SetShaderState() {
 
 }
 
+void CRenderContainer::ClearVolatileResources(){
+	m_vpVolatileTexture.clear();
+	m_vpVolatileBuffer.clear();
+}
+
 void CRenderContainer::RenderExcute() {
 	if (m_nInstance > 0) {
 		for (auto p : m_vpMesh) {
@@ -106,7 +113,7 @@ void CRenderContainer::CleanShaderState() {
 		p->CleanShaderState();
 	}
 	for (auto p : m_vpVolatileTexture) {
-		p->SetShaderState();
+		p->CleanShaderState();
 	}
 	for (auto p : m_vpMaterial) {
 		p->CleanShaderState();
@@ -115,13 +122,9 @@ void CRenderContainer::CleanShaderState() {
 		p->CleanShaderState();
 	}
 	for (auto p : m_vpVolatileBuffer) {
-		p->SetShaderState();
+		p->CleanShaderState();
 	}
 	if (m_pAnimater)m_pAnimater->CleanShaderState();
-
-
-	m_vpVolatileTexture.clear();
-	m_vpVolatileBuffer.clear();
 	//if (m_pGlobalBuffer) m_pGlobalBuffer->CleanShaderState();//global buffer
 }
 

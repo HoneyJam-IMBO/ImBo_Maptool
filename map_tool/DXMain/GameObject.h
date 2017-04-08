@@ -120,6 +120,12 @@ public:
 	}
 
 	shared_ptr<CAnimater> GetAnimater() { return m_pAnimater; }
+	vector<BoundingOrientedBox>& GetObjectActiveOBBs() { return m_vObjectActiveOBBs; }
+
+	virtual void SaveInfo();
+	virtual void LoadInfo();
+
+	static CGameObject* CreateObject(string name, tag t, XMMATRIX xmmtxWorld);
 protected:
 	int m_indexSelectMesh{ 0 };
 
@@ -142,9 +148,11 @@ protected:
 	int m_spaceIndex{ 0 };
 	//animater
 	shared_ptr<CAnimater> m_pAnimater{ nullptr };
+	vector<BoundingOrientedBox> m_vObjectActiveOBBs;
 
 	//texture ui를 위한 변수
 	vector<StructLoadTextureFile> m_vStructLoadTextureFile;
+
 public:
 	CGameObject(string name, tag t = tag::TAG_DEFAULT);
 	virtual ~CGameObject();

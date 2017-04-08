@@ -39,6 +39,7 @@ public:
 	void AddText(float fontSize, float posX, float posY, UINT32 color, TCHAR * msg, ...);
 	void RenderText();
 	void AddTexture(XMFLOAT2 fLeftTop, XMFLOAT2 fRightBottom, ID3D11ShaderResourceView* pSRV);
+	void AddDepthTexture(XMFLOAT2 fLeftTop, XMFLOAT2 fRightBottom, ID3D11ShaderResourceView* pSRV);
 
 	void RenderTexture();
 
@@ -82,10 +83,11 @@ private:
 
 //debug texture
 	CDebugTexture* m_pDebugTextureObj{ nullptr };
-	shared_ptr<CSampler> m_pDebugTextureSampler{ nullptr };
+
 	shared_ptr<CTexture> m_pDebugTexture{ nullptr };
 
 	queue<CDebugTextureData>					m_qDebugTextureData;
+	queue<CDebugTextureData>					m_qDebugDepthTextureData;
 public:
 	CDebuger();
 	virtual ~CDebuger();

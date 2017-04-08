@@ -2,12 +2,11 @@
 #include "Texture.h"
 
 //array
-bool CTexture::Begin(){
+bool CTexture::Begin() {
 	return true;
 }
 
 bool CTexture::End() {
-	m_pSampler = nullptr;
 	//sampler
 	//if (m_pSampler) {
 	//	m_pSampler->End();
@@ -26,57 +25,53 @@ bool CTexture::End() {
 }
 
 void CTexture::SetShaderState() {
-	//sampler
-	if(m_pSampler) m_pSampler->SetShaderState();
 	//constant buffer
-	if(m_pConstantBuffer) m_pConstantBuffer->SetShaderState();
+	if (m_pConstantBuffer) m_pConstantBuffer->SetShaderState();
 
 	//texture
-		if (m_BindFlag & BIND_VS) {
-			GLOBALVALUEMGR->GetDeviceContext()->VSSetShaderResources(m_TextureStartSlot, 1, &m_pd3dsrvTexture);
-		}
-		if (m_BindFlag & BIND_DS) {
-			GLOBALVALUEMGR->GetDeviceContext()->DSSetShaderResources(m_TextureStartSlot, 1, &m_pd3dsrvTexture);
-		}
-		if (m_BindFlag & BIND_HS) {
-			GLOBALVALUEMGR->GetDeviceContext()->HSSetShaderResources(m_TextureStartSlot, 1, &m_pd3dsrvTexture);
-		}
-		if (m_BindFlag & BIND_GS) {
-			GLOBALVALUEMGR->GetDeviceContext()->GSSetShaderResources(m_TextureStartSlot, 1, &m_pd3dsrvTexture);
-		}
-		if (m_BindFlag & BIND_PS) {
-			GLOBALVALUEMGR->GetDeviceContext()->PSSetShaderResources(m_TextureStartSlot, 1, &m_pd3dsrvTexture);
-		}
-		if (m_BindFlag & BIND_CS) {
-			GLOBALVALUEMGR->GetDeviceContext()->CSSetShaderResources(m_TextureStartSlot, 1, &m_pd3dsrvTexture);
-		}
+	if (m_BindFlag & BIND_VS) {
+		GLOBALVALUEMGR->GetDeviceContext()->VSSetShaderResources(m_TextureStartSlot, 1, &m_pd3dsrvTexture);
+	}
+	if (m_BindFlag & BIND_DS) {
+		GLOBALVALUEMGR->GetDeviceContext()->DSSetShaderResources(m_TextureStartSlot, 1, &m_pd3dsrvTexture);
+	}
+	if (m_BindFlag & BIND_HS) {
+		GLOBALVALUEMGR->GetDeviceContext()->HSSetShaderResources(m_TextureStartSlot, 1, &m_pd3dsrvTexture);
+	}
+	if (m_BindFlag & BIND_GS) {
+		GLOBALVALUEMGR->GetDeviceContext()->GSSetShaderResources(m_TextureStartSlot, 1, &m_pd3dsrvTexture);
+	}
+	if (m_BindFlag & BIND_PS) {
+		GLOBALVALUEMGR->GetDeviceContext()->PSSetShaderResources(m_TextureStartSlot, 1, &m_pd3dsrvTexture);
+	}
+	if (m_BindFlag & BIND_CS) {
+		GLOBALVALUEMGR->GetDeviceContext()->CSSetShaderResources(m_TextureStartSlot, 1, &m_pd3dsrvTexture);
+	}
 }
 void CTexture::CleanShaderState() {
-	//sampler
-	if(m_pSampler) m_pSampler->CleanShaderState();
 	//constant buffer
-	if(m_pConstantBuffer) m_pConstantBuffer->CleanShaderState();
+	if (m_pConstantBuffer) m_pConstantBuffer->CleanShaderState();
 
 	//texture
 	ID3D11ShaderResourceView* pSRVs[1] = { nullptr };
-		if (m_BindFlag & BIND_VS) {
-			GLOBALVALUEMGR->GetDeviceContext()->VSSetShaderResources(m_TextureStartSlot, 1, pSRVs);
-		}
-		if (m_BindFlag & BIND_DS) {
-			GLOBALVALUEMGR->GetDeviceContext()->DSSetShaderResources(m_TextureStartSlot, 1, pSRVs);
-		}
-		if (m_BindFlag & BIND_HS) {
-			GLOBALVALUEMGR->GetDeviceContext()->HSSetShaderResources(m_TextureStartSlot, 1, pSRVs);
-		}
-		if (m_BindFlag & BIND_GS) {
-			GLOBALVALUEMGR->GetDeviceContext()->GSSetShaderResources(m_TextureStartSlot, 1, pSRVs);
-		}
-		if (m_BindFlag & BIND_PS) {
-			GLOBALVALUEMGR->GetDeviceContext()->PSSetShaderResources(m_TextureStartSlot, 1, pSRVs);
-		}
-		if (m_BindFlag & BIND_CS) {
-			GLOBALVALUEMGR->GetDeviceContext()->CSSetShaderResources(m_TextureStartSlot, 1, pSRVs);
-		}
+	if (m_BindFlag & BIND_VS) {
+		GLOBALVALUEMGR->GetDeviceContext()->VSSetShaderResources(m_TextureStartSlot, 1, pSRVs);
+	}
+	if (m_BindFlag & BIND_DS) {
+		GLOBALVALUEMGR->GetDeviceContext()->DSSetShaderResources(m_TextureStartSlot, 1, pSRVs);
+	}
+	if (m_BindFlag & BIND_HS) {
+		GLOBALVALUEMGR->GetDeviceContext()->HSSetShaderResources(m_TextureStartSlot, 1, pSRVs);
+	}
+	if (m_BindFlag & BIND_GS) {
+		GLOBALVALUEMGR->GetDeviceContext()->GSSetShaderResources(m_TextureStartSlot, 1, pSRVs);
+	}
+	if (m_BindFlag & BIND_PS) {
+		GLOBALVALUEMGR->GetDeviceContext()->PSSetShaderResources(m_TextureStartSlot, 1, pSRVs);
+	}
+	if (m_BindFlag & BIND_CS) {
+		GLOBALVALUEMGR->GetDeviceContext()->CSSetShaderResources(m_TextureStartSlot, 1, pSRVs);
+	}
 
 }
 
@@ -85,19 +80,13 @@ void CTexture::UpdateShaderState() {
 	if (m_pConstantBuffer) m_pConstantBuffer->UpdateShaderState();
 }
 
-
-
-void CTexture::SetSampler(shared_ptr<CSampler> pSampler){
-	if (!pSampler) return;
-	m_pSampler = pSampler;
-}
 void CTexture::SetConstantBuffer(shared_ptr<CBuffer> pConstantBuffer) {
 	if (!pConstantBuffer) return;
 	m_pConstantBuffer = pConstantBuffer;
 }
 
-ID3D11ShaderResourceView* CTexture::CreateTexture2DArraySRV(_TCHAR(*ppstrFilePaths)[128], UINT nTextures){
-	
+ID3D11ShaderResourceView* CTexture::CreateTexture2DArraySRV(_TCHAR(*ppstrFilePaths)[128], UINT nTextures) {
+
 	D3DX11_IMAGE_LOAD_INFO d3dxImageLoadInfo;
 	d3dxImageLoadInfo.Width = D3DX11_FROM_FILE;
 	d3dxImageLoadInfo.Height = D3DX11_FROM_FILE;
@@ -121,7 +110,7 @@ ID3D11ShaderResourceView* CTexture::CreateTexture2DArraySRV(_TCHAR(*ppstrFilePat
 	for (UINT i = 0; i < nTextures; i++) {
 		ppd3dTextures[i]->GetDesc(&pd3dTexure2DDesc[i]);
 	}
-	
+
 	//test
 
 	D3D11_TEXTURE2D_DESC d3dTexure2DDesc;
@@ -153,12 +142,12 @@ ID3D11ShaderResourceView* CTexture::CreateTexture2DArraySRV(_TCHAR(*ppstrFilePat
 		for (UINT m = 0; m < d3dTexure2DDesc.MipLevels; m++)
 		{
 			pd3dDeviceContext->Map(ppd3dTextures[t], m, D3D11_MAP_READ, 0, &d3dMappedTexture2D);
-			pd3dDeviceContext->UpdateSubresource(	  pd3dTexture2DArray
-													, D3D11CalcSubresource(m, t, d3dTexure2DDesc.MipLevels)
-													, 0
-													, d3dMappedTexture2D.pData
-													, d3dMappedTexture2D.RowPitch
-													, d3dMappedTexture2D.DepthPitch
+			pd3dDeviceContext->UpdateSubresource(pd3dTexture2DArray
+				, D3D11CalcSubresource(m, t, d3dTexure2DDesc.MipLevels)
+				, 0
+				, d3dMappedTexture2D.pData
+				, d3dMappedTexture2D.RowPitch
+				, d3dMappedTexture2D.DepthPitch
 			);
 			pd3dDeviceContext->Unmap(ppd3dTextures[t], m);
 		}
@@ -257,7 +246,7 @@ ID3D11ShaderResourceView* CTexture::CreateTexture2DArraySRV(ID3D11Texture2D **pp
 	return(pd3dsrvTextureArray);
 }
 
-ID3D11ShaderResourceView * CTexture::CreateTexture2DArraySRV(ID3D11ShaderResourceView ** ppd3dSRVs, UINT nTextures){
+ID3D11ShaderResourceView * CTexture::CreateTexture2DArraySRV(ID3D11ShaderResourceView ** ppd3dSRVs, UINT nTextures) {
 	//make textures
 	ID3D11Texture2D** ppd3dTextures = new ID3D11Texture2D*[nTextures];
 	ID3D11Resource* pResource;
@@ -310,7 +299,7 @@ ID3D11ShaderResourceView * CTexture::CreateTexture2DArraySRV(ID3D11ShaderResourc
 			//map을 하는데 기존의 texture를 mapped_subresource로 map함
 			GLOBALVALUEMGR->GetDeviceContext()->Map(ppd3dTextures[t], m, D3D11_MAP_READ, 0, &d3dMappedTexture2D);
 			GLOBALVALUEMGR->GetDeviceContext()->UpdateSubresource(
-				pd3dTexture2DArray, D3D11CalcSubresource(m, t, d3dTexure2DDesc.MipLevels), 
+				pd3dTexture2DArray, D3D11CalcSubresource(m, t, d3dTexure2DDesc.MipLevels),
 				0, d3dMappedTexture2D.pData, d3dMappedTexture2D.RowPitch, d3dMappedTexture2D.DepthPitch);
 			GLOBALVALUEMGR->GetDeviceContext()->Unmap(ppd3dTextures[t], m);
 		}
@@ -336,11 +325,9 @@ ID3D11ShaderResourceView * CTexture::CreateTexture2DArraySRV(ID3D11ShaderResourc
 	return(pd3dsrvTextureArray);
 }
 
-shared_ptr<CTexture> CTexture::CreateTexture(UINT nTextures, _TCHAR(*ppstrFilePaths)[128], shared_ptr<CSampler> pSampler, UINT Slot, UINT BindFlag, shared_ptr<CBuffer> pConstantBuffer){
+shared_ptr<CTexture> CTexture::CreateTexture(UINT nTextures, _TCHAR(*ppstrFilePaths)[128], UINT Slot, UINT BindFlag, shared_ptr<CBuffer> pConstantBuffer) {
 
 	shared_ptr<CTexture> pTexture = make_shared<CTexture>();
-	//sampler
-	pTexture->SetSampler(pSampler);
 	//constant buffer
 	pTexture->SetConstantBuffer(pConstantBuffer);
 	//texture
@@ -365,10 +352,8 @@ shared_ptr<CTexture> CTexture::CreateTexture(UINT nTextures, _TCHAR(*ppstrFilePa
 //	return pTexture;
 //}
 
-shared_ptr<CTexture> CTexture::CreateTexture(UINT nTextures, ID3D11Texture2D ** ppd3dTextures, shared_ptr<CSampler> pSampler, UINT Slot, UINT BindFlag, shared_ptr<CBuffer> pConstantBuffer){
+shared_ptr<CTexture> CTexture::CreateTexture(UINT nTextures, ID3D11Texture2D ** ppd3dTextures, UINT Slot, UINT BindFlag, shared_ptr<CBuffer> pConstantBuffer) {
 	shared_ptr<CTexture> pTexture = make_shared<CTexture>();
-	//sampler
-	pTexture->SetSampler(pSampler);
 	//constant buffer
 	pTexture->SetConstantBuffer(pConstantBuffer);
 	//texture
@@ -379,10 +364,8 @@ shared_ptr<CTexture> CTexture::CreateTexture(UINT nTextures, ID3D11Texture2D ** 
 	return pTexture;
 }
 
-shared_ptr<CTexture> CTexture::CreateTexture(UINT nTextures, ID3D11ShaderResourceView ** ppd3dSRVs, shared_ptr<CSampler> pSampler, UINT Slot, UINT BindFlag, shared_ptr<CBuffer> pConstantBuffer){
+shared_ptr<CTexture> CTexture::CreateTexture(UINT nTextures, ID3D11ShaderResourceView ** ppd3dSRVs, UINT Slot, UINT BindFlag, shared_ptr<CBuffer> pConstantBuffer) {
 	shared_ptr<CTexture> pTexture = make_shared<CTexture>();
-	//sampler
-	pTexture->SetSampler(pSampler);
 	//constant buffer
 	pTexture->SetConstantBuffer(pConstantBuffer);
 	//texture
@@ -393,14 +376,12 @@ shared_ptr<CTexture> CTexture::CreateTexture(UINT nTextures, ID3D11ShaderResourc
 	return pTexture;
 }
 
-shared_ptr<CTexture> CTexture::CreateTexture(_TCHAR(pstrFilePath)[128], shared_ptr<CSampler> pSampler, UINT Slot, UINT BindFlag, shared_ptr<CBuffer> pConstantBuffer){
+shared_ptr<CTexture> CTexture::CreateTexture(_TCHAR(pstrFilePath)[128], UINT Slot, UINT BindFlag, shared_ptr<CBuffer> pConstantBuffer) {
 	wstring wpath{ pstrFilePath };
 	string path; path.assign(wpath.cbegin(), wpath.cend());
 
 	shared_ptr<CTexture> pTexture = make_shared<CTexture>();
 	pTexture->SetsPath(path);
-	//sampler
-	pTexture->SetSampler(pSampler);
 	//constant buffer
 	pTexture->SetConstantBuffer(pConstantBuffer);
 	//texture
@@ -414,14 +395,12 @@ shared_ptr<CTexture> CTexture::CreateTexture(_TCHAR(pstrFilePath)[128], shared_p
 	return pTexture;
 }
 
-shared_ptr<CTexture> CTexture::CreateTexture(wstring pstrFilePath, shared_ptr<CSampler> pSampler, UINT Slot, UINT BindFlag, shared_ptr<CBuffer> pConstantBuffer){
+shared_ptr<CTexture> CTexture::CreateTexture(wstring pstrFilePath, UINT Slot, UINT BindFlag, shared_ptr<CBuffer> pConstantBuffer) {
 	wstring wpath{ pstrFilePath };
 	string path; path.assign(wpath.cbegin(), wpath.cend());
 
 	shared_ptr<CTexture> pTexture = make_shared<CTexture>();
 	pTexture->SetsPath(path);
-	//sampler
-	pTexture->SetSampler(pSampler);
 	//constant buffer
 	pTexture->SetConstantBuffer(pConstantBuffer);
 	//texture
@@ -434,10 +413,8 @@ shared_ptr<CTexture> CTexture::CreateTexture(wstring pstrFilePath, shared_ptr<CS
 	return pTexture;
 }
 
-shared_ptr<CTexture> CTexture::CreateTexture(ID3D11ShaderResourceView * pShaderResourceView, shared_ptr<CSampler> pSampler, UINT Slot, UINT BindFlag, shared_ptr<CBuffer> pConstantBuffer){
+shared_ptr<CTexture> CTexture::CreateTexture(ID3D11ShaderResourceView * pShaderResourceView, UINT Slot, UINT BindFlag, shared_ptr<CBuffer> pConstantBuffer) {
 	shared_ptr<CTexture> pTexture = make_shared<CTexture>();
-	//sampler
-	pTexture->SetSampler(pSampler);
 	//constant buffer
 	pTexture->SetConstantBuffer(pConstantBuffer);
 	//texture

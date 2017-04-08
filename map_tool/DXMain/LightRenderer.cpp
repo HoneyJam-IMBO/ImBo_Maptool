@@ -67,7 +67,7 @@ void CLightRenderer::UpdateShaderState() {
 
 }
 
-void CLightRenderer::Excute(shared_ptr<CCamera> pCamera) {
+void CLightRenderer::Excute(shared_ptr<CCamera> pCamera, shared_ptr<CCamera> pLightCam, ID3D11ShaderResourceView* pShadowSRV){
 	//--------------------------------deferred lighting--------------------------------
 	ID3D11Buffer* pGBufferUnpackingBuffer = pCamera->GetGBufferUnpackingBuffer();
 	GLOBALVALUEMGR->GetDeviceContext()->PSSetConstantBuffers(PS_UNPACKING_SLOT, 1, &pGBufferUnpackingBuffer);
@@ -75,6 +75,12 @@ void CLightRenderer::Excute(shared_ptr<CCamera> pCamera) {
 	ID3D11Buffer* pViewProjectionBuffer = pCamera->GetViewProjectionBuffer();
 	GLOBALVALUEMGR->GetDeviceContext()->PSSetConstantBuffers(PS_CAMERA_DATA_SLOT, 1, &pViewProjectionBuffer);
 
+	if (pShadowSRV)
+	{
+		ID3D11Buffer* pBuf[] = { pLightCam->GetViewProjectionBuffer() };
+		GLOBALVALUEMGR->GetDeviceContext()->PSSetShaderResources(5, 1, &pShadowSRV);
+		GLOBALVALUEMGR->GetDeviceContext()->PSSetConstantBuffers(4, 1, pBuf);
+	}
 	//RENDER
 	//이전 상태 저장
 	GLOBALVALUEMGR->GetDeviceContext()->OMGetDepthStencilState(&m_pPreDepthStencilState, &m_PreStencilRef);

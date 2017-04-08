@@ -14,6 +14,7 @@ public:
 	virtual void UpdateShaderState();
 
 	void Excute(shared_ptr<CCamera> pCamera);
+	void ExcuteShadowRender(shared_ptr<CCamera> pCamera);
 
 	CRenderContainer* GetSkyBoxRenderContainer() { return m_pSkyBoxRenderContainer; }
 	CRenderContainer* GetTerrainRenderContainer() { return m_pTerrainRenderContainer; }

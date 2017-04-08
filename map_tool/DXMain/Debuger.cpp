@@ -7,7 +7,6 @@ bool CDebuger::Begin(){
 	//test
 	m_pDebugTextureObj = new CDebugTexture;
 	m_pDebugTextureObj->Begin();
-	m_pDebugTextureSampler = RESOURCEMGR->GetSampler("DEFAULT");
 	
 	for (auto RenderContainer : RCSELLER->GetTagRenderContainer()[tag::TAG_DEBUG]) {
 		m_mDebugRenderContainer[RenderContainer.first] = RenderContainer.second;
@@ -126,13 +125,13 @@ void CDebuger::RegistOBB(BoundingOrientedBox & obb){
 void CDebuger::RegistToDebugRenderContainer(CGameObject * pObject){
 	string name = pObject->GetName();
 
-	if (name == "debugpointlight") {
+	if (name == "pointlight") {
 		m_mDebugRenderContainer["debugpointlight"]->AddObject(pObject);
 	}
-	else if (name == "debugcapsulelight") {
+	else if (name == "capsulelight") {
 		m_mDebugRenderContainer["debugcapsulelight"]->AddObject(pObject);
 	}
-	else if (name == "debugspotlight") {
+	else if (name == "spotlight") {
 		m_mDebugRenderContainer["debugspotlight"]->AddObject(pObject);
 	}
 	
@@ -193,7 +192,9 @@ void CDebuger::ClearDebuger(){
 	while (false == m_qDebugTextureData.empty()) {
 		m_qDebugTextureData.pop();
 	}
-
+	while (false == m_qDebugDepthTextureData.empty()) {
+		m_qDebugDepthTextureData.pop();
+	}
 	for (auto RenderContainer : m_mDebugRenderContainer) {
 		RenderContainer.second->ClearObjectList();
 	}
@@ -251,7 +252,10 @@ void CDebuger::RenderText(){
 void CDebuger::AddTexture(XMFLOAT2 lt, XMFLOAT2 rb, ID3D11ShaderResourceView* pSRV){
 	CDebugTextureData DebugTextureData(pSRV, lt, rb);
 	m_qDebugTextureData.push(DebugTextureData);
-	
+}
+void CDebuger::AddDepthTexture(XMFLOAT2 fLeftTop, XMFLOAT2 fRightBottom, ID3D11ShaderResourceView * pSRV){
+	CDebugTextureData DebugTextureData(pSRV, fLeftTop, fRightBottom);
+	m_qDebugDepthTextureData.push(DebugTextureData);
 }
 void CDebuger::RenderTexture(){
 	while (false == m_qDebugTextureData.empty()) {
@@ -259,7 +263,7 @@ void CDebuger::RenderTexture(){
 		CDebugTextureData DebugTextureData = m_qDebugTextureData.front();
 		m_qDebugTextureData.pop();
 
-		m_pDebugTexture = CTexture::CreateTexture(DebugTextureData.m_pSRV, m_pDebugTextureSampler);
+		m_pDebugTexture = CTexture::CreateTexture(DebugTextureData.m_pSRV);
 
 		m_pDebugTextureObj->SetTextureInfo(DebugTextureData.lt, DebugTextureData.rb);
 
@@ -268,7 +272,23 @@ void CDebuger::RenderTexture(){
 		m_mDebugRenderContainer["debugtexture"]->Render(nullptr);
 		m_mDebugRenderContainer["debugtexture"]->ClearObjectList();
 		m_mDebugRenderContainer["debugtexture"]->ClearTextures();
+	}
 
+	//dpeh thexture
+	while (false == m_qDebugDepthTextureData.empty()) {
+
+		CDebugTextureData DebugTextureData = m_qDebugDepthTextureData.front();
+		m_qDebugDepthTextureData.pop();
+
+		m_pDebugTexture = CTexture::CreateTexture(DebugTextureData.m_pSRV);
+
+		m_pDebugTextureObj->SetTextureInfo(DebugTextureData.lt, DebugTextureData.rb);
+
+		m_mDebugRenderContainer["debugdepthtexture"]->AddObject(m_pDebugTextureObj);
+		m_mDebugRenderContainer["debugdepthtexture"]->AddTexture(m_pDebugTexture);
+		m_mDebugRenderContainer["debugdepthtexture"]->Render(nullptr);
+		m_mDebugRenderContainer["debugdepthtexture"]->ClearObjectList();
+		m_mDebugRenderContainer["debugdepthtexture"]->ClearTextures();
 	}
 }
 int CDebuger::DebugMessageBox(std::string _title, std::string _message)

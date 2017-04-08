@@ -172,10 +172,23 @@ bool CInputManager::MouseLeftOnlyDown(){
 		m_bLeftOnlyCheck = false;
 		return true;
 	}
+	return false;
 }
 
 bool CInputManager::MouseRightDown(){
 	return m_bRightCheck;
+}
+
+bool CInputManager::MouseRightOnlyDown(){
+	if (m_bRightCheck) {
+		m_bRightOnlyCheck = true;
+		return false;
+	}
+	else if (m_bRightOnlyCheck) {
+		m_bRightOnlyCheck = false;
+		return true;
+	}
+	return false;
 }
 
 //^ 같으면 1, 다르면 0

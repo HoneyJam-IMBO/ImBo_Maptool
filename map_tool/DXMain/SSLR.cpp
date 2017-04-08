@@ -218,7 +218,7 @@ void CSSLR::ResizeBuffer() {
 	};
 	dsrvd.Texture2D.MipLevels = 1;
 	GLOBALVALUEMGR->GetDevice()->CreateShaderResourceView(m_pOcclusionTex, &dsrvd, &m_pOcclusionSRV);
-	m_pOcclussionTexture = CTexture::CreateTexture(m_pOcclusionSRV, RESOURCEMGR->GetSampler("CLAMPSAMPLER"), 0, BIND_PS);
+	m_pOcclussionTexture = CTexture::CreateTexture(m_pOcclusionSRV, 0, BIND_PS);
 	//////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Allocate the light rays resources
 	t2dDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
@@ -232,7 +232,7 @@ void CSSLR::ResizeBuffer() {
 	GLOBALVALUEMGR->GetDevice()->CreateRenderTargetView(m_pLightRaysTex, &rtsvd, &m_pLightRaysRTV);
 
 	GLOBALVALUEMGR->GetDevice()->CreateShaderResourceView(m_pLightRaysTex, &dsrvd, &m_pLightRaysSRV);
-	m_pLightRaysTexture = CTexture::CreateTexture(m_pLightRaysSRV, RESOURCEMGR->GetSampler("CLAMPSAMPLER"), 0, BIND_PS);
+	m_pLightRaysTexture = CTexture::CreateTexture(m_pLightRaysSRV, 0, BIND_PS);
 }
 
 void CSSLR::ReleaseBuffer() {

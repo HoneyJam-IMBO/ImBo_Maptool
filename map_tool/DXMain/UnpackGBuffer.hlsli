@@ -9,15 +9,15 @@ cbuffer cbgbufferUnpack : register(b0) {
 SamplerState        gssSamplerState				: register(s0);
 
 Texture2D           gtxtDepthTexture		 	: register(t0);
-Texture2D           gtxtColorSpecInt			: register(t1);
+Texture2D           gtxtColor 			: register(t1);
 Texture2D           gtxtNormal_Depth			: register(t2);
-Texture2D           gtxtPositionW_SpecPow	 	: register(t3);
+Texture2D           gtxtSpecInt_Pow	 	: register(t3);
 
 struct SURFACE_DATA {
 	float LinearDepth;
 	float3 Color;
 	float3 Normal;
-	float SpecInt;
+	float3 SpecInt;
 	float SpecPow;
 };
 
@@ -47,9 +47,9 @@ SURFACE_DATA UnpackGBuffer(float2 location) {
 
 	//베이스 색상과 스펙큘러 세기 값 추출
 	//float4 baseColorSpecInt = gtxtColorSpecInt.Sample(gssSamplerState, texCoord);
-	float4 baseColorSpecInt = gtxtColorSpecInt.Load(location3);
+	float4 baseColorSpecInt = gtxtColor.Load(location3);
 	Out.Color = baseColorSpecInt.xyz;
-	Out.SpecInt = baseColorSpecInt.w;
+	//Out.SpecInt = baseColorSpecInt.w;
 
 	//노멀 샘플링 후 전체 범위 변환 및 정규화
 	float4 normal_depth = gtxtNormal_Depth.Load(location3);
@@ -62,20 +62,20 @@ SURFACE_DATA UnpackGBuffer(float2 location) {
 	//Out.LinearDepth = depth;
 
 	//원래 범위 값에 대해 스펙큘러 파워 스케일 조정
-	float4 SpecPowerNorm = gtxtPositionW_SpecPow.Load(location3);
+	float4 SpecPowerNorm = gtxtSpecInt_Pow.Load(location3);
 	//Out.PositionW = PositionW_SpecPowerNorm.xyz;
 	Out.SpecPow = g_SpecPowerRange.x + SpecPowerNorm.w * g_SpecPowerRange.y;
-
+	Out.SpecInt = SpecPowerNorm.xyz;
 	return Out;
 }
 SURFACE_DATA UnpackGBuffer_Tex(float2 texCoord) {
 	SURFACE_DATA Out = (SURFACE_DATA)0;
 
 	//베이스 색상과 스펙큘러 세기 값 추출
-	float4 baseColorSpecInt = gtxtColorSpecInt.Sample(gssSamplerState, texCoord);
+	float4 baseColorSpecInt = gtxtColor.Sample(gssSamplerState, texCoord);
 	//float4 baseColorSpecInt = gtxtColorSpecInt.Load(location3);
 	Out.Color = baseColorSpecInt.xyz;
-	Out.SpecInt = baseColorSpecInt.w;
+	//Out.SpecInt = baseColorSpecInt.w;
 
 	//노멀 샘플링 후 전체 범위 변환 및 정규화
 	float4 normal_depth = gtxtNormal_Depth.Sample(gssSamplerState, texCoord);
@@ -90,9 +90,10 @@ SURFACE_DATA UnpackGBuffer_Tex(float2 texCoord) {
 	//Out.LinearDepth = depth;
 
 	//원래 범위 값에 대해 스펙큘러 파워 스케일 조정
-	float4 SpecPowerNorm = gtxtPositionW_SpecPow.Sample(gssSamplerState, texCoord);
-	//float4 PositionW_SpecPowerNorm = gtxtPositionW_SpecPow.Load(location3);
+	float4 SpecPowerNorm = gtxtSpecInt_Pow.Sample(gssSamplerState, texCoord);
+	//float4 PositionW_SpecPowerNorm = gtxtSpecPow_Int.Load(location3);
 	Out.SpecPow = g_SpecPowerRange.x + SpecPowerNorm.w * g_SpecPowerRange.y;
+	Out.SpecInt = SpecPowerNorm.xyz;
 
 	return Out;
 }

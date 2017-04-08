@@ -179,9 +179,10 @@ void CSceneMain::CreatePositioningObject() {
 
 	for (auto vStempMesh : RESOURCEMGR->GetAllStempMesh()) {
 		string name = vStempMesh.second[0]->GetName();
+		tag t = vStempMesh.second[0]->GetTag();
 		bool bAnimation = true;// vStempMesh.second[0]->GetbAnimation();
 		//animation 정보가 없으면 setting가능한 객체이다.
-		CGameObject* pObject = new CGameObject(name);
+		CGameObject* pObject = new CGameObject(name, t);
 		pObject->Begin();
 		m_vpObjectList.push_back(pObject);
 	}
@@ -211,12 +212,12 @@ void CSceneMain::SaveScene(){
 	//scene name
 	EXPORTER->WriteWstring(wsSceneName);
 	EXPORTER->WriteEnter();
-
+	
+	//space info
 	UPDATER->SaveSpaceInfo();
-	//object info save
-	//m_pSpaceContainer->WriteObjects();
-	//EXPORTER->WriteEnter();
 	UPDATER->SaveTerrainInfo(wsOutputPath, wsSceneName);
+	UPDATER->SaveObjectsInfo();
+
 
 	//effect info
 	RENDERER->SaveEffectInfo();
@@ -551,7 +552,8 @@ CGameObject* CSceneMain::PickObjectPointedByCursor(int xClient, int yClient){
 	CGameObject* pNearestObject = NULL;
 	float fHitDistance = FLT_MAX;
 	float fNearDistance = FLT_MAX;
-	pNearestObject = UPDATER->GetSpaceContainer()->PickObject(m_pCamera->GetPosition(), XMVector3Normalize(xmvRayDir), fHitDistance);
+	pNearestObject = UPDATER->PickObject(m_pCamera->GetPosition(), XMVector3Normalize(xmvRayDir), fHitDistance);
+
 	fNearDistance = fHitDistance;
 	
 	return(pNearestObject);
@@ -793,7 +795,9 @@ void CSceneMain::ObjectPositioning(){
 		UPDATER->GetSpaceContainer()->AddObject(pPositioningCapsuleLight);
 	}
 	else {
-		CGameObject* pObject = new CGameObject(GLOBALVALUEMGR->GetPositioningObject()->GetName());
+		CGameObject* pObject = nullptr;
+		//if(GLOBALVALUEMGR->GetPositioningObject()->GetAnimater())
+		pObject = new CGameObject(GLOBALVALUEMGR->GetPositioningObject()->GetName(), GLOBALVALUEMGR->GetPositioningObject()->GetTag());
 		pObject->Begin();
 		pObject->SetPosition(GLOBALVALUEMGR->GetPositioningObject()->GetPosition());
 		UPDATER->GetSpaceContainer()->AddObject(pObject);

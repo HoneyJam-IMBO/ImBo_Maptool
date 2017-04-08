@@ -9,7 +9,11 @@ cbuffer RayTraceConstants : register(b0)
 }
 
 Texture2D<float> IntensityTex : register(t0);
-SamplerState LinearSampler: register(s0);
+SamplerState gssWRAP_LINEAR : register(s0);
+SamplerState gssWRAP_POINT : register(s1);
+SamplerState gssCLAMP_LINEAR : register(s2);
+SamplerState gssCLAMP_POINT : register(s3);
+
 
 struct VS_OUTPUT {
 	float4 position : SV_POSITION;
@@ -18,7 +22,7 @@ struct VS_OUTPUT {
 
 float4 main(VS_OUTPUT In) : SV_TARGET
 {
-	float rayIntensity = IntensityTex.Sample(LinearSampler, In.UV);
+	float rayIntensity = IntensityTex.Sample(gssWRAP_LINEAR, In.UV);
 
 	return float4(RayColor * rayIntensity, 1.0f);
 }

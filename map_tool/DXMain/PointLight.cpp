@@ -82,6 +82,45 @@ CPointLight* CPointLight::CreatePointLight(float fRange, XMFLOAT3 xmf3Color){
 	return pLight;
 }
 
+void TW_CALL SetPointLightRange(void * value, void * clientData) {
+	if (nullptr == clientData) return;
+	CPointLight* plight = reinterpret_cast<CPointLight*>(clientData);
+	*static_cast<float *>(value) = plight->GetRange();
+}
+
+void TW_CALL GetPointLightRange(const void * value, void * clientData) {
+	if (nullptr == clientData) return;
+	CPointLight* plight = reinterpret_cast<CPointLight*>(clientData);
+	float* data = (float*)value;
+	plight->SetRange(*data);
+}
+
+void CPointLight::PickingProc(){
+	CGameObject::PickingProc();
+
+	//color
+	TWBARMGR->AddColorBar3F("PickingBar", "Light", "Color", &m_PointData.xmf3Color);
+	//range
+	TWBARMGR->AddMinMaxBarCB("PickingBar", "Light", "Range", GetPointLightRange, SetPointLightRange, this,
+		1.0f, 1000.f, 0.1f);
+}
+
+void CPointLight::SaveInfo(){
+	CGameObject::SaveInfo();
+
+	EXPORTER->WriteFloat(m_PointData.fRange);
+	EXPORTER->WriteEnter();
+
+	EXPORTER->WriteFloat(m_PointData.xmf3Color.x); EXPORTER->WriteSpace();
+	EXPORTER->WriteFloat(m_PointData.xmf3Color.y); EXPORTER->WriteSpace();
+	EXPORTER->WriteFloat(m_PointData.xmf3Color.z); EXPORTER->WriteSpace();
+	EXPORTER->WriteEnter();
+}
+
+void CPointLight::LoadInfo()
+{
+}
+
 
 
 CPointLight::CPointLight() : CLight("pointlight") {

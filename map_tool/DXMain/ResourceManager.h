@@ -47,13 +47,13 @@ public:
 
 	//create resource 
 	//texture array
-	shared_ptr<CTexture> CreateTexture(string name, UINT nTextures, _TCHAR(*ppstrFilePaths)[128], shared_ptr<CSampler> pSampler, UINT Slot = 0, UINT BindFlag = BIND_PS, shared_ptr<CBuffer> pConstantBuffer = nullptr);
-	shared_ptr<CTexture> CreateTexture(string name, UINT nTextures, ID3D11Texture2D **ppd3dTextures, shared_ptr<CSampler> pSampler, UINT Slot, UINT BindFlag, shared_ptr<CBuffer> pConstantBuffer);
+	shared_ptr<CTexture> CreateTexture(string name, UINT nTextures, _TCHAR(*ppstrFilePaths)[128], UINT Slot = 0, UINT BindFlag = BIND_PS, shared_ptr<CBuffer> pConstantBuffer = nullptr);
+	shared_ptr<CTexture> CreateTexture(string name, UINT nTextures, ID3D11Texture2D **ppd3dTextures, UINT Slot, UINT BindFlag, shared_ptr<CBuffer> pConstantBuffer);
 	//texture 1개
-	shared_ptr<CTexture> CreateTexture(string name, _TCHAR(pstrFilePath)[128], shared_ptr<CSampler> pSampler, UINT Slot = 0, UINT BindFlag = BIND_PS, shared_ptr<CBuffer> pConstantBuffer = nullptr);
+	shared_ptr<CTexture> CreateTexture(string name, _TCHAR(pstrFilePath)[128], UINT Slot = 0, UINT BindFlag = BIND_PS, shared_ptr<CBuffer> pConstantBuffer = nullptr);
 	//완성된 srv set
-	shared_ptr<CTexture> CreateTexture(string name, ID3D11ShaderResourceView* pShaderResourceView, shared_ptr<CSampler> pSampler, UINT Slot = 0, UINT BindFlag = BIND_PS, shared_ptr<CBuffer> pConstantBuffer = nullptr);
-	shared_ptr<CSampler> CreateSampler(string name, UINT Slot = 0, UINT BindFlags = BIND_PS, D3D11_TEXTURE_ADDRESS_MODE Mode = D3D11_TEXTURE_ADDRESS_WRAP, D3D11_FILTER Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR, D3D11_COMPARISON_FUNC ComparisionFunc = D3D11_COMPARISON_NEVER, float MinLOD = 0, float MaxLOD = 0);
+	shared_ptr<CTexture> CreateTexture(string name, ID3D11ShaderResourceView* pShaderResourceView, UINT Slot = 0, UINT BindFlag = BIND_PS, shared_ptr<CBuffer> pConstantBuffer = nullptr);
+	shared_ptr<CSampler> CreateSampler(string name, UINT Slot = 0, UINT BindFlags = BIND_PS, D3D11_TEXTURE_ADDRESS_MODE Mode = D3D11_TEXTURE_ADDRESS_WRAP, D3D11_FILTER Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR, D3D11_COMPARISON_FUNC ComparisionFunc = D3D11_COMPARISON_NEVER, float MinLOD = 0, float MaxLOD = 0, float BorderColor = 0);
 	shared_ptr<CRenderShader> CreateRenderShader(string name, LPCTSTR ShaderName, UINT InputElementFlag, UINT BindFlag = BIND_VS | BIND_PS);
 	shared_ptr<CBuffer> CreateConstantBuffer(string name, UINT nObject, UINT BufferStride, UINT Slot = 0, UINT BindFlag = BIND_VS, UINT Offset = 0);
 	shared_ptr<CBuffer> CreateInstancingBuffer(string name, UINT nObject, UINT BufferStride, UINT Offset = 0);
@@ -79,13 +79,14 @@ public:
 	shared_ptr<CBuffer> GetGlobalBuffer(string name) { return m_mGlobalBuffer[name]; }
 	shared_ptr<CMaterial> GetMaterial(string name) { return m_mMaterial[name]; }
 	shared_ptr<CAnimater> GetAnimater(string name) { return m_mAnimater[name]; }
-	
+
 
 	void ReleaseMesh(string name);
 	void ReleaseStempMesh(string name);
 	void ReleaseAnimater(string name);
 private:
 	//begin func
+	void CreateSamplers();
 	void CreateTextures();
 	void CreateRenderShaders();
 	void CreateMeshs();
@@ -98,6 +99,7 @@ private:
 	void CreateFBXResources();
 
 	//end func
+	void ReleaseSamplers();
 	void ReleaseTextures();
 	void ReleaseRenderShaders();
 	void ReleaseMeshs();

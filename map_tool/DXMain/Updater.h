@@ -33,11 +33,24 @@ public:
 	shared_ptr<CCamera> GetCamera() { return m_pCamera; }
 	void ChangeSceneContainers();
 
+	//directional light
+	void SetDirectionalLight(CDirectionalLight* pDirectionalLight) { m_pDirectionalLight = pDirectionalLight; }
+	CDirectionalLight* GetDirectionalLight() { return m_pDirectionalLight; }
+	//directional light
+
 	void LoadSpaceInfo();
 	void SaveSpaceInfo();
 	void LoadTerrainInfo(wstring wsOutputPath, wstring wsSceneName);
 	void SaveTerrainInfo(wstring wsOutputPath, wstring wsSceneName);
+	void LoadObjectsInfo();
+	void SaveObjectsInfo();
+
+	//picking
+	CGameObject* PickObject(XMVECTOR xmvWorldCameraStartPos, XMVECTOR xmvRayDir, float& distanse);
 private:
+	//directional light
+	CDirectionalLight* m_pDirectionalLight{ nullptr };
+	//directional light
 
 	shared_ptr<CCamera> m_pCamera{ nullptr };
 	//space

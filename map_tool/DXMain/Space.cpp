@@ -112,20 +112,6 @@ void CSpace::Animate(float fTimeElapsed){
 			}
 			nObject++;
 		}
-		for (auto pObject : m_mlpObject[tag::TAG_ANIMDYNAMIC_OBJECT]) {
-			pObject->Animate(fTimeElapsed);
-			int current_index = m_pSpaceContainer->SearchSpace(pObject->GetPosition());
-			if (pObject->GetSpaceIndex() != current_index) {//이전 공간 index와 현재 index가 다르다면
-				m_pSpaceContainer->AddBlockObjectList(pObject);//block Object list에 등록
-				lpDeleteObject.push_back(pObject);
-			}
-			nObject++;
-		}
-		for (auto pObject : m_mlpObject[tag::TAG_ANIMSTATIC_OBJECT]) {
-			pObject->Animate(fTimeElapsed);
-			nObject++;
-		}
-
 		if(INPUTMGR->GetDebugMode())
 			DEBUGER->AddText(10.0f, 250.0f, static_cast<float>(m_index * 15.f), YT_Color(255, 255, 255), L"space %d object_num : %d", m_index, nObject);
 
@@ -137,7 +123,7 @@ void CSpace::Animate(float fTimeElapsed){
 	}
 }
 
-void CSpace::PrepareRender(shared_ptr<CCamera> pCamera){
+void CSpace::PrepareRender(shared_ptr<CCamera> pCamera, UINT renderFlag){
 	
 	if (IsVisible(pCamera)) {//여기에 space 프러스텀 컬링
 		if (nullptr == m_ppChildSpace) {//내 자식이 없으면 나는 leaf node
@@ -147,15 +133,24 @@ void CSpace::PrepareRender(shared_ptr<CCamera> pCamera){
 			//RegistToContainer();
 //			DEBUGER->RegistToDebugRenderContainer(this);
 			for (auto mlp : m_mlpObject) {//모든 객체에 대해서
+				//자신이 속한 rendercontainer에 등록
 				for (auto pObject : mlp.second) {
-					pObject->RegistToContainer();//자신이 속한 rendercontainer에 등록
+					if(renderFlag & RTAG_TERRAIN){
+						if(pObject->GetTag() == TAG_TERRAIN) pObject->RegistToContainer();
+					}
+					if (renderFlag & RTAG_STATIC_OBJECT) {
+						if (pObject->GetTag() == TAG_STATIC_OBJECT) pObject->RegistToContainer();
+					}
+					if (renderFlag & RTAG_DYNAMIC_OBJECT) {
+						if (pObject->GetTag() == TAG_DYNAMIC_OBJECT) pObject->RegistToContainer();
+					}
 				}
 			}//end for
 		}//end if
 		else {//leaf가 아니라면
 			for (int i = 0; i < 4; ++i) {
 
-				m_ppChildSpace[i]->PrepareRender(pCamera);//내 자식들 PrePareRender
+				m_ppChildSpace[i]->PrepareRender(pCamera, renderFlag);//내 자식들 PrePareRender
 			}
 		}//end else
 	}

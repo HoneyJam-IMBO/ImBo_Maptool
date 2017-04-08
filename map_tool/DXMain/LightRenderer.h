@@ -13,7 +13,7 @@ public:
 
 	virtual void UpdateShaderState();
 
-	void Excute(shared_ptr<CCamera> pCamera);
+	void Excute(shared_ptr<CCamera> pCamera, shared_ptr<CCamera> pLightCam = nullptr, ID3D11ShaderResourceView* pShadowSRV = nullptr);
 private:
 	//rendercontainer map!
 	mapRenderContainer m_mRenderContainer;

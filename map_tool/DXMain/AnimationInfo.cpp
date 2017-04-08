@@ -133,21 +133,23 @@ void CAnimationInfo::Update(float fTimeElapsed){
 		}
 	}
 	//debug
+	m_vActiveBoundingBox.clear();
 
 	for (auto data : m_lActiveBoundingBox) {
 		float fMin = data->GetMin();
 		float fMax = data->GetMax();
 		if (fMin <= m_CurFrame && m_CurFrame <= fMax) data->SetActive(true);
 		else data->SetActive(false);
-
+		
 		if (data->GetToolActive()) {//ui 삭제 로직 
 			
 			if (data->GetActive()) {
 				BoundingOrientedBox originObb = data->GetOBB();
 				if (false == m_pAnimationData->GetKeyFrames(data->GetMyJointIndex()).empty()) {
 					originObb.Transform(originObb, m_pAnimationData->GetKeyFrames(data->GetMyJointIndex())[m_CurFrame].GetKeyFrameTransformMtx());
+					m_vActiveBoundingBox.push_back(originObb);
 					//originObb.Transform(originObb, data->GetWorldMtx());
-					DEBUGER->RegistOBB(originObb);
+					//DEBUGER->RegistOBB(originObb);
 				}
 			}
 		}

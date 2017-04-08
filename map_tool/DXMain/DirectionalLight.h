@@ -35,6 +35,10 @@ public:
 	virtual XMFLOAT3 GetColor();
 
 	virtual bool IsVisible(shared_ptr<CCamera> pCamera);
+	void PickingProc();
+
+	virtual void SaveInfo();
+	virtual void LoadInfo();
 private:
 	//data
 	DIRECTIONAL_AMBIENT_LIGHT m_Directional_AmbientData;

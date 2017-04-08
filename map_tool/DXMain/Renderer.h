@@ -15,6 +15,8 @@
 #include "PostProcessingFinalPass.h"
 #include "SSLR.h"
 
+#include "Shadow.h"
+
 class CDirectXFramework;
 
 class CRenderer : public CSingleTonBase<CRenderer> {
@@ -93,6 +95,8 @@ private:
 	CBlur* m_p4to1Blur{ nullptr };
 	CPostProcessingFinalPass* m_pPostProcessingFinalPass{ nullptr };
 	CSSLR* m_pSSLR{ nullptr };
+
+	CShadow* m_pShadow{ nullptr };
 	//-------------------------layer-------------------------
 
 	//effects

@@ -26,6 +26,7 @@ public:
 	//---------------------------dxobject---------------------------------
 
 	//--------------------------container---------------------------------
+	void ClearVolatileResources();
 private:
 	virtual void RenderExcute();
 	void RenderExcuteWithOutObject();

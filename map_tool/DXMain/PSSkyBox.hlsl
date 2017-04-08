@@ -1,7 +1,11 @@
 #include "PackGbuffer.hlsli"
 
 TextureCube gtxtSkyBox : register(t13);
-SamplerState gssSkyBox : register(s0);
+SamplerState gssWRAP_LINEAR : register(s0);
+SamplerState gssWRAP_POINT : register(s1);
+SamplerState gssCLAMP_LINEAR : register(s2);
+SamplerState gssCLAMP_POINT : register(s3);
+
 
 struct Material {
 	float3 normal;
@@ -29,7 +33,7 @@ float4 main(VS_SKYBOX_CUBEMAP_OUTPUT input) : SV_Target
 
 	PS_GBUFFER_OUT output = (PS_GBUFFER_OUT)0;
 
-float4 cColor = gtxtSkyBox.Sample(gssSkyBox, input.positionL);
+float4 cColor = gtxtSkyBox.Sample(gssWRAP_LINEAR, input.positionL);
 return cColor;
 //sky box 조명 연산을 위한 render..
 //float Depth = input.position.z / input.position.w;

@@ -65,7 +65,6 @@ void CSpotLight::SetLength(float len) {
 
 	float SpotLightRange = m_SpotData.SpotLightRange;
 	m_xmmtxScale = XMMatrixScalingFromVector(XMVECTOR(XMVectorSet(SpotLightRange, SpotLightRange, SpotLightRange, 1.0f)));
-
 }
 
 void CSpotLight::SetRange(float outer, float inner) {
@@ -85,13 +84,40 @@ void CSpotLight::SetRange(float outer, float inner) {
 
 }
 
+void CSpotLight::SetInner(float inner){
+	m_SpotData.fInnerAngle = inner;
+
+	float fCosInnerCone = cosf(XM_PI * m_SpotData.fInnerAngle / 180.0f);
+	float fCosOuterCone = cosf(XM_PI * m_SpotData.fOuterAngle / 180.0f);
+	float fSinOuterCone = sinf(XM_PI * m_SpotData.fOuterAngle / 180.0f);
+
+	m_fSpotLightRangeRcp = 1.0f / m_SpotData.SpotLightRange;
+	m_fSpotCosOuterCone = fCosOuterCone;
+	m_fSpotSinOuterCone = fSinOuterCone;
+	m_fSpotCosConeAttRcp = 1.0f / (fCosInnerCone - fCosOuterCone);
+
+}
+
+void CSpotLight::SetOuter(float outer){
+	m_SpotData.fOuterAngle = outer;
+	float fCosInnerCone = cosf(XM_PI * m_SpotData.fInnerAngle / 180.0f);
+	float fCosOuterCone = cosf(XM_PI * m_SpotData.fOuterAngle / 180.0f);
+	float fSinOuterCone = sinf(XM_PI * m_SpotData.fOuterAngle / 180.0f);
+
+	m_fSpotLightRangeRcp = 1.0f / m_SpotData.SpotLightRange;
+	m_fSpotCosOuterCone = fCosOuterCone;
+	m_fSpotSinOuterCone = fSinOuterCone;
+	m_fSpotCosConeAttRcp = 1.0f / (fCosInnerCone - fCosOuterCone);
+
+}
+
 void CSpotLight::SetColor(float r, float g, float b) {
 	m_SpotData.SpotLightColor = XMFLOAT3(r, g, b);
 }
 
 XMFLOAT3 CSpotLight::GetColor()
 {
-	return XMFLOAT3();
+	return m_SpotData.SpotLightColor;
 }
 
 CSpotLight* CSpotLight::CreateSpotLight(float SpotLightRange, XMFLOAT3 SpotLightColor, float fOuterAngle, float fInnerAngle){
@@ -104,6 +130,78 @@ CSpotLight* CSpotLight::CreateSpotLight(float SpotLightRange, XMFLOAT3 SpotLight
 	pLight->SetSpotLightData(data);
 	pLight->Begin();
 	return pLight;
+}
+void TW_CALL SetSpotLightLength(void * value, void * clientData) {
+	if (nullptr == clientData) return;
+	CSpotLight* plight = reinterpret_cast<CSpotLight*>(clientData);
+	*static_cast<float *>(value) = plight->GetLength();
+}
+
+void TW_CALL GetSpotLightLength(const void * value, void * clientData) {
+	if (nullptr == clientData) return;
+	CSpotLight* plight = reinterpret_cast<CSpotLight*>(clientData);
+	float* data = (float*)value;
+	plight->SetLength(*data);
+}
+//inner
+void TW_CALL SetSpotLightInner(void * value, void * clientData) {
+	if (nullptr == clientData) return;
+	CSpotLight* plight = reinterpret_cast<CSpotLight*>(clientData);
+	*static_cast<float *>(value) = plight->GetInner();
+}
+void TW_CALL GetSpotLightInner(const void * value, void * clientData) {
+	if (nullptr == clientData) return;
+	CSpotLight* plight = reinterpret_cast<CSpotLight*>(clientData);
+	float* data = (float*)value;
+	plight->SetInner(*data);
+}
+//inner
+//outter
+void TW_CALL SetSpotLightOuter(void * value, void * clientData) {
+	if (nullptr == clientData) return;
+	CSpotLight* plight = reinterpret_cast<CSpotLight*>(clientData);
+	*static_cast<float *>(value) = plight->GetOuter();
+}
+void TW_CALL GetSpotLightOuter(const void * value, void * clientData) {
+	if (nullptr == clientData) return;
+	CSpotLight* plight = reinterpret_cast<CSpotLight*>(clientData);
+	float* data = (float*)value;
+	plight->SetOuter(*data);
+}
+//outter
+void CSpotLight::PickingProc(){
+	CGameObject::PickingProc();
+
+	//color
+	TWBARMGR->AddColorBar3F("PickingBar", "Light", "Color", &m_SpotData.SpotLightColor);
+	//length
+	TWBARMGR->AddMinMaxBarCB("PickingBar", "Light", "Length", GetSpotLightLength, SetSpotLightLength, this,
+		1.0f, 1000.f, 0.1f);
+	//range inner, outer
+	TWBARMGR->AddMinMaxBarCB("PickingBar", "Light", "inner", GetSpotLightInner, SetSpotLightInner, this,
+		1.0f, 1000.f, 0.1f);
+	TWBARMGR->AddMinMaxBarCB("PickingBar", "Light", "outter", GetSpotLightOuter, SetSpotLightOuter, this,
+		1.0f, 1000.f, 0.1f);
+
+}
+
+void CSpotLight::SaveInfo(){
+	CGameObject::SaveInfo();
+	EXPORTER->WriteFloat(m_SpotData.fInnerAngle);EXPORTER->WriteSpace();
+	EXPORTER->WriteFloat(m_SpotData.fOuterAngle);
+	EXPORTER->WriteEnter();
+
+	EXPORTER->WriteFloat(m_SpotData.SpotLightColor.x); EXPORTER->WriteSpace();
+	EXPORTER->WriteFloat(m_SpotData.SpotLightColor.y); EXPORTER->WriteSpace();
+	EXPORTER->WriteFloat(m_SpotData.SpotLightColor.z); EXPORTER->WriteSpace();
+	EXPORTER->WriteEnter();
+
+	EXPORTER->WriteFloat(m_SpotData.SpotLightRange);
+	EXPORTER->WriteEnter();
+}
+
+void CSpotLight::LoadInfo(){
+
 }
 
 CSpotLight::CSpotLight() : CLight("spotlight") {

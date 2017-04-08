@@ -69,6 +69,14 @@ CTerrain* CTerrain::CreateTerrain(CTerrainContainer * pTerrainContainer, int x, 
 	return pTerrain;
 }
 
+void CTerrain::SaveInfo()
+{
+}
+
+void CTerrain::LoadInfo()
+{
+}
+
 CTerrain::CTerrain() : CGameObject("terrain", tag::TAG_TERRAIN) {
 
 }

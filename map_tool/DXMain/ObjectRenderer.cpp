@@ -72,6 +72,13 @@ void CObjectRenderer::Excute(shared_ptr<CCamera> pCamera){
 	
 	CleanShaderState();
 }
+void CObjectRenderer::ExcuteShadowRender(shared_ptr<CCamera> pCamera)
+{
+	m_pTerrainRenderContainer->Render(pCamera);
+	for (auto pRenderContainer : m_mObjectRenderContainer) {
+		pRenderContainer.second->Render(pCamera);
+	}
+}
 
 CObjectRenderer::CObjectRenderer() : DXObject("objectrenderer"){
 

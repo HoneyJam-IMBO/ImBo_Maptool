@@ -30,10 +30,15 @@ public:
 	void SetPointLightData(POINT_LIGHT& data) { m_PointData = data; }
 	virtual void SetLength(float len);
 	virtual void SetRange(float outer, float inner = 0.0f);
+	float GetRange() { return m_PointData.fRange; }
 	virtual void SetColor(float r, float g, float b);//color
 	virtual XMFLOAT3 GetColor();
 
 	static CPointLight* CreatePointLight(float fRange, XMFLOAT3 xmf3Color);
+	void PickingProc();
+
+	virtual void SaveInfo();
+	virtual void LoadInfo();
 private:
 	//data
 	POINT_LIGHT m_PointData{};

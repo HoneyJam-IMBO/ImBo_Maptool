@@ -8,7 +8,11 @@ texture2D gtxtBase : register(t0);
 Texture2DArray gtxtDetail : register(t1);
 Texture2DArray gtxtBlendInfo : register(t2);
 texture2D gtxtPicpos : register(t3);
-sampler gssTerrain : register(s0);
+SamplerState gssWRAP_LINEAR : register(s0);
+SamplerState gssWRAP_POINT : register(s1);
+SamplerState gssCLAMP_LINEAR : register(s2);
+SamplerState gssCLAMP_POINT : register(s3);
+
 //sampler gssPicpos : register(s2);
 
 
@@ -54,7 +58,7 @@ float4 RenderPickPos(float2 texCoord) {
 	float4 cColor = float4(0.f, 0.f, 0.f, 0.f);
 	if (x & y) {//나의 uv 좌표가 원의 범위 내에 있다면
 		float2 PickPosUV = float2(1 - ((texCoord.x - minPos.x) / (gRenderRadius * 2)), 1 - ((texCoord.y - minPos.y) / (gRenderRadius * 2)));
-		cColor = gtxtPicpos.Sample(gssTerrain, PickPosUV);
+		cColor = gtxtPicpos.Sample(gssWRAP_LINEAR, PickPosUV);
 	}
 	//picpos render
 	return cColor;
@@ -63,7 +67,7 @@ PS_GBUFFER_OUT main(DS_OUT input){
 	PS_GBUFFER_OUT output = (PS_GBUFFER_OUT)0;
 
 	//set base color
-	float4 cBaseTexColor = gtxtBase.Sample(gssTerrain, input.texCoord);
+	float4 cBaseTexColor = gtxtBase.Sample(gssWRAP_LINEAR, input.texCoord);
 	float4 cDetailTexColor = float4(1.0f, 1.0f, 1.0f, 1.0f);
 	float cDetailAlpha = 1.0f;
 
@@ -77,9 +81,9 @@ PS_GBUFFER_OUT main(DS_OUT input){
 
 	//set splatting detail color
 	while (CurrentTextureIndex < gSplattingNum){
-		cCurrentTexColor = gtxtDetail.Sample(gssTerrain, float3(input.detailTexCoord, CurrentTextureIndex));//get detail
+		cCurrentTexColor = gtxtDetail.Sample(gssWRAP_LINEAR, float3(input.detailTexCoord, CurrentTextureIndex));//get detail
 		//cCurrentTexColor = saturate((cPreviousTexColor * 0.5f) + (cCurrentTexColor * 0.5f)); 
-		cDetailAlpha = gtxtBlendInfo.Sample(gssTerrain, float3(input.texCoord, CurrentTextureIndex)).x;
+		cDetailAlpha = gtxtBlendInfo.Sample(gssWRAP_LINEAR, float3(input.texCoord, CurrentTextureIndex)).x;
 		cDetailTexColor = lerp(cPreviousTexColor, cCurrentTexColor, cDetailAlpha);
 		cPreviousTexColor = cDetailTexColor;
 		CurrentTextureIndex++;
@@ -95,7 +99,7 @@ PS_GBUFFER_OUT main(DS_OUT input){
 	
 	//get world normal
 	//float3 normalW = GetWorldNormal(input.tangentW, input.bitangentW, input.texCoord);
-	float3 normalW = gtxtNormal.Sample(gssNormal, input.texCoord).rgb;
+	float3 normalW = gtxtNormal.Sample(gssWRAP_LINEAR, input.texCoord).rgb;
 	normalW = normalW*2-1;//0-2 //-1 1
 	return (PackGBuffer((float3)cColor, normalW, gSpecIntensity, gSpecExp));
 }
