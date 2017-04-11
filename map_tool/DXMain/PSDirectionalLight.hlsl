@@ -2,62 +2,19 @@
 //#include "Directional_AmbientLight.hlsli"
 #include "UnpackGBuffer.hlsli"
 #include "CalcDirectionalLight.hlsli"
+#include "CalcDirectionalShadow.hlsli"
 
 Texture2D<float> AOTex : register(t4);
-Texture2D<float> ShadowMap : register(t5);
 
 SamplerState gssWRAP_LINEAR : register(s0);
 SamplerState gssWRAP_POINT : register(s1);
 SamplerState gssCLAMP_LINEAR : register(s2);
 SamplerState gssCLAMP_POINT : register(s3);
-//SamplerComparisonState gssSHADOW : register(s4);
-SamplerState gssSHADOW : register(s4);
-
-cbuffer LightVPCBuffer : register(b4)
-{
-	matrix gmtxLightVP;
-};
 
 struct VS_TEXTURED_OUTPUT {
 	float4 position : SV_POSITION;
 	float2 uv : TEXCOORD0;
 };
-
-float2 texOffset(int u, int v)
-{
-	return float2(u * 1.0f / 4096, v * 1.0f / 4096);
-}
-float ShaderPCF(float3 position, float cosTheta) {
-	float4 posShadowMap = mul(float4(position, 1.f), gmtxLightVP);
-	float3 UVD = posShadowMap.xyz / posShadowMap.w;
-
-	UVD.xy = 0.5 * UVD.xy + 0.5;
-	UVD.y = 1 - UVD.y;
-
-	float LightDepth = ShadowMap.Sample(gssSHADOW, UVD.xy).x;
-	float fCamposDepth = (UVD.z);
-
-	float value = 0.0000003;//d
-	float offset = 0.000000105;//d
-	float bias = value;
-	bias = value*tan(acos(cosTheta)); // cosTheta is dot( n,l ), clamped between 0 and 1
-	bias = clamp(bias, value - offset, value + offset);
-	
-	float nHalfSamples = 4;//d
-	float sum = 0;
-	if (LightDepth < fCamposDepth - bias) {
-		for (float y = -nHalfSamples; y < nHalfSamples + 1.0; y += 1.0) {
-			for (float x = -nHalfSamples; x < nHalfSamples + 1.0; x += 1.0) {
-				LightDepth = ShadowMap.Sample(gssSHADOW, UVD.xy + float2(x,y)).x;
-				if (LightDepth < fCamposDepth - value) {
-					sum += 0.5;
-				}
-			}
-		}
-		return sum / 16.f;
-	}
-	return 1.f;
-}
 
 
 float4 main(VS_TEXTURED_OUTPUT input) : SV_Target{
@@ -102,6 +59,6 @@ return finalColor;
 //return float4(linearDepth, linearDepth, linearDepth, 1.f);
 //return float4(cpPos, gbd.depth, 1.f);
 //return float4(cameraPos, 1.f);
-//return float4(worldPos, 1.f);
+//return float4(positionW, 1.f);
 //return finalColor;
 }

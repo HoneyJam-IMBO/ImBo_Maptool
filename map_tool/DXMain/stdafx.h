@@ -35,6 +35,7 @@
 #include <d3d11_2.h>
 #include <dxgi1_3.h>
 #include <D3DX11tex.h>
+#include "DirectXTex.h"
 
 // D2D1
 //#include <d2d1_3.h>
@@ -121,6 +122,8 @@ constexpr size_t GetArraySize(Ty(&)[N]) noexcept
 #define MAX(a,b)(a>b? a : b)
 #define MIN(a,b)(a<b? a : b)
 
+#define MAX_SPACE_NUM  64
+
 //texture, constant buffer bind flag
 #define BIND_VS 0b000001   // 0x0001 //0001
 #define BIND_HS 0b000010   // 0x0002 //0010
@@ -134,6 +137,7 @@ enum render_tag {
 	RTAG_TERRAIN = 0b000001,
 	RTAG_DYNAMIC_OBJECT = 0b000010,
 	RTAG_STATIC_OBJECT = 0b000100,
+	RTAG_LIGHT = 0b001000,
 	RTAG_END
 };
 enum tag {

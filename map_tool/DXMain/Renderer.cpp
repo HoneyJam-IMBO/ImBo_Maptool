@@ -40,7 +40,6 @@ bool CRenderer::Begin() {
 	TWBARMGR->AddMinMaxBarRW(barName, "BLOOM", "BloomScale", &m_fBLOOMScale, 0.f, 100.f, 0.1f);
 	//bloom
 	//sslr
-	TWBARMGR->AddMinMaxBarRW(barName, "SSLR", "OffsetSunPos", &m_fSSLROffsetSunPos, -1000, -0.1f, 0.01f);
 	TWBARMGR->AddMinMaxBarRW(barName, "SSLR", "MaxSunDist", &m_fSSLRMaxSunDist, 0.0f, 1000.f, 0.01f);
 	TWBARMGR->AddMinMaxBarRW(barName, "SSLR", "InitDecay", &m_fSSLRInitDecay, 0.0f, 4.f, 0.001f);
 	TWBARMGR->AddMinMaxBarRW(barName, "SSLR", "DistDecay", &m_fSSLRDistDecay, 0.f, 4, 0.001f);
@@ -136,14 +135,11 @@ bool CRenderer::End() {
 	}
 	return true;
 }
- 
+
 void CRenderer::Render(shared_ptr<CCamera> pCamera) {
-	//set global value
-
-
+	
 	//shadow render
-	shared_ptr<CCamera>	pLightCam = nullptr;
-	ID3D11ShaderResourceView* pShadow = m_pShadow->RenderShadowMap(pCamera, pLightCam, m_pObjectRenderer);
+	m_pShadow->RenderShadowMap(pCamera);
 
 	//clear buff
 	//CLEAR
@@ -176,7 +172,7 @@ void CRenderer::Render(shared_ptr<CCamera> pCamera) {
 
 	//LIGHT RENDER
 	SetMainRenderTargetView();
-	m_pLightRenderer->Excute(pCamera, pLightCam, pShadow);
+	m_pLightRenderer->Excute(pCamera, m_pShadow);
 	for (auto texture : m_vObjectLayerResultTexture) {
 		texture->CleanShaderState();
 	}
@@ -193,7 +189,7 @@ void CRenderer::Render(shared_ptr<CCamera> pCamera) {
 	//
 	//		XMVECTOR xmvSunDir = UPDATER->GetDirectionalLight()->GetLook();
 	//		XMFLOAT3 xmf3Color = UPDATER->GetDirectionalLight()->GetColor();
-	//		float fOffsetSunPos = m_fSSLROffsetSunPos;// m_pFramework->GetCurScene()->GetSSLROffsetSunPos();
+	//		float fOffsetSunPos = UPDATER->GetDirectionalLight()->GetOffsetLength();
 	//		float fMaxSunDist = m_fSSLRMaxSunDist;// m_pFramework->GetCurScene()->GetSSLRMaxSunDist();
 	//		float fInitDecay = m_fSSLRInitDecay;// m_pFramework->GetCurScene()->GetSSLRInitDecay();
 	//		float fDistDecay = m_fSSLRDistDecay;// m_pFramework->GetCurScene()->GetSSLRDistDecay();
@@ -231,7 +227,8 @@ void CRenderer::Render(shared_ptr<CCamera> pCamera) {
 		//DEBUGER->AddTexture(XMFLOAT2(100, 100), XMFLOAT2(500, 500), m_pd3dsrvDepthStencil);
 		//debug
 		//DEBUGER->AddTexture(XMFLOAT2(500, 0), XMFLOAT2(750, 150), pAmbientOcclution);
-		DEBUGER->AddDepthTexture(XMFLOAT2(500, 0), XMFLOAT2(750, 150), pShadow);
+		DEBUGER->AddDepthTexture(XMFLOAT2(500, 0), XMFLOAT2(750, 150), m_pd3dsrvDepthStencil);
+		//DEBUGER->AddTexture(XMFLOAT2(300, 0), XMFLOAT2(600, 300), m_pd3dsrvDepthStencil);
 
 		//이건 꼭 여기서 해줘야함.
 
@@ -463,15 +460,15 @@ bool CRenderer::CreateRenderTargetView() {
 		ReleaseForwardRenderTargets();
 
 		//--------------------------------------Scene0 DSV Create-----------------------------------------//
-		d3dTexture2DDesc.Format = DXGI_FORMAT_R24G8_TYPELESS;
-		d3dDepthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-		d3dSRVDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+		d3dTexture2DDesc.Format = DXGI_FORMAT_R32_TYPELESS;
+		d3dDepthStencilViewDesc.Format = DXGI_FORMAT_D32_FLOAT;
+		d3dSRVDesc.Format = DXGI_FORMAT_R32_FLOAT;
 		d3dTexture2DDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_DEPTH_STENCIL;
 		GLOBALVALUEMGR->GetDevice()->CreateTexture2D(&d3dTexture2DDesc, nullptr, &m_pd3dtxtDepthStencil);
 		GLOBALVALUEMGR->GetDevice()->CreateDepthStencilView(m_pd3dtxtDepthStencil, &d3dDepthStencilViewDesc, &m_pd3ddsvDepthStencil);
 		GLOBALVALUEMGR->GetDevice()->CreateShaderResourceView(m_pd3dtxtDepthStencil, &d3dSRVDesc, &m_pd3dsrvDepthStencil);
 		//real depth stencil
-		d3dDepthStencilViewDesc.Flags = D3D11_DSV_READ_ONLY_DEPTH | D3D11_DSV_READ_ONLY_STENCIL;
+		d3dDepthStencilViewDesc.Flags = D3D11_DSV_READ_ONLY_DEPTH;
 		if (FAILED(hResult = GLOBALVALUEMGR->GetDevice()->CreateDepthStencilView(m_pd3dtxtDepthStencil, &d3dDepthStencilViewDesc, &m_pd3ddsvReadOnlyDepthStencil))) return(false);
 		//--------------------------------------Scene0 DSV Create-----------------------------------------//
 		
@@ -610,7 +607,7 @@ bool CRenderer::ResizeBuffer() {
 	return true;
 }
 
-void CRenderer::SaveEffectInfo(){
+void CRenderer::SaveEffectInfo(wstring wsOutputPath, wstring wsSceneName){
 	//ssao
 	EXPORTER->WriteFloat(m_fSSAORadius); EXPORTER->WriteSpace();
 	EXPORTER->WriteFloat(m_fSSAOOffsetRadius);
@@ -623,16 +620,17 @@ void CRenderer::SaveEffectInfo(){
 	EXPORTER->WriteEnter();
 	//sslr
 	EXPORTER->WriteBool(m_bSSLROnOff); EXPORTER->WriteSpace();
-	EXPORTER->WriteFloat(m_fSSLROffsetSunPos); EXPORTER->WriteSpace();
 	EXPORTER->WriteFloat(m_fSSLRMaxSunDist); EXPORTER->WriteSpace();
 	EXPORTER->WriteFloat(m_fSSLRInitDecay); EXPORTER->WriteSpace();
 	EXPORTER->WriteFloat(m_fSSLRDistDecay); EXPORTER->WriteSpace();
 	EXPORTER->WriteFloat(m_fSSLRMaxDeltaLen);
 	EXPORTER->WriteEnter();
 
+	//shadow
+	m_pShadow->SaveShadow(wsOutputPath, wsSceneName);
 }
 
-void CRenderer::LoadEffectInfo(){
+void CRenderer::LoadEffectInfo(wstring wsOutputPath, wstring wsSceneName){
 	//ssao
 	float fSSAORadius = IMPORTER->ReadFloat();
 	SetSSAORadius(fSSAORadius);
@@ -651,8 +649,6 @@ void CRenderer::LoadEffectInfo(){
 	//sslr
 	bool bSSLROnOff = IMPORTER->ReadBool();
 	SetSSLROnOff(bSSLROnOff);
-	float fSSLROffsetSunPos = IMPORTER->ReadFloat();
-	SetSSLROffsetSunPos(fSSLROffsetSunPos);
 	float fSSLRMaxSunDist = IMPORTER->ReadFloat();
 	SetSSLRMaxSunDist(fSSLRMaxSunDist);
 	float fSSLRInitDecay = IMPORTER->ReadFloat();
@@ -661,6 +657,8 @@ void CRenderer::LoadEffectInfo(){
 	SetSSLRDistDecay(fSSLRDistDecay);
 	float fSSLRMaxDeltaLen = IMPORTER->ReadFloat();
 	SetSSLRMaxDeltaLen(fSSLRMaxDeltaLen);
+
+	m_pShadow->LoadShadow(wsOutputPath, wsSceneName);
 }
 
 CRenderer::CRenderer() :CSingleTonBase<CRenderer>("rendereringleton") {

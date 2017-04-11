@@ -69,7 +69,11 @@ void CDirectionalLight::PickingProc(){
 	//color
 	TWBARMGR->AddColorBar4F("PickingBar", "Light", "AmbientColor", &m_Directional_AmbientData.m_AmbientColor);
 	TWBARMGR->AddColorBar4F("PickingBar", "Light", "DirColor", &m_Directional_AmbientData.m_DirLightColor);
-	//TWBARMGR->AddColorBar("PickingBar", "Light", "DirPower", &m_Directional_AmbientData.m_DirLightPower);
+	TWBARMGR->AddMinMaxBarRW("PickingBar", "Light", "DirPosOffset", &m_fOffsetLength,
+		10.f, 1000.f, 0.1f);
+
+	RENDERER->GetShadow()->CreateShadowControlUI();
+	//TWBARMGR->AddColorBar(f"PickingBar", "Light", "DirPower", &m_Directional_AmbientData.m_DirLightPower);
 	//TWBARMGR->AddColorBar("PickingBar", "Light", "DirPower", &m_Directional_AmbientData.m_AmbientDown);
 	////range
 	//TWBARMGR->AddMinMaxBarCB("PickingBar", "Light", "Range", GetPointLightRange, SetPointLightRange, this,
@@ -121,6 +125,9 @@ void CDirectionalLight::SaveInfo(){
 	EXPORTER->WriteFloat(m_Directional_AmbientData.m_DirToLight.z); EXPORTER->WriteSpace();
 	EXPORTER->WriteFloat(m_Directional_AmbientData.m_DirToLight.w); EXPORTER->WriteSpace();
 	EXPORTER->WriteEnter();
+
+	EXPORTER->WriteFloat(m_fOffsetLength);
+	EXPORTER->WriteEnter();
 }
 
 void CDirectionalLight::LoadInfo(){
@@ -160,6 +167,8 @@ void CDirectionalLight::LoadInfo(){
 	m_Directional_AmbientData.m_DirToLight.y = IMPORTER->ReadFloat();
 	m_Directional_AmbientData.m_DirToLight.z = IMPORTER->ReadFloat();
 	m_Directional_AmbientData.m_DirToLight.w = IMPORTER->ReadFloat();
+
+	m_fOffsetLength = IMPORTER->ReadFloat();
 }
 
 CDirectionalLight::CDirectionalLight() : CLight("directionallight") {

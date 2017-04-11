@@ -37,7 +37,7 @@ void CScene::LoadScene(string path){
 	UPDATER->LoadTerrainInfo(wsOutputPath, wsSceneName);
 	UPDATER->LoadObjectsInfo();
 	//effect info
-	RENDERER->LoadEffectInfo();
+	RENDERER->LoadEffectInfo(wsOutputPath, wsSceneName);
 
 	//object info save
 	//m_pSpaceContainer->WriteObjects();

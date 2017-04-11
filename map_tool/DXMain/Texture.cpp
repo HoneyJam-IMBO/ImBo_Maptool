@@ -105,14 +105,6 @@ ID3D11ShaderResourceView* CTexture::CreateTexture2DArraySRV(_TCHAR(*ppstrFilePat
 	ID3D11Texture2D **ppd3dTextures = new ID3D11Texture2D*[nTextures];
 	for (UINT i = 0; i < nTextures; i++) D3DX11CreateTextureFromFile(GLOBALVALUEMGR->GetDevice(), ppstrFilePaths[i], &d3dxImageLoadInfo, 0, (ID3D11Resource **)&ppd3dTextures[i], 0);
 
-	//test
-	D3D11_TEXTURE2D_DESC* pd3dTexure2DDesc = new D3D11_TEXTURE2D_DESC[nTextures];
-	for (UINT i = 0; i < nTextures; i++) {
-		ppd3dTextures[i]->GetDesc(&pd3dTexure2DDesc[i]);
-	}
-
-	//test
-
 	D3D11_TEXTURE2D_DESC d3dTexure2DDesc;
 	ppd3dTextures[0]->GetDesc(&d3dTexure2DDesc);
 
@@ -170,8 +162,6 @@ ID3D11ShaderResourceView* CTexture::CreateTexture2DArraySRV(_TCHAR(*ppstrFilePat
 
 	for (UINT i = 0; i < nTextures; i++) if (ppd3dTextures[i]) ppd3dTextures[i]->Release();
 	delete[] ppd3dTextures;
-	//test
-	delete[] pd3dTexure2DDesc;
 
 	if (pd3dDeviceContext) pd3dDeviceContext->Release();
 
@@ -313,7 +303,7 @@ ID3D11ShaderResourceView * CTexture::CreateTexture2DArraySRV(ID3D11ShaderResourc
 	d3dTextureSRVDesc.Texture2DArray.MipLevels = d3dTexture2DArrayDesc.MipLevels;
 	d3dTextureSRVDesc.Texture2DArray.FirstArraySlice = 0;
 	d3dTextureSRVDesc.Texture2DArray.ArraySize = nTextures;
-
+	
 	ID3D11ShaderResourceView *pd3dsrvTextureArray;
 	GLOBALVALUEMGR->GetDevice()->CreateShaderResourceView(pd3dTexture2DArray, &d3dTextureSRVDesc, &pd3dsrvTextureArray);
 

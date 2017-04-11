@@ -402,6 +402,9 @@
     <Filter Include="HLSL\Debug\DebugDepthTexture">
       <UniqueIdentifier>{b207ccbd-f43a-4d0e-8406-74d136a89c1f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\SingleTon\FileInputOutput\Exporter\dds">
+      <UniqueIdentifier>{3b7c5612-0583-4516-8c25-0fe9d14313bb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -716,6 +719,9 @@
     <ClInclude Include="Shadow.h">
       <Filter>소스 파일\SingleTon\Renderer\99.Shadow</Filter>
     </ClInclude>
+    <ClInclude Include="dds.h">
+      <Filter>소스 파일\SingleTon\FileInputOutput\Exporter\dds</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -1018,6 +1024,9 @@
     <ClCompile Include="Shadow.cpp">
       <Filter>소스 파일\SingleTon\Renderer\99.Shadow</Filter>
     </ClCompile>
+    <ClCompile Include="dds.cpp">
+      <Filter>소스 파일\SingleTon\FileInputOutput\Exporter\dds</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="DXMain.rc">
@@ -1228,6 +1237,9 @@
     </None>
     <None Include="Quaternion.hlsli">
       <Filter>HLSL</Filter>
+    </None>
+    <None Include="CalcDirectionalShadow.hlsli">
+      <Filter>HLSL\Light\Directional</Filter>
     </None>
   </ItemGroup>
 </Project>

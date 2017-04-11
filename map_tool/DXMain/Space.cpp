@@ -123,6 +123,31 @@ void CSpace::Animate(float fTimeElapsed){
 	}
 }
 
+void CSpace::PrepareRender(UINT renderFlag){
+	//나는 그리는 space다.
+	SetbRender(true);
+	this->RegistToDebuger();
+	//RegistToContainer();
+	//			DEBUGER->RegistToDebugRenderContainer(this);
+	for (auto mlp : m_mlpObject) {//모든 객체에 대해서
+								  //자신이 속한 rendercontainer에 등록
+		for (auto pObject : mlp.second) {
+			if (renderFlag & RTAG_TERRAIN) {
+				if (pObject->GetTag() == TAG_TERRAIN) pObject->RegistToContainer();
+			}
+			if (renderFlag & RTAG_STATIC_OBJECT) {
+				if (pObject->GetTag() == TAG_STATIC_OBJECT) pObject->RegistToContainer();
+			}
+			if (renderFlag & RTAG_DYNAMIC_OBJECT) {
+				if (pObject->GetTag() == TAG_DYNAMIC_OBJECT) pObject->RegistToContainer();
+			}
+			if (renderFlag & RTAG_LIGHT) {
+				if (pObject->GetTag() == TAG_LIGHT) pObject->RegistToContainer();
+			}
+		}
+	}//end for
+}
+
 void CSpace::PrepareRender(shared_ptr<CCamera> pCamera, UINT renderFlag){
 	
 	if (IsVisible(pCamera)) {//여기에 space 프러스텀 컬링
@@ -143,6 +168,9 @@ void CSpace::PrepareRender(shared_ptr<CCamera> pCamera, UINT renderFlag){
 					}
 					if (renderFlag & RTAG_DYNAMIC_OBJECT) {
 						if (pObject->GetTag() == TAG_DYNAMIC_OBJECT) pObject->RegistToContainer();
+					}
+					if (renderFlag & RTAG_LIGHT) {
+						if (pObject->GetTag() == TAG_LIGHT) pObject->RegistToContainer();
 					}
 				}
 			}//end for

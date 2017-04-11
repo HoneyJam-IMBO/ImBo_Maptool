@@ -63,6 +63,16 @@ void CSpaceContainer::Animate(float fTimeElapsed){
 	}
 }
 
+void CSpaceContainer::PrepareRenderOneSpace(shared_ptr<CCamera> pCamera, UINT renderFlag, int render_space){
+	if (render_space < 0) {
+		PrepareRender(pCamera, renderFlag);
+	}else{
+		for (int i = 0; i < m_nSpace; ++i) {
+			if(render_space == i) m_ppSpace[i]->PrepareRender(renderFlag);
+		}
+	}
+}
+
 void CSpaceContainer::PrepareRender(shared_ptr<CCamera> pCamera, UINT renderFlag){
 	//directional light
 	//RENDERER->SetDirectionalLight(m_pDirectionalLight);

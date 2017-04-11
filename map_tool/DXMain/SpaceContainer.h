@@ -13,7 +13,8 @@ public:
 
 	//space controller
 	void Animate(float fTimeElapsed);
-	void PrepareRender(shared_ptr<CCamera> pCamera, UINT renderFlag = RTAG_TERRAIN | RTAG_STATIC_OBJECT | RTAG_DYNAMIC_OBJECT);
+	void PrepareRenderOneSpace(shared_ptr<CCamera> pCamera, UINT renderFlag = RTAG_TERRAIN | RTAG_STATIC_OBJECT | RTAG_DYNAMIC_OBJECT | RTAG_LIGHT, int render_space = -1);
+	void PrepareRender(shared_ptr<CCamera> pCamera, UINT renderFlag = RTAG_TERRAIN | RTAG_STATIC_OBJECT | RTAG_DYNAMIC_OBJECT | RTAG_LIGHT);
 	//animate하다가 해당 공간을 벗어난 객체 임시 저장소
 	void AddBlockObjectList(CGameObject* pObject);
 	void AddObject(CGameObject* pObject);
@@ -56,6 +57,7 @@ public:
 	~CSpaceContainer();
 
 	//set get
+	CSpace** GetAllSpace() { return m_ppSpace; }
 	list<CGameObject*>& GetBlockObjectList() { return m_lpBlockObject; }
 	CSpace* GetStartSpace() { return m_pStartSpace; }
 	UINT GetSpaceNum() { return m_nSpace; }

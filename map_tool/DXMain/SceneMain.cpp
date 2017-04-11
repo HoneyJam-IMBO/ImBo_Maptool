@@ -196,7 +196,6 @@ void CSceneMain::SaveScene(){
 	wcout << L"SceneName : ";
 	wcin >> wc;
 	wstring wsSceneName{ (WCHAR*)wc };
-	wsSceneName = wsSceneName + L".scn";
 	//cin>>scene name;
 	//cin>>path
 	//scene name
@@ -204,7 +203,8 @@ void CSceneMain::SaveScene(){
 
 
 	//EXPORTER->Begin(L"../outputdata/scene.txt");
-	EXPORTER->Begin(wsOutputPath + wsSceneName);
+	wstring wsFileName = wsSceneName + L".scn";
+	EXPORTER->Begin(wsOutputPath + wsFileName);
 
 	//output path
 	EXPORTER->WriteWstring(wsOutputPath);
@@ -212,7 +212,7 @@ void CSceneMain::SaveScene(){
 	//scene name
 	EXPORTER->WriteWstring(wsSceneName);
 	EXPORTER->WriteEnter();
-	
+
 	//space info
 	UPDATER->SaveSpaceInfo();
 	UPDATER->SaveTerrainInfo(wsOutputPath, wsSceneName);
@@ -220,10 +220,9 @@ void CSceneMain::SaveScene(){
 
 
 	//effect info
-	RENDERER->SaveEffectInfo();
+	RENDERER->SaveEffectInfo(wsOutputPath, wsSceneName);
 	
 	EXPORTER->End();
-
 	/*
 		3. height map image / /[scene name] + height map
 		4. normal map image / /[scene name] + normal map
@@ -274,6 +273,7 @@ void CSceneMain::CreateSceneListUI(){
 		cnt++;
 	}
 }
+
 bool CSceneMain::Begin() {
 	//모든 positioning이 가능한 객체를 미리 제작해 둔다.
 	CreatePositioningObject();
@@ -435,6 +435,7 @@ bool CSceneMain::End() {
 }
 
 void CSceneMain::Animate(float fTimeElapsed) {
+	
 	CScene::Animate(fTimeElapsed);
 
 	//--------------------------전역 객체 animate / regist-------------------------
@@ -510,6 +511,7 @@ void CSceneMain::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM 
 }
 
 void CSceneMain::ProcessInput(float fTimeElapsed) {
+	
 	if (INPUTMGR->KeyDown(VK_P)) {
 		INPUTMGR->SetDebugMode(static_cast<bool>((INPUTMGR->GetDebugMode() + 1) % 2));
 	}

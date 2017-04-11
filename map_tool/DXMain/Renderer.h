@@ -43,9 +43,11 @@ public:
 
 	CRenderContainer* GetTerrainRenderContainer() { return m_pObjectRenderer->GetTerrainRenderContainer(); }
 	CRenderContainer* GetSkyBoxRenderContainer() { return m_pObjectRenderer->GetSkyBoxRenderContainer(); }
+	CObjectRenderer* GetObjectRenderer() { return m_pObjectRenderer; }
+	CShadow* GetShadow() { return m_pShadow; }
 
-	void SaveEffectInfo();
-	void LoadEffectInfo();
+	void SaveEffectInfo(wstring wsOutputPath, wstring wsSceneName);
+	void LoadEffectInfo(wstring wsOutputPath, wstring wsSceneName);
 	//void SetTerrainContainer(CTerrainContainer* pTerrainContainer) { m_pTerrainContainer = pTerrainContainer; }
 	//void SetSkyBoxContainer(CSkyBoxContainer* pSkyBoxContainer) { m_pSkyBoxContainer = pSkyBoxContainer; }
 	//void SetDirectionalLight(CDirectionalLight* pDirectionalLight) { m_pDirectionalLIght = pDirectionalLight; }
@@ -110,7 +112,6 @@ private:
 	float m_fBLOOMScale{ 2.0f };
 	//sslr
 	bool m_bSSLROnOff;
-	float m_fSSLROffsetSunPos{ -200.f };
 	float m_fSSLRMaxSunDist{ 1000.f };
 	float m_fSSLRInitDecay{ 0.05f };
 	float m_fSSLRDistDecay{ 0.05f };
@@ -138,8 +139,6 @@ public:
 	//sslr
 	void SetSSLROnOff(bool SSLROnOff) { m_bSSLROnOff = SSLROnOff; }
 	bool GetSSLROnOff() { return m_bSSLROnOff; }
-	void SetSSLROffsetSunPos(float SSLROffsetSunPos) { m_fSSLROffsetSunPos = SSLROffsetSunPos; }
-	float GetSSLROffsetSunPos() { return m_fSSLROffsetSunPos; }
 	void SetSSLRMaxSunDist(float SSLRMaxSunDist) { m_fSSLRMaxSunDist = SSLRMaxSunDist; }
 	float GetSSLRMaxSunDist() { return m_fSSLRMaxSunDist; }
 	void SetSSLRInitDecay(float SSLRInitDecay) { m_fSSLRInitDecay = SSLRInitDecay; }

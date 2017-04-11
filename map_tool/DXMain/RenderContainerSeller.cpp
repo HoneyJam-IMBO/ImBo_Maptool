@@ -203,7 +203,11 @@ CRenderContainer* CRenderContainerSeller::GetRenderContainer(string name) {
 }
 
 CRenderContainer * CRenderContainerSeller::GetRenderContainer(tag t, string name){
-
+	//있으면 바로 return
+	if (m_mTagRenderContainer.end() != m_mTagRenderContainer.find(t)) {
+		if (m_mTagRenderContainer[t].end() != m_mTagRenderContainer[t].find(name))
+			return m_mTagRenderContainer[t][name];
+	}
 	return nullptr;
 }
 void CRenderContainerSeller::CreateStempRenderContainer(){

@@ -54,7 +54,7 @@ void CTerrainContainer::Begin() {
 	m_pStempManager = CStempManager::CreateStempManager(m_pSpaceContainer->GetSpaceSize(), this);
 
 	//global buffer Á¦ÀÛ
-	m_pGlobalTerrainBuffer = RESOURCEMGR->GetGlobalBuffer("TerrainGB");
+	m_pGlobalTerrainBuffer = RESOURCEMGR->GetBuffer("TerrainCB");
 	
 	//global buf set
 	m_pGlobalTerrainData = new TERRAIN_GLOBAL_VALUE;

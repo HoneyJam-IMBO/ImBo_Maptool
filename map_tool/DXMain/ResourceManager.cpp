@@ -74,7 +74,7 @@ void CResourceManager::CreateRenderShaders() {
 
 	//animation render shader
 	CreateRenderShader("AnimationObject", TEXT("AnimationObject"),
-		IE_POSITION | IE_NORMAL | IE_TEXCOORD | IE_BONEWEIGHT | IE_BONEINDEX);
+		IE_POSITION | IE_NORMAL | IE_TEXCOORD | IE_BONEWEIGHT | IE_BONEINDEX | IE_INSWORLDMTX);
 	//animation render shader
 
 	//post processing shader
@@ -319,10 +319,12 @@ void CResourceManager::CreateBuffers() {
 	CreateConstantBuffer("SpotLightCB2", 1000, sizeof(SPOT_LIGHT_PS_CB), PS_OBJECT_BUFFER_SLOT, BIND_PS);
 	CreateConstantBuffer("CapsuleLightCB1", 1000, sizeof(CAPSULE_LIGHT_DS_CB), DS_OBJECT_BUFFER_SLOT, BIND_DS);
 	CreateConstantBuffer("CapsuleLightCB2", 1000, sizeof(CAPSULE_LIGHT_PS_CB), PS_OBJECT_BUFFER_SLOT, BIND_PS);
+
+	CreateConstantBuffer("TerrainCB", 1, sizeof(TERRAIN_GLOBAL_VALUE), VS_GLOBAL_BUFFER_SLOT, BIND_VS | BIND_DS);
 }
 
 void CResourceManager::CreateGlobalBuffers() {
-	CreateGlobalBuffer("TerrainGB", 1, sizeof(TERRAIN_GLOBAL_VALUE), VS_GLOBAL_BUFFER_SLOT, BIND_VS | BIND_DS);
+	
 }
 
 void CResourceManager::CreateMaterials() {
@@ -530,11 +532,12 @@ UINT CResourceManager::CreateFBXResource(string path, string name) {
 		for (UINT i = 0; i < FBXIMPORTER->GetMeshCnt(); ++i) {
 			sprintf(pName, "%s%d", name.c_str(), i);
 			pFBXMesh = CFileBasedMesh::CreateMeshFromFBXFile(name, i);
+			pFBXMesh->SetTag(TAG_DYNAMIC_OBJECT);
 			m_mvStempMesh[pName].push_back(pFBXMesh);
 		}
 
 		sprintf(pName, "%s", name.c_str());
-		shared_ptr<CAnimater> pAnimater = CAnimater::CreateAnimaterFromFBXFile();
+		shared_ptr<CAnimater> pAnimater = CAnimater::CreateAnimaterFromFBXFile(true);
 		CAnimationInfo* pAnimationInfo = CAnimationInfo::CreateAnimationInfoFromFBXFile(pAnimater);
 		m_mAnimater.insert(pairAnimater(pName, pAnimater));
 	}
@@ -542,6 +545,7 @@ UINT CResourceManager::CreateFBXResource(string path, string name) {
 		for (UINT j = 0; j < FBXIMPORTER->GetMeshCnt(); ++j) {
 			sprintf(pName, "%s%d", name.c_str(), j);
 			pFBXMesh = CFileBasedMesh::CreateMeshFromFBXFile(name, j);
+			pFBXMesh->SetTag(TAG_STATIC_OBJECT);
 			m_mvStempMesh[pName].push_back(pFBXMesh);
 		}
 	}

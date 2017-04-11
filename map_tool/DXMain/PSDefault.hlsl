@@ -40,7 +40,7 @@ PS_GBUFFER_OUT main(PixelShaderInput input)
 {
 	PS_GBUFFER_OUT output = (PS_GBUFFER_OUT)0;
 	float4 cCPColor = gtxtCP.Sample(gssWRAP_LINEAR, input.uv);
-	if (cCPColor.x == 0 && cCPColor.y == 0 && cCPColor.z == 0) discard;
+	clip(cCPColor.g < 0.05f ? -1 : 1);
 
 	float4 cColor = gtxtDefault.Sample(gssWRAP_LINEAR, input.uv) * gMaterialColor;
 	float4 cSpecColor = gtxtSpec.Sample(gssWRAP_LINEAR, input.uv);

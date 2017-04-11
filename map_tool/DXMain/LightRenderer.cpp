@@ -67,7 +67,7 @@ void CLightRenderer::UpdateShaderState() {
 
 }
 
-void CLightRenderer::Excute(shared_ptr<CCamera> pCamera, shared_ptr<CCamera> pLightCam, ID3D11ShaderResourceView* pShadowSRV){
+void CLightRenderer::Excute(shared_ptr<CCamera> pCamera, CShadow* m_pShadow){
 	//--------------------------------deferred lighting--------------------------------
 	ID3D11Buffer* pGBufferUnpackingBuffer = pCamera->GetGBufferUnpackingBuffer();
 	GLOBALVALUEMGR->GetDeviceContext()->PSSetConstantBuffers(PS_UNPACKING_SLOT, 1, &pGBufferUnpackingBuffer);
@@ -75,11 +75,8 @@ void CLightRenderer::Excute(shared_ptr<CCamera> pCamera, shared_ptr<CCamera> pLi
 	ID3D11Buffer* pViewProjectionBuffer = pCamera->GetViewProjectionBuffer();
 	GLOBALVALUEMGR->GetDeviceContext()->PSSetConstantBuffers(PS_CAMERA_DATA_SLOT, 1, &pViewProjectionBuffer);
 
-	if (pShadowSRV)
-	{
-		ID3D11Buffer* pBuf[] = { pLightCam->GetViewProjectionBuffer() };
-		GLOBALVALUEMGR->GetDeviceContext()->PSSetShaderResources(5, 1, &pShadowSRV);
-		GLOBALVALUEMGR->GetDeviceContext()->PSSetConstantBuffers(4, 1, pBuf);
+	if (m_pShadow){
+		m_pShadow->SetShaderState();
 	}
 	//RENDER
 	//이전 상태 저장
@@ -92,6 +89,9 @@ void CLightRenderer::Excute(shared_ptr<CCamera> pCamera, shared_ptr<CCamera> pLi
 	GLOBALVALUEMGR->GetDeviceContext()->OMSetDepthStencilState(m_pLightDepthStencilState, 0);
 	GLOBALVALUEMGR->GetDeviceContext()->RSSetState(m_pLightRasterizerState);
 
+	if (m_pShadow){
+		m_pShadow->CleanShaderState();
+	}
 	m_mRenderContainer["pointlight"]->Render(pCamera);
 	m_mRenderContainer["capsulelight"]->Render(pCamera);
 	m_mRenderContainer["spotlight"]->Render(pCamera);
