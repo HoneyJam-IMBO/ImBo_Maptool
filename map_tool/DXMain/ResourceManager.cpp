@@ -492,7 +492,7 @@ UINT CResourceManager::CreateGJMResource(string path, string name) {
 	UINT nMeshCnt = IMPORTER->ReadUINT();
 	tag t = (tag)IMPORTER->ReadUINT();
 	for (UINT i = 0; i < nMeshCnt; ++i) {
-		sprintf(pName, "%s%d", name.c_str(), i);
+		sprintf(pName, "%s", name.c_str());
 		pMesh = CFileBasedMesh::CreateMeshFromGJMFile(pName, i, bHasAnimation);
 		pMesh->SetTag(t);
 		m_mvStempMesh[pName].push_back(pMesh);
@@ -530,7 +530,7 @@ UINT CResourceManager::CreateFBXResource(string path, string name) {
 	if (FBXIMPORTER->GetHasAnimation()) {
 
 		for (UINT i = 0; i < FBXIMPORTER->GetMeshCnt(); ++i) {
-			sprintf(pName, "%s%d", name.c_str(), i);
+			sprintf(pName, "%s", name.c_str());
 			pFBXMesh = CFileBasedMesh::CreateMeshFromFBXFile(name, i);
 			pFBXMesh->SetTag(TAG_DYNAMIC_OBJECT);
 			m_mvStempMesh[pName].push_back(pFBXMesh);
@@ -543,7 +543,7 @@ UINT CResourceManager::CreateFBXResource(string path, string name) {
 	}
 	else {
 		for (UINT j = 0; j < FBXIMPORTER->GetMeshCnt(); ++j) {
-			sprintf(pName, "%s%d", name.c_str(), j);
+			sprintf(pName, "%s", name.c_str());
 			pFBXMesh = CFileBasedMesh::CreateMeshFromFBXFile(name, j);
 			pFBXMesh->SetTag(TAG_STATIC_OBJECT);
 			m_mvStempMesh[pName].push_back(pFBXMesh);

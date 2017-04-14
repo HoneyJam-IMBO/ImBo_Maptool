@@ -45,6 +45,7 @@ public:
 	BoundingOrientedBox& GetOBB(UINT index = 0) { return m_vOBB[index].GetOBB(); }
 	CBoundingBox& GetAABBObject(){ return m_AABB; }
 	CBoundingBox& GetOBBObject(UINT index = 0) { return m_vOBB[index]; }
+	vector<CBoundingBox>& GetvOBBObject() { return m_vOBB; }
 
 	void CMesh::CalculateVertexNormal(XMVECTOR *pxmvNormals);
 	void CMesh::SetTriAngleListVertexNormal(XMVECTOR *pxmvNormals);

@@ -177,7 +177,6 @@ void CSpace::PrepareRender(shared_ptr<CCamera> pCamera, UINT renderFlag){
 		}//end if
 		else {//leaf가 아니라면
 			for (int i = 0; i < 4; ++i) {
-
 				m_ppChildSpace[i]->PrepareRender(pCamera, renderFlag);//내 자식들 PrePareRender
 			}
 		}//end else
@@ -222,6 +221,12 @@ void CSpace::RemoveObject(string name){
 			}
 		}
 	}
+}
+
+void CSpace::GetMainBoundingBox(BoundingBox& out) {
+	out = m_OriBoundingBox;
+
+	out.Transform(out, GetWorldMtx());
 }
 
 CGameObject * CSpace::PickObject(XMVECTOR xmvWorldCameraStartPos, XMVECTOR xmvRayDir, float& distance){

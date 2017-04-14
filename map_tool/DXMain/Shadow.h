@@ -1,13 +1,16 @@
 #pragma once
 #include "DXObject.h"
 
+struct stStaticShadowInfo {
+	XMMATRIX xmmtxViewProj[MAX_SPACE_NUM];
+};
 struct stShadowInfo {
 	float bias{ 0.039f };
 	float bias_offset{ 0.0105f };
 	//UINT pad[2];
 	float kernelhalf{ 1.f };
 	float dist_sum{ 0.07f };
-	XMMATRIX xmmtxViewProj[MAX_SPACE_NUM];
+	XMMATRIX xmmtxViewProj;//동적 카메라
 };
 
 class CShadow :
@@ -42,6 +45,8 @@ private:
 	ID3D11RasterizerState* m_pd3dRSShader{ nullptr };
 	//shadow buffer
 	shared_ptr<CBuffer> m_pShadowBuf{ nullptr };
+	//shadow buffer
+	shared_ptr<CBuffer> m_pStaticShadowBuf{ nullptr };
 
 	stShadowInfo* m_pShadowInfo{ nullptr };
 	

@@ -1,7 +1,7 @@
 //SamplerComparisonState gssSHADOW : register(s4);
 SamplerState gssSHADOW : register(s4);
 Texture2D<float> ShadowMap : register(t5);
-Texture2DArray<float> StaticShadowMapArray : register(t9);
+//Texture2DArray<float> StaticShadowMapArray : register(t9);
 
 #define MAX_SPACE_NUM 64
 
@@ -25,8 +25,8 @@ float ShaderPCF(float3 position, float cosTheta) {
 	UVD.xy = 0.5 * UVD.xy + 0.5;
 	UVD.y = 1 - UVD.y;
 
-	//float LightDepth = ShadowMap.Sample(gssSHADOW, UVD.xy).x;
-	float LightDepth = StaticShadowMapArray.Sample(gssSHADOW, float3(UVD.xy, 0)).x;
+	float LightDepth = ShadowMap.Sample(gssSHADOW, UVD.xy).x;
+	//float LightDepth = StaticShadowMapArray.Sample(gssSHADOW, float3(UVD.xy, 0)).x;
 	float fCamposDepth = (UVD.z);
 
 	float value = bias;//d
@@ -46,8 +46,8 @@ float ShaderPCF(float3 position, float cosTheta) {
 			[unroll(9)]
 			for (x = -kernelhalf; x <= kernelhalf; x += 1.f){
 				float2 pcfUV = UVD + float2(x * fxlsize, y * fxlsize);
-				LightDepth = StaticShadowMapArray.Sample(gssSHADOW, float3(pcfUV, 0)).x;
-				//float LightDepth = ShadowMap.Sample(gssSHADOW, pcfUV).x;
+				//LightDepth = StaticShadowMapArray.Sample(gssSHADOW, float3(pcfUV, 0)).x;
+				LightDepth = ShadowMap.Sample(gssSHADOW, pcfUV).x;
 
 				if (LightDepth < fCamposDepth - bias){
 					sum += dist_sum;

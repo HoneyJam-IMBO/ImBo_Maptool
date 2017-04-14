@@ -26,6 +26,7 @@ bool CShadow::Begin(){
 	GLOBALVALUEMGR->GetDevice()->CreateRasterizerState(&descRasterizer, &m_pd3dRSShader);
 
 	m_pShadowBuf = RESOURCEMGR->CreateConstantBuffer("ShadowInfoBuffer", 1, sizeof(stShadowInfo), 4, BIND_PS);
+	m_pStaticShadowBuf = RESOURCEMGR->CreateConstantBuffer("StaticShadowInfoBuffer", 1, sizeof(stShadowInfo), 9, BIND_PS);
 
 	m_pShadowInfo = new stShadowInfo;
 
@@ -87,37 +88,24 @@ bool CShadow::End()
 	if (m_pCamera) {
 		m_pCamera->End();
 	}
+	//static shadow map clean
+	if (m_pShadowTexture){ 
+		m_pShadowTexture->CleanShaderState();
+		m_pShadowTexture->End();
+		m_pShadowTexture = nullptr;
+	}
 	return true;
 }
-ID3D11ShaderResourceView* txtTest = nullptr;
+
 void CShadow::SetShaderState(){
+	//동적 그림자 srv
 	ID3D11ShaderResourceView* pSRV[] = { m_pd3dsrvShadow };
-	if (txtTest) {
-		pSRV[0] = { txtTest };
-	}
 	GLOBALVALUEMGR->GetDeviceContext()->PSSetShaderResources(5, 1, pSRV);
+	//동적 그림자 srv
 
-	float offset = UPDATER->GetDirectionalLight()->GetOffsetLength();
-	XMVECTOR xmvDirectionalLightDir = UPDATER->GetDirectionalLight()->GetLook();
-	UINT SelectSpace = m_SelectSpace;
-	UINT nSpace = UPDATER->GetSpaceContainer()->GetSpaceNum();
-	XMVECTOR at;
-	XMFLOAT3 xmf3Pos;
-	stShadowInfo* pData = (stShadowInfo*)m_pShadowBuf->Map();
 	//이건 동적 그림자 카메라
-	//pData->xmmtxViewProj[0] = XMMatrixTranspose(m_pCamera->GetViewMtx()*m_pCamera->GetProjectionMtx());
-	for (int i = 0; i < UPDATER->GetSpaceContainer()->GetSpaceNum(); ++i) {
-		XMVECTOR xmPos = UPDATER->GetSpaceContainer()->GetAllSpace()[i]->GetPosition();
-		float pos_offset = (UPDATER->GetSpaceContainer()->GetOneSpaceSize() / 2);;
-		xmPos += XMVectorSet(pos_offset, pos_offset, pos_offset, 0);
-		XMStoreFloat3(&xmf3Pos, xmPos);
-		at = XMVectorSet(xmf3Pos.x, 0, xmf3Pos.z, 0);
-		XMVECTOR eye = at + xmvDirectionalLightDir*offset;
-		XMVECTOR up = { 0.0f, 1.0f, 0.0f, 0.0f };
-		m_pCamera->SetLookAt(eye, at, up);
-
-		pData->xmmtxViewProj[i] = XMMatrixTranspose(m_pCamera->GetViewMtx()*m_pCamera->GetProjectionMtx());
-	}
+	stShadowInfo* pData = (stShadowInfo*)m_pShadowBuf->Map();
+	pData->xmmtxViewProj = XMMatrixTranspose(m_pCamera->GetViewMtx()*m_pCamera->GetProjectionMtx());
 	pData->bias = m_pShadowInfo->bias * 0.00001;
 	pData->bias_offset = m_pShadowInfo->bias_offset * 0.00001;
 	pData->kernelhalf = m_pShadowInfo->kernelhalf;
@@ -125,15 +113,13 @@ void CShadow::SetShaderState(){
 
 	m_pShadowBuf->Unmap();
 	m_pShadowBuf->SetShaderState();
+	//이건 동적 그림자 카메라
 }
 
 void CShadow::CleanShaderState(){
 	ID3D11ShaderResourceView* pSRV[] = { nullptr };
 	GLOBALVALUEMGR->GetDeviceContext()->PSSetShaderResources(5, 1, pSRV);
 	m_pShadowBuf->CleanShaderState();
-
-	//static shadow map clean
-	if (m_pShadowTexture) m_pShadowTexture->CleanShaderState();
 }
 
 void CShadow::UpdateShaderState(){
@@ -141,40 +127,14 @@ void CShadow::UpdateShaderState(){
 }
 
 ID3D11ShaderResourceView * CShadow::RenderShadowMap(shared_ptr<CCamera> pCamera){
-	//static shadow map set
-	if(m_pShadowTexture) m_pShadowTexture->SetShaderState();
-
-	//set global value
-	if (INPUTMGR->KeyDown(VK_1)) {
-		//SaveShadow(L"../outputdata/shadowmap/", L"test_scene");
-		//EXPORTER->MakeSRVTexture(m_pd3dsrvShadow, L"../01.dds");
-	}
-	if (INPUTMGR->KeyDown(VK_2)) {
-		TexMetadata info;
-		ScratchImage image;
-		HRESULT hr = LoadFromDDSFile(L"../outputdata/shadowmap/test_sceneShadowMap0.dds", DDS_FLAGS_NONE, &info, image);
-		if (FAILED(hr))DEBUGER->DebugGMessageBox(L"fail", L"dds load key2");
-		CreateShaderResourceView(GLOBALVALUEMGR->GetDevice(), image.GetImages(), image.GetImageCount(), info, &txtTest);
-
-		LoadShadow(L"../outputdata/shadowmap/", L"test_scene");
-	}
-	if (INPUTMGR->KeyDown(VK_3)) {
-		if (txtTest)txtTest->Release();
-		//delete txtTest;
-		txtTest = nullptr;
-	}
-	if (txtTest) {
-		DEBUGER->AddDepthTexture(XMFLOAT2(300, 0), XMFLOAT2(500, 200), txtTest);
-		DEBUGER->AddDepthTexture(XMFLOAT2(300, 200), XMFLOAT2(500, 400), m_pd3dsrvRenderShadow);
-	}
-
+	
 	GLOBALVALUEMGR->GetDeviceContext()->ClearDepthStencilView(m_pd3ddsvShadow, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-
+	
 	ID3D11RasterizerState* pPrevRSState;
 	GLOBALVALUEMGR->GetDeviceContext()->RSGetState(&pPrevRSState);
 	GLOBALVALUEMGR->GetDeviceContext()->RSSetState(m_pd3dRSShader);
-
-
+	
+	
 	float offset = UPDATER->GetDirectionalLight()->GetOffsetLength();
 	XMVECTOR xmvDirectionalLightDir = UPDATER->GetDirectionalLight()->GetLook();
 	//XMVECTOR xmvCameraPos = pCamera->GetPosition();
@@ -188,7 +148,7 @@ ID3D11ShaderResourceView * CShadow::RenderShadowMap(shared_ptr<CCamera> pCamera)
 		//select space가 0이면 camera를 쫓아 다닌다.
 		if(pCamera) XMStoreFloat3(&xmf3Pos, pCamera->GetPosition());
 		else xmf3Pos = XMFLOAT3{ 0.f, 0.f, 0.f };
-
+	
 		at = XMVectorSet(xmf3Pos.x, 0, xmf3Pos.z, 0);
 	}
 	else if (SelectSpace <= nSpace) {
@@ -204,17 +164,18 @@ ID3D11ShaderResourceView * CShadow::RenderShadowMap(shared_ptr<CCamera> pCamera)
 	XMVECTOR up = { 0.0f, 1.0f, 0.0f, 0.0f };
 	m_pCamera->SetLookAt(eye, at, up);
 	m_pCamera->SetViewport(0, 0, 4096, 4096, 0.0f, 1.0f);
-
+	
 	m_pCamera->UpdateShaderState();
 	m_pCamera->SetShaderState();
-
-	UPDATER->GetSpaceContainer()->PrepareRenderOneSpace(m_pCamera, RTAG_TERRAIN | RTAG_DYNAMIC_OBJECT | RTAG_STATIC_OBJECT, SelectSpace - 1);
-
+	
+	//UPDATER->GetSpaceContainer()->PrepareRenderOneSpace(m_pCamera, RTAG_TERRAIN | RTAG_DYNAMIC_OBJECT | RTAG_STATIC_OBJECT, SelectSpace - 1);
+	UPDATER->GetSpaceContainer()->PrepareRender(m_pCamera, RTAG_TERRAIN | RTAG_DYNAMIC_OBJECT | RTAG_STATIC_OBJECT);
+	
 	ID3D11RenderTargetView*	rtNULL = nullptr;
 	GLOBALVALUEMGR->GetDeviceContext()->OMSetRenderTargets(1, &rtNULL, m_pd3ddsvShadow);
 	//GLOBALVALUEMGR->GetDeviceContext()->PSSetShaderResources(m_TextureStartSlot, 1, &m_pd3dsrvShadow);
 	RENDERER->GetObjectRenderer()->ExcuteShadowRender(m_pCamera);
-
+	
 	DEBUGER->AddDepthTexture(XMFLOAT2(500, 150), XMFLOAT2(750, 300), m_pd3dsrvShadow);
 	m_pCamera->SetViewport(0, 0, GLOBALVALUEMGR->GetrcClient().right, GLOBALVALUEMGR->GetrcClient().bottom, 0.0f, 1.0f);
 	GLOBALVALUEMGR->GetDeviceContext()->RSSetState(pPrevRSState);
@@ -332,6 +293,31 @@ void CShadow::LoadShadow(wstring wsOutputPath, wstring wsSceneName){
 	m_pShadowTexture = nullptr;
 
 	m_pShadowTexture = CTexture::CreateTexture(nSpace, ppstrShadowMapTextureNames, 9, BIND_PS);
+	//static shadow map set
+	if (m_pShadowTexture) m_pShadowTexture->SetShaderState();
+
+	float offset = UPDATER->GetDirectionalLight()->GetOffsetLength();
+	XMVECTOR xmvDirectionalLightDir = UPDATER->GetDirectionalLight()->GetLook();
+	UINT SelectSpace = m_SelectSpace;
+	XMVECTOR at;
+	XMFLOAT3 xmf3Pos;
+	stStaticShadowInfo* pData = (stStaticShadowInfo*)m_pStaticShadowBuf->Map();
+	//이건 정적 그림자 카메라 버퍼
+	for (int i = 0; i < UPDATER->GetSpaceContainer()->GetSpaceNum(); ++i) {
+		XMVECTOR xmPos = UPDATER->GetSpaceContainer()->GetAllSpace()[i]->GetPosition();
+		float pos_offset = (UPDATER->GetSpaceContainer()->GetOneSpaceSize() / 2);;
+		xmPos += XMVectorSet(pos_offset, pos_offset, pos_offset, 0);
+		XMStoreFloat3(&xmf3Pos, xmPos);
+		at = XMVectorSet(xmf3Pos.x, 0, xmf3Pos.z, 0);
+		XMVECTOR eye = at + xmvDirectionalLightDir*offset;
+		XMVECTOR up = { 0.0f, 1.0f, 0.0f, 0.0f };
+		m_pCamera->SetLookAt(eye, at, up);
+
+		pData->xmmtxViewProj[i] = XMMatrixTranspose(m_pCamera->GetViewMtx()*m_pCamera->GetProjectionMtx());
+	}
+	m_pStaticShadowBuf->Unmap();
+	m_pStaticShadowBuf->SetShaderState();
+
 }
 
 CShadow::CShadow()

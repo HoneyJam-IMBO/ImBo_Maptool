@@ -68,7 +68,8 @@ void CSpaceContainer::PrepareRenderOneSpace(shared_ptr<CCamera> pCamera, UINT re
 		PrepareRender(pCamera, renderFlag);
 	}else{
 		for (int i = 0; i < m_nSpace; ++i) {
-			if(render_space == i) m_ppSpace[i]->PrepareRender(renderFlag);
+			if(render_space == i) 
+				m_ppSpace[i]->PrepareRender(renderFlag);
 		}
 	}
 }

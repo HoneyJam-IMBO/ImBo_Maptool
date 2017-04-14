@@ -381,6 +381,9 @@ void CGameObject::GetMainBoundingBox(BoundingBox& out){
 		out.Transform(out, m_pAnimater->GetMeshOffsetMtx()*GetWorldMtx());
 		return;
 	}
+	else {
+		out = m_pRenderContainer->GetMesh()->GetAABB();
+	}
 
 	out.Transform(out, GetWorldMtx());
 }
