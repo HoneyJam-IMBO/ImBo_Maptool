@@ -137,7 +137,14 @@ bool CRenderer::End() {
 }
 
 void CRenderer::Render(shared_ptr<CCamera> pCamera) {
-	
+	RESOURCEMGR->GetSampler("WRAP_LINEAR")->SetShaderState();
+	RESOURCEMGR->GetSampler("WRAP_POINT")->SetShaderState();
+	//CLAMP
+	RESOURCEMGR->GetSampler("CLAMP_LINEAR")->SetShaderState();
+	RESOURCEMGR->GetSampler("CLAMP_POINT")->SetShaderState();
+	RESOURCEMGR->GetSampler("SHADOW")->SetShaderState();
+
+
 	//shadow render
 	m_pShadow->RenderShadowMap(pCamera);
 
@@ -149,6 +156,8 @@ void CRenderer::Render(shared_ptr<CCamera> pCamera) {
 	//CLEAR
 
 	//object
+	//object positioning 객체 랜더
+
 	UPDATER->GetSpaceContainer()->PrepareRender(pCamera);
 	pCamera->SetShaderState();
 	m_pObjectRenderer->Excute(pCamera);
@@ -159,6 +168,7 @@ void CRenderer::Render(shared_ptr<CCamera> pCamera) {
 	//OBJECT RENDER
 
 	//SSAO
+	//이건 light map이라고 생각하자
 	SetRenderTargetViews(1, &m_pd3drtvLight, m_pd3ddsvReadOnlyDepthStencil);
 	for (auto texture : m_vObjectLayerResultTexture) {
 		texture->SetShaderState();
@@ -171,49 +181,49 @@ void CRenderer::Render(shared_ptr<CCamera> pCamera) {
 	//SSAO
 
 	//LIGHT RENDER
-	SetMainRenderTargetView();
+	//SetMainRenderTargetView();
 	m_pLightRenderer->Excute(pCamera, m_pShadow);
 	for (auto texture : m_vObjectLayerResultTexture) {
 		texture->CleanShaderState();
 	}
 	//LIGHT RENDER
 
-	////SSLR
-	//if (m_bSSLROnOff) {
-	//	if (UPDATER->GetDirectionalLight()) {
-	//		D3D11_VIEWPORT oldvp;
-	//		UINT num = 1;
-	//		GLOBALVALUEMGR->GetDeviceContext()->RSGetViewports(&num, &oldvp);
-	//		ID3D11RasterizerState* pPrevRSState;
-	//		GLOBALVALUEMGR->GetDeviceContext()->RSGetState(&pPrevRSState);
-	//
-	//		XMVECTOR xmvSunDir = UPDATER->GetDirectionalLight()->GetLook();
-	//		XMFLOAT3 xmf3Color = UPDATER->GetDirectionalLight()->GetColor();
-	//		float fOffsetSunPos = UPDATER->GetDirectionalLight()->GetOffsetLength();
-	//		float fMaxSunDist = m_fSSLRMaxSunDist;// m_pFramework->GetCurScene()->GetSSLRMaxSunDist();
-	//		float fInitDecay = m_fSSLRInitDecay;// m_pFramework->GetCurScene()->GetSSLRInitDecay();
-	//		float fDistDecay = m_fSSLRDistDecay;// m_pFramework->GetCurScene()->GetSSLRDistDecay();
-	//		float fMaxDeltaLen = m_fSSLRMaxDeltaLen;//m_pFramework->GetCurScene()->GetSSLRMaxDeltaLen();
-	//
-	//		m_pSSLR->Excute(pCamera, m_pd3drtvLight, pAmbientOcclution, xmvSunDir, xmf3Color,
-	//			fOffsetSunPos, fMaxSunDist, fInitDecay, fDistDecay, fMaxDeltaLen);
-	//
-	//		// Restore the states
-	//		GLOBALVALUEMGR->GetDeviceContext()->RSSetViewports(num, &oldvp);
-	//		GLOBALVALUEMGR->GetDeviceContext()->RSSetState(pPrevRSState);
-	//		if (pPrevRSState)pPrevRSState->Release();
-	//	}
-	//}//sslr 모드가 true이면 sslr 실행 
-	////SSLR
-	//
-	////POST PROCESSING
-	//SetMainRenderTargetView();
-	//m_vLightLayerResultTexture[0]->SetShaderState();
-	//PostProcessing(pCamera);
-	//for (auto texture : m_vLightLayerResultTexture) {
-	//	texture->CleanShaderState();
-	//}
-	////POST PROCESSING
+	//SSLR
+	if (m_bSSLROnOff) {
+		if (UPDATER->GetDirectionalLight()) {
+			D3D11_VIEWPORT oldvp;
+			UINT num = 1;
+			GLOBALVALUEMGR->GetDeviceContext()->RSGetViewports(&num, &oldvp);
+			ID3D11RasterizerState* pPrevRSState;
+			GLOBALVALUEMGR->GetDeviceContext()->RSGetState(&pPrevRSState);
+	
+			XMVECTOR xmvSunDir = UPDATER->GetDirectionalLight()->GetLook();
+			XMFLOAT3 xmf3Color = UPDATER->GetDirectionalLight()->GetColor();
+			float fOffsetSunPos = UPDATER->GetDirectionalLight()->GetOffsetLength();
+			float fMaxSunDist = m_fSSLRMaxSunDist;// m_pFramework->GetCurScene()->GetSSLRMaxSunDist();
+			float fInitDecay = m_fSSLRInitDecay;// m_pFramework->GetCurScene()->GetSSLRInitDecay();
+			float fDistDecay = m_fSSLRDistDecay;// m_pFramework->GetCurScene()->GetSSLRDistDecay();
+			float fMaxDeltaLen = m_fSSLRMaxDeltaLen;//m_pFramework->GetCurScene()->GetSSLRMaxDeltaLen();
+	
+			m_pSSLR->Excute(pCamera, m_pd3drtvLight, pAmbientOcclution, xmvSunDir, xmf3Color,
+				fOffsetSunPos, fMaxSunDist, fInitDecay, fDistDecay, fMaxDeltaLen);
+	
+			// Restore the states
+			GLOBALVALUEMGR->GetDeviceContext()->RSSetViewports(num, &oldvp);
+			GLOBALVALUEMGR->GetDeviceContext()->RSSetState(pPrevRSState);
+			if (pPrevRSState)pPrevRSState->Release();
+		}
+	}//sslr 모드가 true이면 sslr 실행 
+	//SSLR
+	
+	//POST PROCESSING
+	SetMainRenderTargetView();
+	m_vLightLayerResultTexture[0]->SetShaderState();
+	PostProcessing(pCamera);
+	for (auto texture : m_vLightLayerResultTexture) {
+		texture->CleanShaderState();
+	}
+	//POST PROCESSING
 
 	//DEBUG
 	if (INPUTMGR->GetDebugMode()) {
@@ -222,12 +232,12 @@ void CRenderer::Render(shared_ptr<CCamera> pCamera) {
 
 		//if(testBotton){
 		//DEBUGER->AddTexture(XMFLOAT2(100, 100), XMFLOAT2(250, 250), m_pd3dsrvColorSpecInt);
-		//DEBUGER->AddTexture(XMFLOAT2(500, 0), XMFLOAT2(750, 150), m_pd3dsrvNormal);
+		DEBUGER->AddTexture(XMFLOAT2(500, 150), XMFLOAT2(750, 300), m_pd3dsrvNormal);
 		//DEBUGER->AddTexture(XMFLOAT2(100, 400), XMFLOAT2(250, 550), m_pd3dsrvLight);
 		//DEBUGER->AddTexture(XMFLOAT2(100, 100), XMFLOAT2(500, 500), m_pd3dsrvDepthStencil);
 		//debug
 		//DEBUGER->AddTexture(XMFLOAT2(500, 0), XMFLOAT2(750, 150), pAmbientOcclution);
-		DEBUGER->AddDepthTexture(XMFLOAT2(500, 0), XMFLOAT2(750, 150), m_pd3dsrvDepthStencil);
+		//DEBUGER->AddDepthTexture(XMFLOAT2(500, 0), XMFLOAT2(750, 150), m_pd3dsrvDepthStencil);
 		//DEBUGER->AddTexture(XMFLOAT2(300, 0), XMFLOAT2(600, 300), m_pd3dsrvDepthStencil);
 
 		//이건 꼭 여기서 해줘야함.
@@ -534,6 +544,17 @@ bool CRenderer::CreateRenderTargetView() {
 		pTexture = CTexture::CreateTexture(m_pd3dsrvLight, LightTexSlot, LightTexBindFlag);
 		m_vLightLayerResultTexture.push_back(pTexture);
 		//light texture제작
+
+		////lighted color texture제작
+		//GLOBALVALUEMGR->GetDevice()->CreateTexture2D(&d3dTexture2DDesc, nullptr, &m_pd3dtxtLight);
+		//GLOBALVALUEMGR->GetDevice()->CreateRenderTargetView(m_pd3dtxtLight, &d3dRTVDesc, &m_pd3drtvLight);
+		//GLOBALVALUEMGR->GetDevice()->CreateShaderResourceView(m_pd3dtxtLight, &d3dSRVDesc, &m_pd3dsrvLight);
+		//
+		////make texture
+		//UINT LightedColorTexSlot = { 0 };
+		//UINT LightedColorTexBindFlag = { BIND_PS | BIND_CS };
+		//m_LightedColorTexture = CTexture::CreateTexture(m_pd3dsrvLight, LightedColorTexSlot, LightedColorTexBindFlag);
+		////lighted colortexture제작
 	}
 	m_pAORenderer->ResizeBuffer();
 	m_pBloomDownScale->ResizeBuffer();

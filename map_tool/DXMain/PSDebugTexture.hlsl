@@ -14,5 +14,10 @@ struct VS_TEXTURED_OUTPUT {
 
 float4 main(VS_TEXTURED_OUTPUT input) : SV_Target{
 	float4 cColor = gtxtViewer.Sample(gssWRAP_LINEAR, input.texCoord);
+
+	//float depth = cColor.x;
+	//float linearDepth = ConvertDepthToLinear(depth) / 10000;
+	//return float4(linearDepth, linearDepth, linearDepth, 1.f);
+
 	return cColor;
 }

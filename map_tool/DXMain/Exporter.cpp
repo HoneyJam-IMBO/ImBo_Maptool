@@ -379,12 +379,13 @@ void CExporter::MakeSRVTexture(ID3D11ShaderResourceView* pSRV, wstring wFileName
 	//dsv의 texture를 인자로 넣어서 srv를 제작하는 함수를 제작한다.
 	ID3D11Resource* pRsc;
 	ScratchImage image;
-	TexMetadata info = image.GetMetadata();
 
 	pSRV->GetResource(&pRsc);
 	HRESULT hr = DirectX::CaptureTexture(GLOBALVALUEMGR->GetDevice(), GLOBALVALUEMGR->GetDeviceContext(), pRsc, image);
 	size_t nimg = image.GetImageCount();
 	const Image* img = image.GetImages();
-	hr = SaveToDDSFile(img, nimg, image.GetMetadata(), DDS_FLAGS_NONE, wFileName.c_str());
+	TexMetadata info = image.GetMetadata();
+
+	hr = SaveToDDSFile(img, nimg, info, DDS_FLAGS_NONE, wFileName.c_str());
 	if (FAILED(hr)) DEBUGER->DebugGMessageBox(L"message", L"fail_save");
 }

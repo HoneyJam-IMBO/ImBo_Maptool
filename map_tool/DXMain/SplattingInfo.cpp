@@ -99,7 +99,7 @@ void CSplattingInfo::CreateControllUI(){
 	DIRECTORYFINDER->GetFiles(vFile, L"../../Assets/Detail_Texture", true, true, L".PNG");
 
 	//const char* groupName = "File";
-	char menuName[64];
+	char menuName[256];
 	int cnt{ 0 };
 	m_vLoadFileStruct.resize(vFile.size());
 	for (auto data : vFile) {

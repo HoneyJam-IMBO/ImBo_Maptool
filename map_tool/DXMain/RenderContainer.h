@@ -71,7 +71,6 @@ public:
 protected:
 	//--------------------------관리 대상------------------------------
 	//컨테이너의 객체들은 동적으로 변할 것이다. 그러므로 리스트로 관리하는 것이 맞다
-	int m_nInstance{ 0 };
 	list<CGameObject*> m_lpObjects;
 
 	vector<shared_ptr<CMesh>> m_vpMesh;

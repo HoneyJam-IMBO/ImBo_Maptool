@@ -23,9 +23,6 @@ private:
 	ID3D11DepthStencilState* m_pd3dTempDepthStencilState{ nullptr };
 	UINT m_TempStencil{ 0 };
 
-	//rendercontainer map!
-	mapRenderContainer m_mObjectRenderContainer;
-	
 	CRenderContainer* m_pTerrainRenderContainer{ nullptr };
 	CRenderContainer* m_pSkyBoxRenderContainer{ nullptr };
 public:

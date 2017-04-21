@@ -28,16 +28,10 @@ struct VS_SKYBOX_CUBEMAP_OUTPUT
 	float4	position : SV_POSITION;
 };
 
-float4 main(VS_SKYBOX_CUBEMAP_OUTPUT input) : SV_Target
-{
-
+float4 main(VS_SKYBOX_CUBEMAP_OUTPUT input) : SV_Target{
 	PS_GBUFFER_OUT output = (PS_GBUFFER_OUT)0;
-
-float4 cColor = gtxtSkyBox.Sample(gssWRAP_LINEAR, input.positionL);
-return cColor;
-//sky box 조명 연산을 위한 render..
-//float Depth = input.position.z / input.position.w;
-//
-//return (PackGBuffer(cColor, normalize(float3(1, 0, 0)), input.positionW, gSpecIntensity, gSpecExp, Depth));
-
+	float4 cColor = gtxtSkyBox.Sample(gssWRAP_LINEAR, input.positionL);
+	return cColor;
+	//sky box 조명 연산을 위한 render..
+	//return (PackGBuffer(cColor.xyz, float3(0, 0, 0), float3(1, 1, 1), gSpecExp));
 }

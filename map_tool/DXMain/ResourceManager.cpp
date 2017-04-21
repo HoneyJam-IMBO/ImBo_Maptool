@@ -254,30 +254,12 @@ void CResourceManager::CreateMeshs() {
 	CreateStempMeshs();
 	//mesh
 }
-string GetFileName(string path) {
-	size_t size = path.size();
-	char name[64];
-	int index{ 0 };
-	for (int i = size - 1; i > 1; i--) {
-		if (path[i] == '\\' | path[i] == '/') {
-			for (int j = i + 1; j < size; ++j) {
-				if (path[j] == '.') break;
-				name[index++] = path[j];
-			}
-			name[index] = '\0';
-			break;
-		}
-	}
-	return name;
-}
 void CResourceManager::CreateStempMeshs() {
 	
 	vector<wstring> vFile;
-	DIRECTORYFINDER->GetFiles(vFile, L"../inputdata", true, true, L".fbx");
-	DIRECTORYFINDER->GetFiles(vFile, L"../inputdata", true, true, L".FBX");
-	DIRECTORYFINDER->GetFiles(vFile, L"../outputdata", true, true, L".gjm");
-	DIRECTORYFINDER->GetFiles(vFile, L"../outputdata", true, true, L".GJM");
-	
+	DIRECTORYFINDER->GetFiles(vFile, L"../../Assets/SceneResource", true, true, L".gjm");
+	DIRECTORYFINDER->GetFiles(vFile, L"../../Assets/SceneResource", true, true, L".GJM");
+
 	int i{ 0 };
 	string name;
 	for (auto fileName : vFile) {
@@ -321,6 +303,8 @@ void CResourceManager::CreateBuffers() {
 	CreateConstantBuffer("CapsuleLightCB2", 1000, sizeof(CAPSULE_LIGHT_PS_CB), PS_OBJECT_BUFFER_SLOT, BIND_PS);
 
 	CreateConstantBuffer("TerrainCB", 1, sizeof(TERRAIN_GLOBAL_VALUE), VS_GLOBAL_BUFFER_SLOT, BIND_VS | BIND_DS);
+//	CreateConstantBuffer("SpaceCB", 1, sizeof(SPACE_GLOBAL_VALUE), 11, BIND_PS);
+
 }
 
 void CResourceManager::CreateGlobalBuffers() {
@@ -608,6 +592,12 @@ void CResourceManager::ReleaseStempMeshs() {
 		vMesh.second.clear();
 	}
 	m_mvStempMesh.clear();
+}
+
+void CResourceManager::ReleaseAllResource(){
+	ReleaseTextures();
+	ReleaseStempMeshs();      //gjm
+	ReleaseAnimaters();
 }
 
 void CResourceManager::ReleaseMesh(string name) {

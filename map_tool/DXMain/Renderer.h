@@ -82,11 +82,19 @@ private:
 	vector<shared_ptr<CTexture>> m_vObjectLayerResultTexture;
 	vector<shared_ptr<CTexture>> m_vLightLayerResultTexture;
 
-	//--------------------------light render target----------------
+	//--------------------------light map render target----------------
 	ID3D11Texture2D			 *m_pd3dtxtLight{ nullptr };
 	ID3D11ShaderResourceView *m_pd3dsrvLight{ nullptr };
 	ID3D11RenderTargetView   *m_pd3drtvLight{ nullptr };
-	//--------------------------light render target----------------
+	//--------------------------light map render target----------------
+
+	////--------------------------light render target----------------
+	//ID3D11Texture2D			 *m_pd3dtxtLightedColor{ nullptr };
+	//ID3D11ShaderResourceView *m_pd3dsrvLightedColor{ nullptr };
+	//ID3D11RenderTargetView   *m_pd3drtvLightedColor{ nullptr };
+	////--------------------------light render target----------------
+	//shared_ptr<CTexture> m_LightedColorTexture;
+
 	//-------------------------layer-------------------------
 	CObjectRenderer* m_pObjectRenderer{ nullptr };
 	CAORenderer* m_pAORenderer{ nullptr };

@@ -381,9 +381,9 @@ void CGameObject::GetMainBoundingBox(BoundingBox& out){
 		out.Transform(out, m_pAnimater->GetMeshOffsetMtx()*GetWorldMtx());
 		return;
 	}
-	else {
-		out = m_pRenderContainer->GetMesh()->GetAABB();
-	}
+	//else {
+	//	out = m_pRenderContainer->GetMesh()->GetAABB();
+	//}
 
 	out.Transform(out, GetWorldMtx());
 }
@@ -458,13 +458,13 @@ void CGameObject::CreateMenuMeshTextureUI(){
 	TWBARMGR->AddBar(barName);
 
 	vector<wstring> vFile;
-	DIRECTORYFINDER->GetFiles(vFile, L"../inputdata", true, true, L".jpg");
-	DIRECTORYFINDER->GetFiles(vFile, L"../inputdata", true, true, L".JPG");
-	DIRECTORYFINDER->GetFiles(vFile, L"../inputdata", true, true, L".png");
-	DIRECTORYFINDER->GetFiles(vFile, L"../inputdata", true, true, L".PNG");
+	DIRECTORYFINDER->GetFiles(vFile, L"../../Assets", true, true, L".jpg");
+	DIRECTORYFINDER->GetFiles(vFile, L"../../Assets", true, true, L".JPG");
+	DIRECTORYFINDER->GetFiles(vFile, L"../../Assets", true, true, L".png");
+	DIRECTORYFINDER->GetFiles(vFile, L"../../Assets", true, true, L".PNG");
 
 	const char* groupName = "TextureFile";
-	char menuName[64];
+	char menuName[256];
 	int cnt{ 0 };
 	m_vStructLoadTextureFile.resize(vFile.size());
 	for (auto data : vFile) {

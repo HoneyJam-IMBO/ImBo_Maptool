@@ -5,7 +5,7 @@
 bool CUpdater::Begin() {
 	//--------------------------------------space-------------------------------------
 	//space
-	SetSpaceContainer(CSpaceContainer::CreateSpaceContainer(512, 2));
+	SetSpaceContainer(CSpaceContainer::CreateSpaceContainer(512, 0));
 	//terrain
 	SetTerrainContainer(CTerrainContainer::CreateTerrainContainer(L"Temp", 256, 256, 0.5, UPDATER->GetSpaceContainer(), true));
 	//skybox
@@ -15,7 +15,7 @@ bool CUpdater::Begin() {
 	m_pDirectionalLight = new CDirectionalLight;
 	m_pDirectionalLight->Begin(DIRECTIONAL_AMBIENT_LIGHT{
 		XMFLOAT4(1.0f, -1.0f, 1.0f, 0.0f),XMFLOAT4(0.1f, 0.1f, 0.1f, 0.0f) , XMFLOAT4(1.5f, 1.5f, 1.5f, 1.f),//dir
-		XMFLOAT4(0.1f, 0.1f, 0.1f, 1.f), XMFLOAT4(0.1f, 0.1f, 0.1f, 1.f), XMFLOAT4(0.1f, 0.1f, 0.1f, 1.f), XMFLOAT4(5.1f, 5.1f, 5.1f, 1.f)//ambient
+		XMFLOAT4(0.1f, 0.1f, 0.1f, 1.f), XMFLOAT4(0.1f, 0.1f, 0.1f, 1.f), XMFLOAT4(0.1f, 0.1f, 0.1f, 1.f), XMFLOAT4(0.1f, 0.1f, 0.1f, 1.f)//ambient
 	});
 	m_pDirectionalLight->SetPosition(XMVectorSet(m_pSpaceContainer->GetSize() / 2.f, m_pSpaceContainer->GetSize(), m_pSpaceContainer->GetSize() / 2.f, 0.f));
 	m_pDirectionalLight->Rotate(30.f, 0.f, 0.f);

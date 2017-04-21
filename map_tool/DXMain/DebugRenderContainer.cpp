@@ -33,7 +33,6 @@ void CDebugRenderContainer::UpdateShaderState(shared_ptr<CCamera> pCamera) {
 			nInstance++;
 	}
 
-	m_nInstance = nInstance;
 	//unmap
 	for (auto p : m_vpBuffer) {
 		p->Unmap();

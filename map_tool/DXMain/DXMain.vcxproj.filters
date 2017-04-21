@@ -405,6 +405,9 @@
     <Filter Include="소스 파일\SingleTon\FileInputOutput\Exporter\dds">
       <UniqueIdentifier>{3b7c5612-0583-4516-8c25-0fe9d14313bb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\FUnc">
+      <UniqueIdentifier>{5f96aff2-04d3-4be1-9142-7de70146e5a0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -722,6 +725,9 @@
     <ClInclude Include="dds.h">
       <Filter>소스 파일\SingleTon\FileInputOutput\Exporter\dds</Filter>
     </ClInclude>
+    <ClInclude Include="Func.h">
+      <Filter>소스 파일\FUnc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -1026,6 +1032,9 @@
     </ClCompile>
     <ClCompile Include="dds.cpp">
       <Filter>소스 파일\SingleTon\FileInputOutput\Exporter\dds</Filter>
+    </ClCompile>
+    <ClCompile Include="Func.cpp">
+      <Filter>소스 파일\FUnc</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

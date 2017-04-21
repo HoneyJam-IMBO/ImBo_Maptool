@@ -314,23 +314,7 @@ shared_ptr<CFileBasedMesh> CFileBasedMesh::CreateMeshFromGJMFile(string name, UI
 	}
 	//다른 tool에 추가되야 할 부분
 	if (false == bHasAnimation) {
-		XMFLOAT3 xmf3Pos;
-		xmf3Pos.x = IMPORTER->ReadFloat();
-		xmf3Pos.y = IMPORTER->ReadFloat();
-		xmf3Pos.z = IMPORTER->ReadFloat();
-
-		XMFLOAT3 xmf3Scale;
-		xmf3Scale.x = IMPORTER->ReadFloat();
-		xmf3Scale.y = IMPORTER->ReadFloat();
-		xmf3Scale.z = IMPORTER->ReadFloat();
-		
-		pFileBasedMesh->GetAABBObject().Begin(XMLoadFloat3(&xmf3Pos), XMVectorSet(xmf3Scale.x, xmf3Scale.y, xmf3Scale.z, 1.0f));;
-
-		int obbCnt = IMPORTER->ReadInt();
-
-		//obb info
-		//WriteWCHAR(L"ObbInfos"); WriteSpace();
-		for (int i = 0; i < obbCnt; ++i) {
+		if (index == 0) {
 			XMFLOAT3 xmf3Pos;
 			xmf3Pos.x = IMPORTER->ReadFloat();
 			xmf3Pos.y = IMPORTER->ReadFloat();
@@ -340,18 +324,36 @@ shared_ptr<CFileBasedMesh> CFileBasedMesh::CreateMeshFromGJMFile(string name, UI
 			xmf3Scale.x = IMPORTER->ReadFloat();
 			xmf3Scale.y = IMPORTER->ReadFloat();
 			xmf3Scale.z = IMPORTER->ReadFloat();
+			
+			pFileBasedMesh->GetAABBObject().Begin(XMLoadFloat3(&xmf3Pos), XMVectorSet(xmf3Scale.x, xmf3Scale.y, xmf3Scale.z, 1.0f));
+			
+			int obbCnt = IMPORTER->ReadInt();
 
-			XMFLOAT4 xmf4Quaternion;
-			xmf4Quaternion.x = IMPORTER->ReadFloat();
-			xmf4Quaternion.y = IMPORTER->ReadFloat();
-			xmf4Quaternion.z = IMPORTER->ReadFloat();
-			xmf4Quaternion.w = IMPORTER->ReadFloat();
+			//obb info
+			//WriteWCHAR(L"ObbInfos"); WriteSpace();
+			for (int i = 0; i < obbCnt; ++i) {
+				XMFLOAT3 xmf3Pos;
+				xmf3Pos.x = IMPORTER->ReadFloat();
+				xmf3Pos.y = IMPORTER->ReadFloat();
+				xmf3Pos.z = IMPORTER->ReadFloat();
 
-			CBoundingBox obb;
-			obb.Begin(XMLoadFloat3(&xmf3Pos), XMVectorSet(xmf3Scale.x, xmf3Scale.y, xmf3Scale.z, 1.0f), XMLoadFloat4(&xmf4Quaternion));
-			obb.SetActive(true);
-			pFileBasedMesh->GetvOBBObject().push_back(obb);
-		}//end obb for 
+				XMFLOAT3 xmf3Scale;
+				xmf3Scale.x = IMPORTER->ReadFloat();
+				xmf3Scale.y = IMPORTER->ReadFloat();
+				xmf3Scale.z = IMPORTER->ReadFloat();
+
+				XMFLOAT4 xmf4Quaternion;
+				xmf4Quaternion.x = IMPORTER->ReadFloat();
+				xmf4Quaternion.y = IMPORTER->ReadFloat();
+				xmf4Quaternion.z = IMPORTER->ReadFloat();
+				xmf4Quaternion.w = IMPORTER->ReadFloat();
+
+				CBoundingBox obb;
+				obb.Begin(XMLoadFloat3(&xmf3Pos), XMVectorSet(xmf3Scale.x, xmf3Scale.y, xmf3Scale.z, 1.0f), XMLoadFloat4(&xmf4Quaternion));
+				obb.SetActive(true);
+				pFileBasedMesh->GetvOBBObject().push_back(obb);
+			}//end obb for 
+		}
 	}
 	pFileBasedMesh->Begin();
 	return pFileBasedMesh;

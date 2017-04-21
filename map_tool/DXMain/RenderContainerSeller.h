@@ -11,15 +11,18 @@ public:
 	bool End();
 
 	mapTagRenderContainer& GetTagRenderContainer() { return m_mTagRenderContainer; }
-	//mapRenderContainer GetTagRenderContainer(tag t) { return m_mTagRenderContainer[t]; }
+	mapTagRenderContainer& GetStempRenderContainer() { return m_mStempRenderContainer; }
+
 	CRenderContainer* GetRenderContainer(string name);
 	CRenderContainer* GetRenderContainer(tag t, string name);
 
-private:
+
+	void ClearStempRenderContainer();
 	void CreateStempRenderContainer();
+private:
 	//이게 진짜 rendercontainer
 	mapTagRenderContainer m_mTagRenderContainer;
-
+	mapTagRenderContainer m_mStempRenderContainer;
 public:
 	CRenderContainerSeller() : CSingleTonBase<CRenderContainerSeller>("inputmanagersingleton") {}
 

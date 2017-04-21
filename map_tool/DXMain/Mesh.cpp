@@ -45,7 +45,7 @@ bool CMesh::End() {
 }
 void CMesh::SetShaderState() {
 	for (auto pTexture : m_vMeshTexture) {
-		pTexture->SetShaderState();
+		if(pTexture)pTexture->SetShaderState();
 	}
 	if (m_pMeshMaterial) m_pMeshMaterial->SetShaderState();
 
@@ -61,7 +61,7 @@ void CMesh::SetShaderState() {
 
 void CMesh::CleanShaderState(){
 	for (auto pTexture : m_vMeshTexture) {
-		pTexture->CleanShaderState();
+		if(pTexture)pTexture->CleanShaderState();
 	}
 }
 

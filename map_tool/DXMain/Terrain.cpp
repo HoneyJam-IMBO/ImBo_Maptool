@@ -5,6 +5,7 @@
 bool CTerrain::Begin() {
 	//object_id set
 //	m_objectID = object_id::OBJECT_TERRAIN;
+	SetPositionY(128);
 
 	if (m_pTerrainContainer->GetIsTool()) {
 		CGameObject::Begin();

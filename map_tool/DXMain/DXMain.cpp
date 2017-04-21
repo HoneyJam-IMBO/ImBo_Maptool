@@ -120,8 +120,10 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 	   , WS_OVERLAPPEDWINDOW
 	   , 0
 	   , 0
-	   , 1680
-	   , 1050
+	   //, 1680
+	   //, 1050
+	   , 1024
+	   , 784
 	   , nullptr
 	   , nullptr
 	   , hInstance

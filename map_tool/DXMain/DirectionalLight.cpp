@@ -67,7 +67,13 @@ void CDirectionalLight::PickingProc(){
 	CGameObject::PickingProc();
 
 	//color
+	XMFLOAT4 m_AmbientDown;
+	XMFLOAT4 m_AmbientRange;
+	XMFLOAT4 m_AmbientUp;
 	TWBARMGR->AddColorBar4F("PickingBar", "Light", "AmbientColor", &m_Directional_AmbientData.m_AmbientColor);
+	TWBARMGR->AddColorBar4F("PickingBar", "Light", "AmbientUp", &m_Directional_AmbientData.m_AmbientUp);
+	TWBARMGR->AddColorBar4F("PickingBar", "Light", "AmbientDown", &m_Directional_AmbientData.m_AmbientDown);
+
 	TWBARMGR->AddColorBar4F("PickingBar", "Light", "DirColor", &m_Directional_AmbientData.m_DirLightColor);
 	TWBARMGR->AddMinMaxBarRW("PickingBar", "Light", "DirPosOffset", &m_fOffsetLength,
 		10.f, 1000.f, 0.1f);

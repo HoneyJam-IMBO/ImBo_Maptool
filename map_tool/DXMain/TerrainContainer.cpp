@@ -566,7 +566,13 @@ void CTerrainContainer::CreateResetTextures(LPCTSTR pTerrainName) {
 	WCHAR path[256];
 	wsprintf(path, L"../%sHeightMap.bmp", pTerrainName);//name
 	m_pHeightData = new Pixel24[(m_nWidth) * (m_nLength)];//pixel data
-	ZeroMemory(m_pHeightData, sizeof(Pixel24) * (m_nWidth) * (m_nLength));
+	for (int i = 0; i < m_nWidth*m_nLength; ++i) {
+		m_pHeightData[i].r = 128;
+		m_pHeightData[i].g = 128;
+		m_pHeightData[i].b = 128;
+	}
+
+	//ZeroMemory(m_pHeightData, sizeof(Pixel24) * (m_nWidth) * (m_nLength));
 	EXPORTER->MakeBitmap24(path, m_pHeightData, m_nWidth, m_nLength);
 	m_pHeightMapTexture = CTexture::CreateTexture(path, 1, BIND_DS);
 	m_pBaseTexture = CTexture::CreateTexture(L"../../Assets/default.jpg", 0);

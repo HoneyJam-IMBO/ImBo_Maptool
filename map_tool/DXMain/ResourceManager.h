@@ -80,6 +80,7 @@ public:
 	shared_ptr<CMaterial> GetMaterial(string name) { return m_mMaterial[name]; }
 	shared_ptr<CAnimater> GetAnimater(string name) { return m_mAnimater[name]; }
 
+	void ReleaseAllResource();
 
 	void ReleaseMesh(string name);
 	void ReleaseStempMesh(string name);

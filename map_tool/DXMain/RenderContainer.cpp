@@ -22,6 +22,8 @@ bool CRenderContainer::End() {
 
 //--------------------------container---------------------------------
 void CRenderContainer::UpdateShaderState(shared_ptr<CCamera> pCamera) {
+	if (m_vpBuffer.empty()) return;
+
 	if(m_pAnimater) m_pAnimater->Update(TIMEMGR->GetTimeElapsed());
 
 	m_pShader->UpdateShaderState();
@@ -38,8 +40,6 @@ void CRenderContainer::UpdateShaderState(shared_ptr<CCamera> pCamera) {
 	//if (m_pGlobalBuffer) m_pGlobalBuffer->UpdateShaderState();
 	//----------------------------update instance buffer--------------------------
 
-	if (m_vpBuffer.empty()) return;
-
 	int nInstance = 0;
 	
 	int nBuffer = 0;
@@ -49,16 +49,12 @@ void CRenderContainer::UpdateShaderState(shared_ptr<CCamera> pCamera) {
 	}
 	
 	for (auto pObject : m_lpObjects) {
-		if (pObject->IsVisible(pCamera)) {
-			DEBUGER->RegistToDebugRenderContainer(pObject);
-			pObject->RegistToDebuger();
-			pObject->SetBufferInfo(m_ppBufferData, nInstance, pCamera);
-			nInstance++;
-		}
+		DEBUGER->RegistToDebugRenderContainer(pObject);
+		pObject->RegistToDebuger();
+		pObject->SetBufferInfo(m_ppBufferData, nInstance, pCamera);
+		nInstance++;
 	}
 
-	m_nInstance = nInstance;
-	
 	//unmap
 	for (auto p : m_vpBuffer) {
 		p->Unmap();
@@ -95,11 +91,10 @@ void CRenderContainer::ClearVolatileResources(){
 }
 
 void CRenderContainer::RenderExcute() {
-	if (m_nInstance > 0) {
-		for (auto p : m_vpMesh) {
-			p->Render(m_nInstance);
-		}
+	for (auto p : m_vpMesh) {
+		p->Render(m_lpObjects.size());
 	}
+	
 }
 void CRenderContainer::RenderExcuteWithOutObject(){
 	for (auto p : m_vpMesh) {
@@ -131,6 +126,7 @@ void CRenderContainer::CleanShaderState() {
 
 //--------------------------container 불변 함수---------------------------------
 void CRenderContainer::Render(shared_ptr<CCamera> pCamera) {
+	if (m_lpObjects.empty()) return;
 
 	//shader State Update/ Instancing Buffet Update
 	UpdateShaderState(pCamera);

@@ -20,6 +20,7 @@ float4 main(DS_OUTPUT input) : SV_TARGET
 	//float2 uv = input.UV;
 	float2 uv = input.Position.xy;
 	SURFACE_DATA gbd = UnpackGBuffer(uv);
+
 	//return float4(gbd.Normal,1.0);
 	//재질 구조체로 데이터 변환
 	Material mat;

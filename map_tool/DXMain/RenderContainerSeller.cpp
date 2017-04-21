@@ -188,6 +188,14 @@ bool CRenderContainerSeller::End(){
 		pairTagRenderContainer.second.clear();
 	}
 	m_mTagRenderContainer.clear();
+
+	for (auto pairTagRenderContainer : m_mStempRenderContainer) {
+		for (auto pairRenderContainer : pairTagRenderContainer.second) {
+			delete pairRenderContainer.second;
+		}
+		pairTagRenderContainer.second.clear();
+	}
+	m_mStempRenderContainer.clear();
 	//render container delete
 
 	return true;
@@ -196,6 +204,10 @@ bool CRenderContainerSeller::End(){
 CRenderContainer* CRenderContainerSeller::GetRenderContainer(string name) {
 	//있으면 바로 return
 	for (auto pairTagRenderContainer : m_mTagRenderContainer) {
+		if (pairTagRenderContainer.second.end() != pairTagRenderContainer.second.find(name))
+			return pairTagRenderContainer.second[name];
+	}
+	for (auto pairTagRenderContainer : m_mStempRenderContainer) {
 		if (pairTagRenderContainer.second.end() != pairTagRenderContainer.second.find(name))
 			return pairTagRenderContainer.second[name];
 	}
@@ -208,7 +220,22 @@ CRenderContainer * CRenderContainerSeller::GetRenderContainer(tag t, string name
 		if (m_mTagRenderContainer[t].end() != m_mTagRenderContainer[t].find(name))
 			return m_mTagRenderContainer[t][name];
 	}
+	if (m_mStempRenderContainer.end() != m_mStempRenderContainer.find(t)) {
+		if (m_mStempRenderContainer[t].end() != m_mStempRenderContainer[t].find(name))
+			return m_mStempRenderContainer[t][name];
+	}
 	return nullptr;
+}
+void CRenderContainerSeller::ClearStempRenderContainer(){
+	{
+		for (auto pairTagRenderContainer : m_mStempRenderContainer) {
+			for (auto pairRenderContainer : pairTagRenderContainer.second) {
+				delete pairRenderContainer.second;
+			}
+			pairTagRenderContainer.second.clear();
+		}
+		m_mStempRenderContainer.clear();
+	}
 }
 void CRenderContainerSeller::CreateStempRenderContainer(){
 	//tag는 mesh에서 얻어와야 한다. 
@@ -217,33 +244,33 @@ void CRenderContainerSeller::CreateStempRenderContainer(){
 	for (auto vStempMesh : RESOURCEMGR->GetAllStempMesh()) {
 		string name = vStempMesh.second[0]->GetName();
 		tag t = vStempMesh.second[0]->GetTag();
-		m_mTagRenderContainer[t][name] = new CRenderContainer;
+		m_mStempRenderContainer[t][name] = new CRenderContainer;
 		shared_ptr<CAnimater> pAnimater = RESOURCEMGR->GetAnimater(name);
 		//animation
 		if (pAnimater) {
-			m_mTagRenderContainer[t][name]->SetShader(RESOURCEMGR->GetRenderShader("AnimationObject"));
-			m_mTagRenderContainer[t][name]->SetAnimater(RESOURCEMGR->GetAnimater(name));
+			m_mStempRenderContainer[t][name]->SetShader(RESOURCEMGR->GetRenderShader("AnimationObject"));
+			m_mStempRenderContainer[t][name]->SetAnimater(RESOURCEMGR->GetAnimater(name));
 		}
 		else {
-			m_mTagRenderContainer[t][name]->SetShader(RESOURCEMGR->GetRenderShader("DEFAULT"));
+			m_mStempRenderContainer[t][name]->SetShader(RESOURCEMGR->GetRenderShader("DEFAULT"));
 		}
 		//animation
 		//mesh
 		for (auto pStempMesh : vStempMesh.second) {
-			m_mTagRenderContainer[t][name]->AddMesh(pStempMesh);
+			m_mStempRenderContainer[t][name]->AddMesh(pStempMesh);
 		}//mesh가 1개 이상이면 mesh material, texture를 사용한다.
 		if (vStempMesh.second.size() == 1) {
 			//mesh가 1개라면 
 			//mseh의 resource를 rc로 옮기고 
-			m_mTagRenderContainer[t][name]->AddMaterial(vStempMesh.second[0]->GetMeshMaterial());
+			m_mStempRenderContainer[t][name]->AddMaterial(vStempMesh.second[0]->GetMeshMaterial());
 			for (auto pTexture : vStempMesh.second[0]->GetvMeshTexture()) {
-				m_mTagRenderContainer[t][name]->AddTexture(pTexture);
+				m_mStempRenderContainer[t][name]->AddTexture(pTexture);
 			}
 			//자신이 가진 resource는 지워준다.
 			vStempMesh.second[0]->ClearMeshResources();
 		}
 		//mesh
-		m_mTagRenderContainer[t][name]->AddInstanceBuffer(RESOURCEMGR->GetBuffer("DEFAULTIB"));
+		m_mStempRenderContainer[t][name]->AddInstanceBuffer(RESOURCEMGR->GetBuffer("DEFAULTIB"));
 	}
 }
 //

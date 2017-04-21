@@ -207,3 +207,6 @@ enum shader_value_num {
 #define			UPDATER	    CUpdater::GetInstance()
 
 #define USE_ANIM
+
+
+#include "Func.h"

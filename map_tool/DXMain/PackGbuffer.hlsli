@@ -27,6 +27,5 @@ PS_GBUFFER_OUT PackGBuffer(float3 BaseColor, float3 Normal, float3 SpecIntensity
 	Out.SpecPow_Int = float4(SpecIntensity, SpecPowerNorm);
 	//Out.PositionW_SpecPow.xyz = PositionW;
 
-	
 	return Out;
 }

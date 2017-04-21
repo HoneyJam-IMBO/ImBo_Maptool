@@ -272,6 +272,7 @@
     <ClInclude Include="Updater.h" />
     <ClInclude Include="VertexData.h" />
     <ClInclude Include="SkeletonData.h" />
+    <ClInclude Include="Func.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Animater.cpp" />
@@ -312,6 +313,7 @@
     <ClCompile Include="Exporter.cpp" />
     <ClCompile Include="FileExporter.cpp" />
     <ClCompile Include="FileImporter.cpp" />
+    <ClCompile Include="Func.cpp" />
     <ClCompile Include="GlobalValueManager.cpp" />
     <ClCompile Include="Importer.cpp" />
     <ClCompile Include="InputManager.cpp" />
