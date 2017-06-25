@@ -4,7 +4,8 @@
 
 bool CTerrain::Begin() {
 	//object_id set
-	m_objectID = object_id::OBJECT_TERRAIN;
+//	m_objectID = object_id::OBJECT_TERRAIN;
+	SetPositionY(128);
 
 	if (m_pTerrainContainer->GetIsTool()) {
 		CGameObject::Begin();
@@ -13,7 +14,7 @@ bool CTerrain::Begin() {
 	else {
 		XMStoreFloat4x4(&m_xmf4x4World, XMMatrixIdentity());
 		XMStoreFloat4(&m_xmf4Quaternion, XMQuaternionIdentity());
-		m_pRenderContainer = RCSELLER->GetRenderContainer(m_objectID);
+		m_pRenderContainer = RCSELLER->GetRenderContainer("terrain");
 
 		float fx = static_cast<float>(m_pTerrainContainer->GetSpaceContainer()->GetOneSpaceSize());
 		float fy = static_cast<float>(m_pTerrainContainer->GetSpaceContainer()->GetSpaceSize());
@@ -67,6 +68,14 @@ CTerrain* CTerrain::CreateTerrain(CTerrainContainer * pTerrainContainer, int x, 
 	pTerrainContainer->GetSpaceContainer()->AddObject(pTerrain);
 
 	return pTerrain;
+}
+
+void CTerrain::SaveInfo()
+{
+}
+
+void CTerrain::LoadInfo()
+{
 }
 
 CTerrain::CTerrain() : CGameObject("terrain", tag::TAG_TERRAIN) {

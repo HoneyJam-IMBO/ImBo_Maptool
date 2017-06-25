@@ -9,8 +9,8 @@ bool CSSLR::Begin(){
 	m_pRayTraceCB = CBuffer::CreateConstantBuffer(1, sizeof(CB_LIGHT_RAYS), 0, BIND_PS);
 
 	m_pMakeOcclussionComputeShader = CComputeShader::CreateComputeShader(TEXT("Occlussion.cso"));
-	m_pLayTraceRenderContainer = RCSELLER->GetRenderContainer(object_id::OBJECT_LAYTRACE);
-	m_pConmbineRenderContainer = RCSELLER->GetRenderContainer(object_id::OBJECT_COMBINE);
+	m_pLayTraceRenderContainer = RCSELLER->GetRenderContainer("laytrace");
+	m_pConmbineRenderContainer = RCSELLER->GetRenderContainer("combine");
 
 	// Create the additive blend state
 	D3D11_BLEND_DESC descBlend;
@@ -218,7 +218,7 @@ void CSSLR::ResizeBuffer() {
 	};
 	dsrvd.Texture2D.MipLevels = 1;
 	GLOBALVALUEMGR->GetDevice()->CreateShaderResourceView(m_pOcclusionTex, &dsrvd, &m_pOcclusionSRV);
-	m_pOcclussionTexture = CTexture::CreateTexture(m_pOcclusionSRV, RESOURCEMGR->GetSampler("CLAMPSAMPLER"), 0, BIND_PS);
+	m_pOcclussionTexture = CTexture::CreateTexture(m_pOcclusionSRV, 0, BIND_PS);
 	//////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Allocate the light rays resources
 	t2dDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
@@ -232,7 +232,7 @@ void CSSLR::ResizeBuffer() {
 	GLOBALVALUEMGR->GetDevice()->CreateRenderTargetView(m_pLightRaysTex, &rtsvd, &m_pLightRaysRTV);
 
 	GLOBALVALUEMGR->GetDevice()->CreateShaderResourceView(m_pLightRaysTex, &dsrvd, &m_pLightRaysSRV);
-	m_pLightRaysTexture = CTexture::CreateTexture(m_pLightRaysSRV, RESOURCEMGR->GetSampler("CLAMPSAMPLER"), 0, BIND_PS);
+	m_pLightRaysTexture = CTexture::CreateTexture(m_pLightRaysSRV, 0, BIND_PS);
 }
 
 void CSSLR::ReleaseBuffer() {

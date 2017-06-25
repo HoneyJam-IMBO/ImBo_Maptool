@@ -4,7 +4,7 @@
 
 bool CTestObject::Begin() {
 	//object_id set
-	m_objectID = object_id::OBJECT_FBX_ELF;
+	//m_objectID = object_id::OBJECT_FBX_ELF;
 	//m_objectID = object_id::OBJECT_TEST;
 
 	Rotate(-90.f, 0.f, 0.f);
@@ -37,7 +37,7 @@ void CTestObject::Animate(float fTimeElapsed) {
 	//	m_pRenderContainer->GetMesh(i).get()->Update(fTimeElapsed);
 	//}
 }
-CTestObject::CTestObject() : CGameObject("testobject", tag::TAG_DYNAMIC_OBJECT) {
+CTestObject::CTestObject() : CGameObject("fbx", tag::TAG_DYNAMIC_OBJECT) {
 
 }
 CTestObject::~CTestObject() {

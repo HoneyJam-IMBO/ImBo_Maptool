@@ -50,9 +50,10 @@ void CSkyBoxContainer::CreateSkyBoxTexture(UINT index){
 	_TCHAR pstrTextureNames[128];
 	_stprintf_s(pstrTextureNames, _T("../../Assets/SkyBox_%d.dds"), index);
 	string name{ "" }; name.assign(m_wsSkyBoxName.begin(), m_wsSkyBoxName.end());
-	m_ptxtSkyBox = CTexture::CreateTexture(pstrTextureNames, RESOURCEMGR->GetSampler("DEFAULT"), PS_SLOT_SKYBOX, BIND_PS);
+	m_ptxtSkyBox = CTexture::CreateTexture(pstrTextureNames, PS_SLOT_SKYBOX, BIND_PS);
 }
 void CSkyBoxContainer::PrepareRender() {
+	RENDERER->GetSkyBoxRenderContainer()->ClearVolatileResources();
 	RENDERER->GetSkyBoxRenderContainer()->AddVolatileTexture(m_ptxtSkyBox);
 	//if (m_bActive) {
 	//	//skybox

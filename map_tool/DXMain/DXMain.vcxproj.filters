@@ -120,21 +120,6 @@
     <Filter Include="소스 파일\44.GameObject\Player">
       <UniqueIdentifier>{00f37ad8-d24b-4060-be26-8ad2c4c9aeeb}</UniqueIdentifier>
     </Filter>
-    <Filter Include="소스 파일\44.GameObject\Light">
-      <UniqueIdentifier>{b6940c1f-e4fb-4a32-904f-02a0bb46be81}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="소스 파일\44.GameObject\Light\CapsuleLight">
-      <UniqueIdentifier>{6266970d-8a69-46af-b3c9-bf93e06d5d44}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="소스 파일\44.GameObject\Light\DirectionalLight">
-      <UniqueIdentifier>{422161ec-0871-4987-b85e-56181cfbd672}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="소스 파일\44.GameObject\Light\PointLight">
-      <UniqueIdentifier>{7fe4bccc-aeb5-4c2d-acb0-0e303e748624}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="소스 파일\44.GameObject\Light\SpotLight">
-      <UniqueIdentifier>{942c6764-c39e-41fe-b22c-d073567f7cbe}</UniqueIdentifier>
-    </Filter>
     <Filter Include="소스 파일\44.GameObject\Plane">
       <UniqueIdentifier>{25e89755-2b56-490f-bfc8-42aec2336347}</UniqueIdentifier>
     </Filter>
@@ -395,6 +380,33 @@
     </Filter>
     <Filter Include="소스 파일\SingleTon\Updater">
       <UniqueIdentifier>{05de8359-c4e1-41b5-bffa-7ed23ca9eab9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\44.GameObject\Light">
+      <UniqueIdentifier>{b6940c1f-e4fb-4a32-904f-02a0bb46be81}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\44.GameObject\Light\CapsuleLight">
+      <UniqueIdentifier>{6266970d-8a69-46af-b3c9-bf93e06d5d44}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\44.GameObject\Light\DirectionalLight">
+      <UniqueIdentifier>{422161ec-0871-4987-b85e-56181cfbd672}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\44.GameObject\Light\PointLight">
+      <UniqueIdentifier>{7fe4bccc-aeb5-4c2d-acb0-0e303e748624}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\44.GameObject\Light\SpotLight">
+      <UniqueIdentifier>{942c6764-c39e-41fe-b22c-d073567f7cbe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\SingleTon\Renderer\99.Shadow">
+      <UniqueIdentifier>{746bae07-1e89-4ab6-b821-357bb82d01d2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="HLSL\Debug\DebugDepthTexture">
+      <UniqueIdentifier>{b207ccbd-f43a-4d0e-8406-74d136a89c1f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\SingleTon\FileInputOutput\Exporter\dds">
+      <UniqueIdentifier>{3b7c5612-0583-4516-8c25-0fe9d14313bb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\FUnc">
+      <UniqueIdentifier>{5f96aff2-04d3-4be1-9142-7de70146e5a0}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -707,6 +719,15 @@
     <ClInclude Include="Updater.h">
       <Filter>소스 파일\SingleTon\Updater</Filter>
     </ClInclude>
+    <ClInclude Include="Shadow.h">
+      <Filter>소스 파일\SingleTon\Renderer\99.Shadow</Filter>
+    </ClInclude>
+    <ClInclude Include="dds.h">
+      <Filter>소스 파일\SingleTon\FileInputOutput\Exporter\dds</Filter>
+    </ClInclude>
+    <ClInclude Include="Func.h">
+      <Filter>소스 파일\FUnc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -1006,6 +1027,15 @@
     <ClCompile Include="Updater.cpp">
       <Filter>소스 파일\SingleTon\Updater</Filter>
     </ClCompile>
+    <ClCompile Include="Shadow.cpp">
+      <Filter>소스 파일\SingleTon\Renderer\99.Shadow</Filter>
+    </ClCompile>
+    <ClCompile Include="dds.cpp">
+      <Filter>소스 파일\SingleTon\FileInputOutput\Exporter\dds</Filter>
+    </ClCompile>
+    <ClCompile Include="Func.cpp">
+      <Filter>소스 파일\FUnc</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="DXMain.rc">
@@ -1177,6 +1207,15 @@
     <FxCompile Include="PSCombine.hlsl">
       <Filter>HLSL\SSLR\Combine</Filter>
     </FxCompile>
+    <FxCompile Include="VSDebugDepthTexture.hlsl">
+      <Filter>HLSL\Debug\DebugDepthTexture</Filter>
+    </FxCompile>
+    <FxCompile Include="PSDebugDepthTexture.hlsl">
+      <Filter>HLSL\Debug\DebugDepthTexture</Filter>
+    </FxCompile>
+    <FxCompile Include="GSDebugDepthTexture.hlsl">
+      <Filter>HLSL\Debug\DebugDepthTexture</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="PackGbuffer.hlsli">
@@ -1207,6 +1246,9 @@
     </None>
     <None Include="Quaternion.hlsli">
       <Filter>HLSL</Filter>
+    </None>
+    <None Include="CalcDirectionalShadow.hlsli">
+      <Filter>HLSL\Light\Directional</Filter>
     </None>
   </ItemGroup>
 </Project>

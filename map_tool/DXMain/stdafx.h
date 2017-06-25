@@ -35,6 +35,7 @@
 #include <d3d11_2.h>
 #include <dxgi1_3.h>
 #include <D3DX11tex.h>
+#include "DirectXTex.h"
 
 // D2D1
 //#include <d2d1_3.h>
@@ -121,6 +122,8 @@ constexpr size_t GetArraySize(Ty(&)[N]) noexcept
 #define MAX(a,b)(a>b? a : b)
 #define MIN(a,b)(a<b? a : b)
 
+#define MAX_SPACE_NUM  64
+
 //texture, constant buffer bind flag
 #define BIND_VS 0b000001   // 0x0001 //0001
 #define BIND_HS 0b000010   // 0x0002 //0010
@@ -130,42 +133,23 @@ constexpr size_t GetArraySize(Ty(&)[N]) noexcept
 #define BIND_CS 0b100000   // 0x0020 //..
 
 //for loop¸¦ À§ÇÑ enum = OBJECT_END
-enum object_id {
-	OBJECT_SKYBOX,
-	OBJECT_SPACE,
-	OBJECT_TERRAIN,
-	OBJECT_TEST,
-	OBJECT_PLANE,
-	OBJECT_FBX_ELF,
-	OBJECT_FBX_BUNNY,
-	OBJECT_END,
-
-	OBJECT_DIRECTIONAL_LIGHT,
-	OBJECT_POINT_LIGHT,
-	OBJECT_SPOT_LIGHT,
-	OBJECT_CAPSULE_LIGHT,
-	OBJECT_LIGHT_END,
-
-	OBJECT_POSTPROCESSING,
-	OBJECT_POSTPROCESSING_END,
-
-	OBJECT_DEBUG_AABB,
-	OBJECT_DEBUG_COORD,
-	OBJECT_DEBUG_POINT_LIGHT,
-	OBJECT_DEBUG_CAPSULE_LIGHT,
-	OBJECT_DEBUG_SPOT_LIGHT,
-	OBJECT_DEBUG_TEXTURE,
-	OBJECT_DEBUG_END,
-
-	OBJECT_LAYTRACE,
-	OBJECT_COMBINE
+enum render_tag {
+	RTAG_TERRAIN = 0b000001,
+	RTAG_DYNAMIC_OBJECT = 0b000010,
+	RTAG_STATIC_OBJECT = 0b000100,
+	RTAG_LIGHT = 0b001000,
+	RTAG_END
 };
-
 enum tag {
 	TAG_DEFAULT,
 	TAG_TERRAIN,
+	TAG_SPACE,
 	TAG_STATIC_OBJECT,
 	TAG_DYNAMIC_OBJECT,
+	TAG_LIGHT,
+	TAG_SSLR,
+	TAG_POSTPROCESSING,
+	TAG_DEBUG,
 	TAG_END
 };
 
@@ -223,3 +207,6 @@ enum shader_value_num {
 #define			UPDATER	    CUpdater::GetInstance()
 
 #define USE_ANIM
+
+
+#include "Func.h"

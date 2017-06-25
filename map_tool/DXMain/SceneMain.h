@@ -62,15 +62,21 @@ public:
 
 	CTestObject* GetFBXObject() { return m_pFBXObject; }
 	void CreatePositioningObject();
+	void CreatePositioningStempObject();
 
+	void SetMeshRoot(wstring wsMeshRoot);
 	void SaveScene();
 	void LoadScene(string path);
 	void CreateSceneListUI();
+
+	virtual void LoadResource(wstring wsMeshRoot);//추가
 private:
+	
 	//tool 변수
 	//모든 생성 가능한 객체를 벡터로 미리 만들어 둔다.
 	//이 안의 모든 객체를 버튼으로써 제작한다.
 	vector<CGameObject*> m_vpObjectList;
+	vector<CGameObject*> m_vpStempObjectList;
 	vector<LoadFileStruct> m_LoadFileStruct;
 
 	//fbx object

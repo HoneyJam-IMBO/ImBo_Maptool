@@ -5,7 +5,7 @@
 
 void CSpace::Begin(CSpaceContainer * pSpaceContainer, UINT size, int lv, XMVECTOR pos){
 	//object_id set 
-	m_objectID = object_id::OBJECT_SPACE;
+//	m_objectID = object_id::OBJECT_SPACE;
 	CGameObject::Begin();
 	//size를 알아야 할지도 모르니까 일단 저장
 	m_size = size;
@@ -121,9 +121,37 @@ void CSpace::Animate(float fTimeElapsed){
 		}
 
 	}
+
 }
 
-void CSpace::PrepareRender(shared_ptr<CCamera> pCamera){
+void CSpace::PrepareRender(UINT renderFlag){
+	//나는 그리는 space다.
+	SetbRender(true);
+	this->RegistToDebuger();
+	//RegistToContainer();
+	//			DEBUGER->RegistToDebugRenderContainer(this);
+	for (auto mlp : m_mlpObject) {//모든 객체에 대해서
+								  //자신이 속한 rendercontainer에 등록
+		for (auto pObject : mlp.second) {
+			
+				if (renderFlag & RTAG_TERRAIN) {
+					if (pObject->GetTag() == TAG_TERRAIN) pObject->RegistToContainer();
+				}
+				if (renderFlag & RTAG_STATIC_OBJECT) {
+					if (pObject->GetTag() == TAG_STATIC_OBJECT) pObject->RegistToContainer();
+				}
+				if (renderFlag & RTAG_DYNAMIC_OBJECT) {
+					if (pObject->GetTag() == TAG_DYNAMIC_OBJECT) pObject->RegistToContainer();
+				}
+				if (renderFlag & RTAG_LIGHT) {
+					if (pObject->GetTag() == TAG_LIGHT) pObject->RegistToContainer();
+				}
+			
+		}
+	}//end for
+}
+
+void CSpace::PrepareRender(shared_ptr<CCamera> pCamera, UINT renderFlag){
 	
 	if (IsVisible(pCamera)) {//여기에 space 프러스텀 컬링
 		if (nullptr == m_ppChildSpace) {//내 자식이 없으면 나는 leaf node
@@ -133,15 +161,28 @@ void CSpace::PrepareRender(shared_ptr<CCamera> pCamera){
 			//RegistToContainer();
 //			DEBUGER->RegistToDebugRenderContainer(this);
 			for (auto mlp : m_mlpObject) {//모든 객체에 대해서
+				//자신이 속한 rendercontainer에 등록
 				for (auto pObject : mlp.second) {
-					pObject->RegistToContainer();//자신이 속한 rendercontainer에 등록
+					if(pObject->IsVisible(pCamera)) {
+						if(renderFlag & RTAG_TERRAIN){
+							if(pObject->GetTag() == TAG_TERRAIN) pObject->RegistToContainer();
+						}
+						if (renderFlag & RTAG_STATIC_OBJECT) {
+							if (pObject->GetTag() == TAG_STATIC_OBJECT) pObject->RegistToContainer();
+						}
+						if (renderFlag & RTAG_DYNAMIC_OBJECT) {
+							if (pObject->GetTag() == TAG_DYNAMIC_OBJECT) pObject->RegistToContainer();
+						}
+						if (renderFlag & RTAG_LIGHT) {
+							if (pObject->GetTag() == TAG_LIGHT) pObject->RegistToContainer();
+						}
+					}
 				}
 			}//end for
 		}//end if
 		else {//leaf가 아니라면
 			for (int i = 0; i < 4; ++i) {
-
-				m_ppChildSpace[i]->PrepareRender(pCamera);//내 자식들 PrePareRender
+				m_ppChildSpace[i]->PrepareRender(pCamera, renderFlag);//내 자식들 PrePareRender
 			}
 		}//end else
 	}
@@ -187,25 +228,25 @@ void CSpace::RemoveObject(string name){
 	}
 }
 
+void CSpace::GetMainBoundingBox(BoundingBox& out) {
+	out = m_OriBoundingBox;
+
+	out.Transform(out, GetWorldMtx());
+}
+
 CGameObject * CSpace::PickObject(XMVECTOR xmvWorldCameraStartPos, XMVECTOR xmvRayDir, float& distance){
 	float fHitDistance = FLT_MAX;
 	distance = fHitDistance;
 	float fNearHitDistance = FLT_MAX;
 	CGameObject* pObj = nullptr;
 	//자신의 모든 객체에 대해서 검사
-	for (auto pObject : m_mlpObject[tag::TAG_DYNAMIC_OBJECT]) {
-		if (pObject->CheckPickObject(xmvWorldCameraStartPos, xmvRayDir, fHitDistance)) {//ray와 충돌했다면
-			if (fNearHitDistance > fHitDistance) {//이전의 가장 가까운 녀석과 비교
-				distance = fHitDistance;//더 가까우면 가장 가까운 객체 변경
-				pObj = pObject;
-			}
-		}
-	}
-	for (auto pObject : m_mlpObject[tag::TAG_STATIC_OBJECT]) {
-		if (pObject->CheckPickObject(xmvWorldCameraStartPos, xmvRayDir, fHitDistance)) {//ray와 충돌했다면
-			if (fNearHitDistance > fHitDistance) {//이전의 가장 가까운 녀석과 비교
-				distance = fHitDistance;//더 가까우면 가장 가까운 객체 변경
-				pObj = pObject;
+	for (auto Objects : m_mlpObject) {
+		for (auto pObject : Objects.second) {
+			if (pObject->CheckPickObject(xmvWorldCameraStartPos, xmvRayDir, fHitDistance)) {//ray와 충돌했다면
+				if (fNearHitDistance > fHitDistance) {//이전의 가장 가까운 녀석과 비교
+					distance = fHitDistance;//더 가까우면 가장 가까운 객체 변경
+					pObj = pObject;
+				}
 			}
 		}
 	}
@@ -213,7 +254,7 @@ CGameObject * CSpace::PickObject(XMVECTOR xmvWorldCameraStartPos, XMVECTOR xmvRa
 }
 
 
-CSpace::CSpace() : CGameObject("space"){
+CSpace::CSpace() : CGameObject("space", tag::TAG_SPACE){
 
 }
 

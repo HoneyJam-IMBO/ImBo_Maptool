@@ -1,6 +1,11 @@
 #include "stdafx.h"
 #include "SceneMain.h"
 
+//객체 회전 관련 변수
+float gfXRotate{ 0 };
+float gfYRotate{ 0 };
+float gfZRotate{ 0 };
+//zxc
 void TW_CALL BaseTextureSelectCallback(void * clientData) {
 	LoadFileStruct* pLFS = reinterpret_cast<LoadFileStruct*>(clientData);
 	//	string s = pLFS->Filename;
@@ -152,6 +157,15 @@ void TW_CALL FCSaveButtonCallback(void * clientData) {
 	CSceneMain* pData = (CSceneMain*)clientData;
 	pData->SaveScene();
 }
+void TW_CALL FCSetMeshRootButtonCallback(void* clientData) {
+	CSceneMain* pData = (CSceneMain*)clientData;
+	wcout << L"input the path : " << endl;
+	wcout << L"Mesh Root Path: ";
+	WCHAR wc[128];
+	wcin >> wc;
+
+	pData->SetMeshRoot(wc);
+}
 void TW_CALL FCLoadButtonCallback(void * clientData) {
 	CSceneMain* pData = (CSceneMain*)clientData;
 	pData->CreateSceneListUI();
@@ -176,8 +190,22 @@ void CSceneMain::CreatePositioningObject() {
 
 	CSpotLight* pPositioningSpotLight = CSpotLight::CreateSpotLight(500.f, XMFLOAT3(0.1f, 0.1f, 0.1f), 30.f, 15.f);
 	m_vpObjectList.push_back(pPositioningSpotLight);
-
-
+}
+void CSceneMain::CreatePositioningStempObject(){
+	for (auto vStempMesh : RESOURCEMGR->GetAllStempMesh()) {
+		string name = vStempMesh.second[0]->GetName();
+		tag t = vStempMesh.second[0]->GetTag();
+		bool bAnimation = true;// vStempMesh.second[0]->GetbAnimation();
+							   //animation 정보가 없으면 setting가능한 객체이다.
+		CGameObject* pObject = new CGameObject(name, t);
+		pObject->Begin();
+		m_vpObjectList.push_back(pObject);
+	}
+}
+void CSceneMain::SetMeshRoot(wstring wsMeshRoot){
+	CScene::LoadResource(wsMeshRoot);
+	CreatePositioningStempObject();
+	CreateObjectPositioningUI();
 }
 void CSceneMain::SaveScene(){
 	wcout << L"if you want save input the path, sceneName : " << endl;
@@ -188,7 +216,6 @@ void CSceneMain::SaveScene(){
 	wcout << L"SceneName : ";
 	wcin >> wc;
 	wstring wsSceneName{ (WCHAR*)wc };
-	wsSceneName = wsSceneName + L".scn";
 	//cin>>scene name;
 	//cin>>path
 	//scene name
@@ -196,7 +223,8 @@ void CSceneMain::SaveScene(){
 
 
 	//EXPORTER->Begin(L"../outputdata/scene.txt");
-	EXPORTER->Begin(wsOutputPath + wsSceneName);
+	wstring wsFileName = wsSceneName + L".scn";
+	EXPORTER->Begin(wsOutputPath + wsFileName);
 
 	//output path
 	EXPORTER->WriteWstring(wsOutputPath);
@@ -205,17 +233,20 @@ void CSceneMain::SaveScene(){
 	EXPORTER->WriteWstring(wsSceneName);
 	EXPORTER->WriteEnter();
 
-	UPDATER->SaveSpaceInfo();
-	//object info save
-	//m_pSpaceContainer->WriteObjects();
+	////resource root path
+	//EXPORTER->WriteWstring(m_wsMeshRoot);
 	//EXPORTER->WriteEnter();
+
+	//space info
+	UPDATER->SaveSpaceInfo();
 	UPDATER->SaveTerrainInfo(wsOutputPath, wsSceneName);
+	UPDATER->SaveObjectsInfo();
+
 
 	//effect info
-	RENDERER->SaveEffectInfo();
+	RENDERER->SaveEffectInfo(wsOutputPath, wsSceneName);
 	
 	EXPORTER->End();
-
 	/*
 		3. height map image / /[scene name] + height map
 		4. normal map image / /[scene name] + normal map
@@ -233,13 +264,11 @@ void CSceneMain::CreateSceneListUI(){
 	TWBARMGR->AddBar(barName);
 
 	vector<wstring> vFile;
-	DIRECTORYFINDER->GetFiles(vFile, L"../outputdata", true, true, L".scn");
-	DIRECTORYFINDER->GetFiles(vFile, L"../outputdata", true, true, L".SCN");
-	//test
-	DIRECTORYFINDER->GetFiles(vFile, L"../outputdata", true, true, L".txt");
-
+	DIRECTORYFINDER->GetFiles(vFile, L"../../Assets/SceneResource", true, true, L".scn");
+	DIRECTORYFINDER->GetFiles(vFile, L"../../Assets/SceneResource", true, true, L".SCN");
+	
 	//const char* groupName = "File";
-	char menuName[64];
+	char menuName[256];
 	int cnt{ 0 };
 	m_LoadFileStruct.resize(vFile.size());
 	for (auto data : vFile) {
@@ -266,6 +295,14 @@ void CSceneMain::CreateSceneListUI(){
 		cnt++;
 	}
 }
+
+void CSceneMain::LoadResource(wstring wsMeshRoot){
+	CScene::LoadResource(wsMeshRoot);
+
+	CreatePositioningStempObject();
+	//CreateObjectPositioningUI();
+}
+
 bool CSceneMain::Begin() {
 	//모든 positioning이 가능한 객체를 미리 제작해 둔다.
 	CreatePositioningObject();
@@ -295,8 +332,11 @@ bool CSceneMain::Begin() {
 	TWBARMGR->AddButtonCB(barName, "TerrainControll", "CreateSplatting", MCCreateSplattingButtonCallback, this);
 	TWBARMGR->AddButtonCB(barName, "TerrainControll", "BaseTextureSelect", MCBaseTextureSelectButtonCallback, this);
 	
+	TWBARMGR->AddButtonCB(barName, "FileControll", "Set_Mesh_Root", FCSetMeshRootButtonCallback, this);
 	TWBARMGR->AddButtonCB(barName, "FileControll", "Save", FCSaveButtonCallback, this);
 	TWBARMGR->AddButtonCB(barName, "FileControll", "Load", FCLoadButtonCallback, this);
+
+
 	//test
 	//TWBARMGR->AddBoolBarCB(barName, "Test", "TerrainOnOff", SetTerrainOnOffCallback, GetTerrainOnOffCallback, this);
 	//test
@@ -416,6 +456,11 @@ bool CSceneMain::End() {
 		delete pObject;
 	}
 	m_vpObjectList.clear();
+
+	for (auto pObject : m_vpStempObjectList) {
+		delete pObject;
+	}
+	m_vpStempObjectList.clear();
 	//m_pPlayer->End();
 	//seller
 	//m_RenderContainerSeller->End();
@@ -427,6 +472,7 @@ bool CSceneMain::End() {
 }
 
 void CSceneMain::Animate(float fTimeElapsed) {
+	
 	CScene::Animate(fTimeElapsed);
 
 	//--------------------------전역 객체 animate / regist-------------------------
@@ -434,6 +480,24 @@ void CSceneMain::Animate(float fTimeElapsed) {
 	//UPDATER->GetSpaceContainer()->SetSpaceSize(m_space_size);
 	//UPDATER->GetSpaceContainer()->SetSpaceLevel(m_space_lv);
 
+	if(INPUTMGR->KeyDown(VK_1)) {
+		GLOBALVALUEMGR->SetToolMode(TOOL_MODE_TERRAIN);
+	}
+	else if (INPUTMGR->KeyDown(VK_2)) {
+		GLOBALVALUEMGR->SetToolMode(TOOL_MODE_SPLATTING);
+	}
+	else if (INPUTMGR->KeyDown(VK_3)) {
+		GLOBALVALUEMGR->SetToolMode(TOOL_MODE_OBJECTPOSITIONING);
+	}
+	else if (INPUTMGR->KeyDown(VK_4)) {
+		GLOBALVALUEMGR->SetToolMode(TOOL_MODE_FREECAMERA);
+	}
+	else if (INPUTMGR->KeyDown(VK_5)) {
+		GLOBALVALUEMGR->SetToolMode(TOOL_MODE_CHARACTER);
+	}
+	else if (INPUTMGR->KeyDown(VK_6)) {
+		UPDATER->GetDirectionalLight()->PickingProc();
+	}
 	//object positioning 객체 랜더
 	if (GLOBALVALUEMGR->GetToolMode() == TOOL_MODE_OBJECTPOSITIONING) {
 		
@@ -502,6 +566,21 @@ void CSceneMain::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM 
 }
 
 void CSceneMain::ProcessInput(float fTimeElapsed) {
+	//rotate 변수 출력
+	DEBUGER->AddText(15.0f, 450.0f, static_cast<float>(0* 20.f), YT_Color(255, 255, 255), L"Rotate X (press z) : %f", gfXRotate);
+	DEBUGER->AddText(15.0f, 450.0f, static_cast<float>(1* 20.f), YT_Color(255, 255, 255), L"Rotate Y (press x) : %f", gfYRotate);
+	DEBUGER->AddText(15.0f, 450.0f, static_cast<float>(2* 20.f), YT_Color(255, 255, 255), L"Rotate Z (press c) : %f", gfZRotate);
+	if (INPUTMGR->KeyDown(VK_Z)) {
+		gfXRotate = (int)(gfXRotate + 90.f) % 360;
+		GLOBALVALUEMGR->GetPositioningObject()->Rotate(XMMatrixRotationAxis(GLOBALVALUEMGR->GetPositioningObject()->GetRight(), XM_PI / 2));
+	}else if (INPUTMGR->KeyDown(VK_X)) {
+		gfYRotate = (int)(gfYRotate + 90.f) % 360;
+		GLOBALVALUEMGR->GetPositioningObject()->Rotate(XMMatrixRotationAxis(GLOBALVALUEMGR->GetPositioningObject()->GetUp(), XM_PI / 2));
+	}else if (INPUTMGR->KeyDown(VK_C)) {
+		gfZRotate = (int)(gfZRotate + 90.f) % 360;
+		GLOBALVALUEMGR->GetPositioningObject()->Rotate(XMMatrixRotationAxis(GLOBALVALUEMGR->GetPositioningObject()->GetLook(), XM_PI / 2));
+	}
+
 	if (INPUTMGR->KeyDown(VK_P)) {
 		INPUTMGR->SetDebugMode(static_cast<bool>((INPUTMGR->GetDebugMode() + 1) % 2));
 	}
@@ -544,7 +623,8 @@ CGameObject* CSceneMain::PickObjectPointedByCursor(int xClient, int yClient){
 	CGameObject* pNearestObject = NULL;
 	float fHitDistance = FLT_MAX;
 	float fNearDistance = FLT_MAX;
-	pNearestObject = UPDATER->GetSpaceContainer()->PickObject(m_pCamera->GetPosition(), XMVector3Normalize(xmvRayDir), fHitDistance);
+	pNearestObject = UPDATER->PickObject(m_pCamera->GetPosition(), XMVector3Normalize(xmvRayDir), fHitDistance);
+
 	fNearDistance = fHitDistance;
 	
 	return(pNearestObject);
@@ -554,13 +634,13 @@ void CSceneMain::CreateControllObject(string path){
 //resource 제작	
 	m_MeshCnt = RESOURCEMGR->CreateMultiMesh(path, "Test");
 	//m_MeshCnt = RESOURCEMGR->CreateMultiMesh("../outputata/text.txt", "Test");
-	RCSELLER->GetRenderContainer(object_id::OBJECT_FBX_ELF)->ClearMesh();
+	RCSELLER->GetRenderContainer("fbx")->ClearMesh();
 	char pName[20];
 	for (int i = 0; i < m_MeshCnt; ++i) {
 		sprintf(pName, "%s%d", "Test", i);
-		RCSELLER->GetRenderContainer(object_id::OBJECT_FBX_ELF)->AddMesh(RESOURCEMGR->GetMesh(pName));
+		RCSELLER->GetRenderContainer("fbx")->AddMesh(RESOURCEMGR->GetMesh(pName, i));
 	}
-	RCSELLER->GetRenderContainer(object_id::OBJECT_FBX_ELF)->SetAnimater(RESOURCEMGR->GetAnimater("Test"));
+	RCSELLER->GetRenderContainer("fbx")->SetAnimater(RESOURCEMGR->GetAnimater("Test"));
 //resource 제작	
 
 
@@ -581,17 +661,16 @@ void CSceneMain::CreateLoadFileUI(){
 	TWBARMGR->AddBar(barName);
 
 	vector<wstring> vFile;
-	DIRECTORYFINDER->GetFiles(vFile, L"../inputdata", true, true, L".fbx");
-	DIRECTORYFINDER->GetFiles(vFile, L"../inputdata", true, true, L".FBX");
-	DIRECTORYFINDER->GetFiles(vFile, L"../inputdata", true, true, L".gjm");
-	DIRECTORYFINDER->GetFiles(vFile, L"../inputdata", true, true, L".GJM");
-	DIRECTORYFINDER->GetFiles(vFile, L"../outputdata", true, true, L".gjm");
-	DIRECTORYFINDER->GetFiles(vFile, L"../outputdata", true, true, L".GJM");
-	//test
-	DIRECTORYFINDER->GetFiles(vFile, L"../outputdata", true, true, L".txt");
+	DIRECTORYFINDER->GetFiles(vFile, L"../../Assets/SceneResource", true, true, L".fbx");
+	DIRECTORYFINDER->GetFiles(vFile, L"../../Assets/SceneResource", true, true, L".FBX");
+	DIRECTORYFINDER->GetFiles(vFile, L"../../Assets/SceneResource", true, true, L".gjm");
+	DIRECTORYFINDER->GetFiles(vFile, L"../../Assets/SceneResource", true, true, L".GJM");
+	DIRECTORYFINDER->GetFiles(vFile, L"../../Assets/SceneResource", true, true, L".gjm");
+	DIRECTORYFINDER->GetFiles(vFile, L"../../Assets/SceneResource", true, true, L".GJM");
+	
 
 	//const char* groupName = "File";
-	char menuName[64];
+	char menuName[256];
 	int cnt{ 0 };
 	m_LoadFileStruct.resize(vFile.size());
 	for (auto data : vFile) {
@@ -647,11 +726,11 @@ void CSceneMain::CreateAddInfoUI(){
 
 	if (m_LoadFileStruct.empty()) {
 		vector<wstring> vFile;
-		DIRECTORYFINDER->GetFiles(vFile, L"../inputdata", true, false, L".fbx");
-		DIRECTORYFINDER->GetFiles(vFile, L"../inputdata", true, false, L".FBX");
+		DIRECTORYFINDER->GetFiles(vFile, L"../../Assets/SceneResource", true, false, L".fbx");
+		DIRECTORYFINDER->GetFiles(vFile, L"../../Assets/SceneResource", true, false, L".FBX");
 
 		const char* groupName = "File";
-		char menuName[64];
+		char menuName[256];
 		int cnt{ 0 };
 		m_LoadFileStruct.resize(vFile.size());
 		for (auto data : vFile) {
@@ -665,7 +744,7 @@ void CSceneMain::CreateAddInfoUI(){
 	}
 	else {
 		const char* groupName = "File";
-		char menuName[64];
+		char menuName[256];
 		int cnt{ 0 };
 		for (auto data : m_LoadFileStruct) {
 			sprintf(menuName, "%s", m_LoadFileStruct[cnt].Filename.c_str());
@@ -689,7 +768,7 @@ void CSceneMain::ClearAllFBXObject(){
 		const char* name = "Test";
 		for (int i = 0; i < m_MeshCnt; ++i) {
 			sprintf(MeshName, "%s%d", name, i);
-			RESOURCEMGR->ReleaseMesh(MeshName);
+			RESOURCEMGR->ReleaseStempMesh(MeshName);
 		}
 		RESOURCEMGR->ReleaseAnimater(name);
 		m_MeshCnt = 0;
@@ -722,7 +801,7 @@ void CSceneMain::CreateBaseTextureSelectUI(){
 	DIRECTORYFINDER->GetFiles(vFile, L"../../Assets", true, true, L".PNG");
 
 	//const char* groupName = "File";
-	char menuName[64];
+	char menuName[256];
 	int cnt{ 0 };
 	m_LoadFileStruct.resize(vFile.size());
 	for (auto data : vFile) {
@@ -765,25 +844,38 @@ void CSceneMain::CreateObjectPositioningUI(){
 	for (auto pObject : m_vpObjectList) {
 		TWBARMGR->AddButtonCB(barName, "Objects", pObject->GetName().c_str(), OPCreatePositioningObjectButtonCallback, pObject);
 	}
+	for (auto pObject : m_vpStempObjectList) {
+		TWBARMGR->AddButtonCB(barName, "StempObjects", pObject->GetName().c_str(), OPCreatePositioningObjectButtonCallback, pObject);
+	}
+	
 }
 
 void CSceneMain::ObjectPositioning(){
+	
 	if (GLOBALVALUEMGR->GetPositioningObject()->GetName() == "pointlight") {
 		CPointLight *pPositioningPointLight = CPointLight::CreatePointLight(100.f, XMFLOAT3(rand() % 5, rand() % 5, rand() % 5));
-		pPositioningPointLight->SetPosition(GLOBALVALUEMGR->GetPositioningObject()->GetPosition());
+		pPositioningPointLight->SetWorldMtx(GLOBALVALUEMGR->GetPositioningObject()->GetWorldMtx());
 		UPDATER->GetSpaceContainer()->AddObject(pPositioningPointLight);
 	}
 	else if (GLOBALVALUEMGR->GetPositioningObject()->GetName() == "spotlight") {
 		CSpotLight* pPositioningSpotLight = CSpotLight::CreateSpotLight(500.f, XMFLOAT3(0.1f, 0.1f, 0.1f), 30.f, 15.f);
 		//CSpotLight* pPositioningSpotLight = new CSpotLight;
 		//pPositioningSpotLight->Begin(SPOT_LIGHT{ 500.f, XMFLOAT3(rand() % 100, rand() % 100, rand() % 100), 30.f, 15.f });
-		pPositioningSpotLight->SetPosition(GLOBALVALUEMGR->GetPositioningObject()->GetPosition());
+		pPositioningSpotLight->SetWorldMtx(GLOBALVALUEMGR->GetPositioningObject()->GetWorldMtx());
 		UPDATER->GetSpaceContainer()->AddObject(pPositioningSpotLight);
 	}
 	else if (GLOBALVALUEMGR->GetPositioningObject()->GetName() == "capsulelight") {
 		CCapsuleLight* pPositioningCapsuleLight = CCapsuleLight::CreateCapsuleLight(100.f, XMFLOAT3(rand() % 5, rand() % 5, rand() % 5), 50.f);
-		pPositioningCapsuleLight->SetPosition(GLOBALVALUEMGR->GetPositioningObject()->GetPosition());
+		pPositioningCapsuleLight->SetWorldMtx(GLOBALVALUEMGR->GetPositioningObject()->GetWorldMtx());
 		UPDATER->GetSpaceContainer()->AddObject(pPositioningCapsuleLight);
+	}
+	else {
+		CGameObject* pObject = nullptr;
+		//if(GLOBALVALUEMGR->GetPositioningObject()->GetAnimater())
+		pObject = new CGameObject(GLOBALVALUEMGR->GetPositioningObject()->GetName(), GLOBALVALUEMGR->GetPositioningObject()->GetTag());
+		pObject->Begin();
+		pObject->SetWorldMtx(GLOBALVALUEMGR->GetPositioningObject()->GetWorldMtx());
+		UPDATER->GetSpaceContainer()->AddObject(pObject);
 	}
 }
 

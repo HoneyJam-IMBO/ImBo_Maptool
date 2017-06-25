@@ -29,8 +29,11 @@ public:
 	//create scene
 
 	void LoadScene(string path);
+	virtual void LoadResource(wstring wsMeshRoot);//추가
 protected:
 	string m_sName;
+	//resource의 root dir는 assets이다. 추가
+	wstring m_wsMeshRoot{ L"../../Assets" };
 
 	//framework
 	CDirectXFramework* m_pFrameWork{ nullptr };

@@ -45,7 +45,7 @@ bool CMesh::End() {
 }
 void CMesh::SetShaderState() {
 	for (auto pTexture : m_vMeshTexture) {
-		pTexture->SetShaderState();
+		if(pTexture)pTexture->SetShaderState();
 	}
 	if (m_pMeshMaterial) m_pMeshMaterial->SetShaderState();
 
@@ -61,7 +61,7 @@ void CMesh::SetShaderState() {
 
 void CMesh::CleanShaderState(){
 	for (auto pTexture : m_vMeshTexture) {
-		pTexture->CleanShaderState();
+		if(pTexture)pTexture->CleanShaderState();
 	}
 }
 
@@ -170,6 +170,10 @@ void CMesh::CreateTBFromPoints(XMFLOAT3 * pPositions, XMFLOAT2 * pUVs, XMFLOAT3 
 
 	XMStoreFloat3(&outT, XMVector3Normalize(e0*x + e1*y));
 	XMStoreFloat3(&outB, XMVector3Normalize(e0*z + e1*w));
+}
+void CMesh::ClearMeshResources(){
+	m_pMeshMaterial = nullptr;
+	m_vMeshTexture.clear();
 }
 void CMesh::AddMeshTexture(shared_ptr<CTexture> pTexture){
 	m_vMeshTexture.emplace_back(pTexture);

@@ -1,6 +1,9 @@
 
 
-SamplerState        gssSamplerState		: register(s0);
+SamplerState gssWRAP_LINEAR : register(s0);
+SamplerState gssWRAP_POINT : register(s1);
+SamplerState gssCLAMP_LINEAR : register(s2);
+SamplerState gssCLAMP_POINT : register(s3);
 
 Texture2D           gtxtColorSpecInt	: register(t0);
 //Texture2D           gtxtNormal_Depth	: register(t1);
@@ -71,7 +74,7 @@ float4 main(VS_TEXTURED_OUTPUT input) : SV_Target{
 
 
 	//------------------------------------- ÁöÈÆ -----------------------------------------------
-	float4 cColor = gtxtColorSpecInt.Sample(gssSamplerState, input.texCoord);
+	float4 cColor = gtxtColorSpecInt.Sample(gssWRAP_LINEAR, input.texCoord);
 	return float4(cColor.xyz, 1.0);
 //	return(float4(gbd.Normal, 1.0f));
 

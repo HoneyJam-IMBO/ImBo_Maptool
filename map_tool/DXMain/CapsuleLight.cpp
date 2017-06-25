@@ -3,7 +3,7 @@
 
 bool CCapsuleLight::Begin() {
 	m_lightid = light_id::LIGHT_CAPSULE;
-	m_objectID = object_id::OBJECT_CAPSULE_LIGHT;
+//	m_objectID = object_id::OBJECT_CAPSULE_LIGHT;
 
 	m_fHalfSegmentLen = m_CapsuleData.CapsuleLightLen*0.5f;
 	m_fCapsuleLightRangeRcp = 1 / m_CapsuleData.CapsuleLightRange;
@@ -84,6 +84,59 @@ CCapsuleLight * CCapsuleLight::CreateCapsuleLight(float CapsuleLightLen, XMFLOAT
 	pLight->SetCapsuleLightData(data);
 	pLight->Begin();
 	return pLight;
+}
+void TW_CALL SetCapsuleLightRange(void * value, void * clientData) {
+	if (nullptr == clientData) return;
+	CCapsuleLight* plight = reinterpret_cast<CCapsuleLight*>(clientData);
+	*static_cast<float *>(value) = plight->GetRange();
+}
+
+void TW_CALL GetCapsuleLightRange(const void * value, void * clientData) {
+	if (nullptr == clientData) return;
+	CCapsuleLight* plight = reinterpret_cast<CCapsuleLight*>(clientData);
+	float* data = (float*)value;
+	plight->SetRange(*data);
+}
+void TW_CALL SetCapsuleLightLength(void * value, void * clientData) {
+	if (nullptr == clientData) return;
+	CCapsuleLight* plight = reinterpret_cast<CCapsuleLight*>(clientData);
+	*static_cast<float *>(value) = plight->GetLength();
+}
+
+void TW_CALL GetCapsuleLightLength(const void * value, void * clientData) {
+	if (nullptr == clientData) return;
+	CCapsuleLight* plight = reinterpret_cast<CCapsuleLight*>(clientData);
+	float* data = (float*)value;
+	plight->SetLength(*data);
+}
+void CCapsuleLight::PickingProc(){
+	CGameObject::PickingProc();
+
+	//color
+	TWBARMGR->AddColorBar3F("PickingBar", "Light", "Color", &m_CapsuleData.CapsuleLightColor);
+	
+	//range
+	TWBARMGR->AddMinMaxBarCB("PickingBar", "Light", "Range", GetCapsuleLightRange, SetCapsuleLightRange, this,
+		1.0f, 1000.f, 0.1f);
+	TWBARMGR->AddMinMaxBarCB("PickingBar", "Light", "Length", GetCapsuleLightLength, SetCapsuleLightLength, this,
+		1.0f, 1000.f, 0.1f);
+
+}
+
+void CCapsuleLight::SaveInfo(){
+	CGameObject::SaveInfo();
+	EXPORTER->WriteFloat(m_CapsuleData.CapsuleLightColor.x); EXPORTER->WriteSpace();
+	EXPORTER->WriteFloat(m_CapsuleData.CapsuleLightColor.x); EXPORTER->WriteSpace();
+	EXPORTER->WriteFloat(m_CapsuleData.CapsuleLightColor.x); EXPORTER->WriteSpace();
+	EXPORTER->WriteEnter();
+
+	EXPORTER->WriteFloat(m_CapsuleData.CapsuleLightLen); EXPORTER->WriteSpace();
+	EXPORTER->WriteFloat(m_CapsuleData.CapsuleLightRange); EXPORTER->WriteSpace();
+	EXPORTER->WriteEnter();
+}
+
+void CCapsuleLight::LoadInfo(){
+
 }
 
 

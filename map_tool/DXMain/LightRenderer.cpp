@@ -2,9 +2,8 @@
 #include "LightRenderer.h"
 
 bool CLightRenderer::Begin() {
-	for (int i = object_id::OBJECT_END + 1; i < object_id::OBJECT_LIGHT_END; ++i) {
-		object_id id = (object_id)i;
-		m_mRenderContainer.insert(pairRenderContainer(id, RCSELLER->GetRenderContainer(id)));
+	for (auto RenderContainer : RCSELLER->GetTagRenderContainer()[tag::TAG_LIGHT]) {
+		m_mRenderContainer[RenderContainer.first] = RenderContainer.second;
 	}
 	//depth stencil state
 	D3D11_DEPTH_STENCIL_DESC descDepthStencil;
@@ -58,11 +57,8 @@ void CLightRenderer::CleanShaderState() {
 	GLOBALVALUEMGR->GetDeviceContext()->OMSetDepthStencilState(m_pPreDepthStencilState, m_PreStencilRef);
 	GLOBALVALUEMGR->GetDeviceContext()->RSSetState(m_pPreRasterizerState);
 
-	object_id id = object_id::OBJECT_END;
-	//scene의 모든 Part의 rendercontainer안에 part list Clear!
-	for (int i = object_id::OBJECT_END + 1; i < object_id::OBJECT_LIGHT_END; ++i) {
-		id = (object_id)i;
-		m_mRenderContainer[id]->ClearObjectList();
+	for (auto RenderContainer : m_mRenderContainer) {
+		RenderContainer.second->ClearObjectList();
 	}
 
 }
@@ -71,7 +67,7 @@ void CLightRenderer::UpdateShaderState() {
 
 }
 
-void CLightRenderer::Excute(shared_ptr<CCamera> pCamera) {
+void CLightRenderer::Excute(shared_ptr<CCamera> pCamera, CShadow* m_pShadow){
 	//--------------------------------deferred lighting--------------------------------
 	ID3D11Buffer* pGBufferUnpackingBuffer = pCamera->GetGBufferUnpackingBuffer();
 	GLOBALVALUEMGR->GetDeviceContext()->PSSetConstantBuffers(PS_UNPACKING_SLOT, 1, &pGBufferUnpackingBuffer);
@@ -79,28 +75,27 @@ void CLightRenderer::Excute(shared_ptr<CCamera> pCamera) {
 	ID3D11Buffer* pViewProjectionBuffer = pCamera->GetViewProjectionBuffer();
 	GLOBALVALUEMGR->GetDeviceContext()->PSSetConstantBuffers(PS_CAMERA_DATA_SLOT, 1, &pViewProjectionBuffer);
 
+	if (m_pShadow){
+		m_pShadow->SetShaderState();
+	}
 	//RENDER
 	//이전 상태 저장
 	GLOBALVALUEMGR->GetDeviceContext()->OMGetDepthStencilState(&m_pPreDepthStencilState, &m_PreStencilRef);
 	GLOBALVALUEMGR->GetDeviceContext()->RSGetState(&m_pPreRasterizerState);
 	GLOBALVALUEMGR->GetDeviceContext()->OMGetBlendState(&m_pPreBlendState, m_pPreBlendFactor, &m_PreSampleMask);
 
-	object_id id = object_id::OBJECT_END;
-	//scene의 모든 Part의 rendercontainer안에 part list Render!
-	for (int i = object_id::OBJECT_END + 1; i < object_id::OBJECT_LIGHT_END; ++i) {
-		id = (object_id)i;
-		if (id == object_id::OBJECT_DIRECTIONAL_LIGHT) {
-			//directional
-			m_mRenderContainer[id]->Render(pCamera);
+	m_mRenderContainer["directionallight"]->Render(pCamera);
+	GLOBALVALUEMGR->GetDeviceContext()->OMSetBlendState(m_pLightBlendState, nullptr, 0xffffffff);
+	GLOBALVALUEMGR->GetDeviceContext()->OMSetDepthStencilState(m_pLightDepthStencilState, 0);
+	GLOBALVALUEMGR->GetDeviceContext()->RSSetState(m_pLightRasterizerState);
 
-			GLOBALVALUEMGR->GetDeviceContext()->OMSetBlendState(m_pLightBlendState, nullptr, 0xffffffff);
-			GLOBALVALUEMGR->GetDeviceContext()->OMSetDepthStencilState(m_pLightDepthStencilState, 0);
-			GLOBALVALUEMGR->GetDeviceContext()->RSSetState(m_pLightRasterizerState);
-		}
-		else {
-			m_mRenderContainer[id]->Render(pCamera);
-		}
+	if (m_pShadow){
+		m_pShadow->CleanShaderState();
 	}
+	m_mRenderContainer["pointlight"]->Render(pCamera);
+	m_mRenderContainer["capsulelight"]->Render(pCamera);
+	m_mRenderContainer["spotlight"]->Render(pCamera);
+
 	CleanShaderState();
 }
 

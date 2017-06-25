@@ -41,8 +41,11 @@ public:
 	static shared_ptr<CAnimater> CreateAnimaterFromFBXFile(bool bHasAnimation = true);
 	static shared_ptr<CAnimater> CreateAnimaterFromGJMFile(bool bHasAnimation = true);
 
+	vector<BoundingOrientedBox> GetActiveOBBs() { return m_vpAnimationInfos[m_CurAnimationIndex]->GetvActiveOBBs(); }
+
 	void SetMeshOffsetMtx(XMFLOAT4X4& xmf4x4Mtx) { m_xmf4x4MeshOffsetMtx = xmf4x4Mtx; }
 	void SetMeshOffsetMtx(XMMATRIX xmMtx) { XMStoreFloat4x4(&m_xmf4x4MeshOffsetMtx, xmMtx); }
+	XMMATRIX GetMeshOffsetMtx() { return XMLoadFloat4x4(&m_xmf4x4MeshOffsetMtx); }
 	void SetpAnimBuffer(shared_ptr<CBuffer> pAnimBuffer) { m_pAnimBuffer = pAnimBuffer; }
 	void SetpMainAABB(CBoundingBox* pMainBoundingBox) { m_pMainBoundingBox = pMainBoundingBox; }
 	void SetpSkeletonData(CSkeletonData* pSkeletonData) { m_pSkeletonData = pSkeletonData; }

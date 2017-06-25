@@ -12,7 +12,7 @@ public:
 	void SetTag(tag t) { m_tag = t; }
 	void SetName(string name) { m_name = name; }
 
-private:
+protected:
 	string m_name;
 	tag m_tag{ tag::TAG_DEFAULT };
 

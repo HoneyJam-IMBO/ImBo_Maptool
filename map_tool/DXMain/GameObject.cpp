@@ -56,7 +56,7 @@ void TW_CALL LoadTextureFileCallback(void* clientData) {
 
 	char name[64];
 	sprintf(name, "Test%d", dynamic_cast<CFileBasedMesh*>(pData->m_pMesh.get())->GetMeshIndex());
-	pData->m_pMesh->SetMeshTexture(0, RESOURCEMGR->CreateTexture(name, (WCHAR*)wPath.c_str(), RESOURCEMGR->GetSampler("DEFAULT")));
+	pData->m_pMesh->SetMeshTexture(0, RESOURCEMGR->CreateTexture(name, (WCHAR*)wPath.c_str()));
 
 	pData->m_pMesh->SetMeshMaterial(RESOURCEMGR->GetMaterial("DEFAULT"));
 }
@@ -64,7 +64,7 @@ bool CGameObject::Begin() {
 
 	XMStoreFloat4x4(&m_xmf4x4World, XMMatrixIdentity());
 
-	m_pRenderContainer = RCSELLER->GetRenderContainer(m_objectID);
+	m_pRenderContainer = RCSELLER->GetRenderContainer(m_name);
 	if (m_pRenderContainer->GetMesh())//mesh가 있으면
 	{//aabb 해당 mesh에서 aabb를 얻어온다.
 		m_OriBoundingBox = m_pRenderContainer->GetMesh()->GetAABB();
@@ -79,7 +79,7 @@ bool CGameObject::Begin() {
 	return true;
 }
 bool CGameObject::End() {
-
+	m_vObjectActiveOBBs.clear();
 	//-------------------------------component---------------------------
 	ClearComponents();
 	//-------------------------------component---------------------------
@@ -87,6 +87,16 @@ bool CGameObject::End() {
 }
 
 void CGameObject::Animate(float fTimeElapsed) {
+	if (m_pAnimater) {
+		//obb animate
+		m_vObjectActiveOBBs.clear();
+		for (auto OBB : m_pAnimater->GetActiveOBBs()) {
+			OBB.Transform(OBB, m_pAnimater->GetMeshOffsetMtx()*GetWorldMtx());
+			m_vObjectActiveOBBs.push_back(OBB);
+			DEBUGER->RegistOBB(OBB);
+		}
+	}
+
 	DEBUGER->RegistCoordinateSys(GetWorldMtx());
 
 	//모든 컴포넌트를 돌면서 Update실행
@@ -131,7 +141,8 @@ void CGameObject::Rotate(float x, float y, float z) {
 		//SetRotationQuaternion(XMQuaternionRotationAxis(GetLook(), z));
 	}
 	
-	SetQuaternion(XMQuaternionRotationMatrix(GetWorldMtx()));
+	XMStoreFloat4(&m_xmf4Quaternion, XMQuaternionMultiply(XMQuaternionRotationRollPitchYaw(x, y, z), XMLoadFloat4(&m_xmf4Quaternion)));
+	//SetQuaternion(XMQuaternionRotationMatrix(GetWorldMtx()));
 }
 
 void CGameObject::RotateWorldAxis(float x, float y, float z) {
@@ -140,28 +151,27 @@ void CGameObject::RotateWorldAxis(float x, float y, float z) {
 	{
 		xmmtxRotate = XMMatrixRotationAxis(XMVectorSet(1.f,0.f,0.f,0.f), (float)XMConvertToRadians(x));
 		XMStoreFloat4x4(&m_xmf4x4World, XMMatrixMultiply(xmmtxRotate, XMLoadFloat4x4(&m_xmf4x4World)));
-		//SetRotationQuaternion(XMQuaternionRotationAxis(GetRight(), x));
+		XMStoreFloat4(&m_xmf4Quaternion, XMQuaternionMultiply(XMQuaternionRotationAxis(GetRight(), x), XMLoadFloat4(&m_xmf4Quaternion)));
 	}
 	if (y != 0.0f)
 	{
 		//플레이어의 로컬 y-축을 기준으로 회전하는 행렬을 생성한다.
 		xmmtxRotate = XMMatrixRotationAxis(XMVectorSet(0.f, 1.f, 0.f, 0.f), (float)XMConvertToRadians(y));
 		XMStoreFloat4x4(&m_xmf4x4World, XMMatrixMultiply(xmmtxRotate, XMLoadFloat4x4(&m_xmf4x4World)));
-		//SetRotationQuaternion(XMQuaternionRotationAxis(GetUp(), y));
+		XMStoreFloat4(&m_xmf4Quaternion, XMQuaternionMultiply(XMQuaternionRotationAxis(GetUp(), y), XMLoadFloat4(&m_xmf4Quaternion)));
 	}
 	if (z != 0.0f)
 	{
 		//플레이어의 로컬 z-축을 기준으로 회전하는 행렬을 생성한다.
 		xmmtxRotate = XMMatrixRotationAxis(XMVectorSet(0.f, 0.f, 1.f, 0.f), (float)XMConvertToRadians(z));
 		XMStoreFloat4x4(&m_xmf4x4World, XMMatrixMultiply(xmmtxRotate, XMLoadFloat4x4(&m_xmf4x4World)));
-		//SetRotationQuaternion(XMQuaternionRotationAxis(GetLook(), z));
+		XMStoreFloat4(&m_xmf4Quaternion, XMQuaternionMultiply(XMQuaternionRotationAxis(GetLook(), z), XMLoadFloat4(&m_xmf4Quaternion)));
 	}
 
 	m_xmf3Rotate = XMFLOAT3{ m_xmf3Rotate.x + x, m_xmf3Rotate.y + y, m_xmf3Rotate.z + z };
-	SetQuaternion(XMQuaternionRotationMatrix(GetWorldMtx()));
+	//SetQuaternion(XMQuaternionRotationMatrix(GetWorldMtx()));
 }
 void CGameObject::SetPosition(XMVECTOR pos) {
-	XMFLOAT3 m_xmf3Position;
 	XMStoreFloat3(&m_xmf3Position, pos);
 
 	m_xmf4x4World._41 = m_xmf3Position.x;
@@ -186,6 +196,9 @@ void CGameObject::SetPositionZ(const float pos) {
 }
 void CGameObject::SetWorldMtx(XMMATRIX mtxWorld) {
 	XMStoreFloat4x4(&m_xmf4x4World, mtxWorld);
+	SetQuaternion(XMQuaternionRotationMatrix(mtxWorld));
+	SetPosition(XMVectorSet(m_xmf4x4World._41, m_xmf4x4World._42, m_xmf4x4World._43, 1.0f));
+	//SetScale(XMVectorSet(1.f, 1.f, 1.f, 1.f));
 }
 
 void CGameObject::SetScale(XMVECTOR xmv){
@@ -317,6 +330,10 @@ void CGameObject::SetBufferInfo(void** ppMappedResources, int& nInstance, shared
 	VS_VB_INSTANCE *pnInstances = (VS_VB_INSTANCE *)ppMappedResources[0];
 	
 	//transpose 이후 정보 주입
+	if (m_pAnimater) {
+		pnInstances[nInstance].m_xmmtxWorld = XMMatrixTranspose(m_pAnimater->GetMeshOffsetMtx()*GetWorldMtx());
+		return;
+	}
 	pnInstances[nInstance].m_xmmtxWorld = XMMatrixTranspose(GetWorldMtx());
 
 }
@@ -361,7 +378,12 @@ void CGameObject::GetMainBoundingBox(BoundingBox& out){
 	out = m_OriBoundingBox;
 	if (m_pAnimater) {
 		out = m_pAnimater->GetMainAABB()->GetAABB();
+		out.Transform(out, m_pAnimater->GetMeshOffsetMtx()*GetWorldMtx());
+		return;
 	}
+	//else {
+	//	out = m_pRenderContainer->GetMesh()->GetAABB();
+	//}
 
 	out.Transform(out, GetWorldMtx());
 }
@@ -381,24 +403,28 @@ void CGameObject::PickingProc(){
 		m_pAnimater->CreateAnimationUI();
 	}
 }
-
+void TW_CALL DeleteObjectCallback(void* clientData) {
+	CGameObject* pData = reinterpret_cast<CGameObject*>(clientData);
+	UPDATER->GetSpaceContainer()->RemoveObject(pData);
+}
 void CGameObject::CreateObjectUI(){
 	const char* barName = "PickingBar";
 	TWBARMGR->DeleteBar(barName);
 	TWBARMGR->AddBar(barName);
 	//set param
-	TWBARMGR->SetBarSize(barName, 250, 200);
+	TWBARMGR->SetBarSize(barName, 250, 500);
 	TWBARMGR->SetBarPosition(barName, 0, 0);
 	TWBARMGR->SetBarColor(barName, 255, 0, 0);
 	TWBARMGR->SetBarContained(barName, true);
 	TWBARMGR->SetBarMovable(barName, false);
 	TWBARMGR->SetBarResizable(barName, false);
 	//set param
+	TWBARMGR->AddButtonCB(barName, "Control", "Delete", DeleteObjectCallback, this);
 	TWBARMGR->AddRotationBar(barName, "Rotation World", "Rotate", this);
-	//임시 방편
-	float SPACE_SIZE = 1000.f;
-	TWBARMGR->AddPositionBar(barName, "Position", "Position", this, 0.f, SPACE_SIZE - 1.0f, 1.0f);
+	TWBARMGR->AddPositionBar(barName, "Position", "Position", this, 0.f, UPDATER->GetSpaceContainer()->GetSize() - 1.0f, 1.0f);
 	TWBARMGR->AddScaleBar(barName, "Scale", "Scale", this, 0.1f, 100.f, 0.1f);
+
+
 }
 
 void CGameObject::CreateMeshUI(){
@@ -432,13 +458,13 @@ void CGameObject::CreateMenuMeshTextureUI(){
 	TWBARMGR->AddBar(barName);
 
 	vector<wstring> vFile;
-	DIRECTORYFINDER->GetFiles(vFile, L"../inputdata", true, true, L".jpg");
-	DIRECTORYFINDER->GetFiles(vFile, L"../inputdata", true, true, L".JPG");
-	DIRECTORYFINDER->GetFiles(vFile, L"../inputdata", true, true, L".png");
-	DIRECTORYFINDER->GetFiles(vFile, L"../inputdata", true, true, L".PNG");
+	DIRECTORYFINDER->GetFiles(vFile, L"../../Assets", true, true, L".jpg");
+	DIRECTORYFINDER->GetFiles(vFile, L"../../Assets", true, true, L".JPG");
+	DIRECTORYFINDER->GetFiles(vFile, L"../../Assets", true, true, L".png");
+	DIRECTORYFINDER->GetFiles(vFile, L"../../Assets", true, true, L".PNG");
 
 	const char* groupName = "TextureFile";
-	char menuName[64];
+	char menuName[256];
 	int cnt{ 0 };
 	m_vStructLoadTextureFile.resize(vFile.size());
 	for (auto data : vFile) {
@@ -449,6 +475,37 @@ void CGameObject::CreateMenuMeshTextureUI(){
 		TWBARMGR->AddButtonCB(barName, groupName, menuName, LoadTextureFileCallback, &m_vStructLoadTextureFile[cnt]);
 		cnt++;
 	}
+}
+
+void CGameObject::SaveInfo(){
+	//tag
+	EXPORTER->WriteUINT(m_tag);
+	EXPORTER->WriteEnter();
+	//name
+	EXPORTER->WriteCHAR(m_name.c_str());
+	EXPORTER->WriteEnter();
+	//worldmtx
+	EXPORTER->WriteFloat4x4(m_xmf4x4World);
+	EXPORTER->WriteEnter();
+}
+
+void CGameObject::LoadInfo(){
+	//tag
+	m_tag = (tag)IMPORTER->ReadUINT();
+
+	//name
+	m_name = IMPORTER->Readstring();
+	
+	//worldmtx
+	m_xmf4x4World = IMPORTER->ReadFloat4x4();
+	SetWorldMtx(XMLoadFloat4x4(&m_xmf4x4World));
+}
+
+CGameObject* CGameObject::CreateObject(string name, tag t, XMMATRIX xmmtxWorld){
+	CGameObject* pObject = new CGameObject(name, t);
+	pObject->Begin();
+	pObject->SetWorldMtx(xmmtxWorld);
+	return pObject;
 }
 
 

@@ -25,6 +25,7 @@ public:
 	virtual XMFLOAT3 GetColor() = 0;
 	light_id GetLightID() { return m_lightid; };
 
+	void PickingProc() = 0;
 
 protected:
 	//light는 버퍼를 따로 가지지 않는다.
@@ -32,6 +33,6 @@ protected:
 	light_id m_lightid{ light_id::LIGHT_END };
 
 public:
-	CLight(string name):CGameObject(name, tag::TAG_DYNAMIC_OBJECT) { m_lightid = light_id::LIGHT_END; }
+	CLight(string name):CGameObject(name, tag::TAG_LIGHT) { m_lightid = light_id::LIGHT_END; }
 	virtual ~CLight() {}
 };

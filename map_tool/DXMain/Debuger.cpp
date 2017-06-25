@@ -7,12 +7,9 @@ bool CDebuger::Begin(){
 	//test
 	m_pDebugTextureObj = new CDebugTexture;
 	m_pDebugTextureObj->Begin();
-	m_pDebugTextureSampler = RESOURCEMGR->GetSampler("DEFAULT");
 	
-
-	for (int i = object_id::OBJECT_DEBUG_AABB; i < object_id::OBJECT_DEBUG_END; ++i) {
-		object_id id = (object_id)i;
-		m_mDebugRenderContainer[id] = RCSELLER->GetRenderContainer(id);
+	for (auto RenderContainer : RCSELLER->GetTagRenderContainer()[tag::TAG_DEBUG]) {
+		m_mDebugRenderContainer[RenderContainer.first] = RenderContainer.second;
 	}
 	
 	//aabb객체 미리 할당
@@ -112,33 +109,32 @@ bool CDebuger::End() {
 }
 void CDebuger::RegistCoordinateSys(FXMMATRIX mtx) {
 	m_ppCoordinateSys[m_nCoordinateSys]->SetCoordinateSysInfo(mtx);
-	m_mDebugRenderContainer[object_id::OBJECT_DEBUG_COORD]->AddObject(m_ppCoordinateSys[m_nCoordinateSys++]);
+	m_mDebugRenderContainer["coordinatesys"]->AddObject(m_ppCoordinateSys[m_nCoordinateSys++]);
 }
 
 void CDebuger::RegistAABB(BoundingBox& aabb){
 	m_ppBoundingBox[m_nAABB]->SetBoundingBoxInfo(aabb);
-	m_mDebugRenderContainer[object_id::OBJECT_DEBUG_AABB]->AddObject(m_ppBoundingBox[m_nAABB++]);
+	m_mDebugRenderContainer["aabb"]->AddObject(m_ppBoundingBox[m_nAABB++]);
 
 }
 void CDebuger::RegistOBB(BoundingOrientedBox & obb){
 	m_ppBoundingBox[m_nAABB]->SetBoundingBoxInfo(obb);
-	m_mDebugRenderContainer[object_id::OBJECT_DEBUG_AABB]->AddObject(m_ppBoundingBox[m_nAABB++]);
+	m_mDebugRenderContainer["aabb"]->AddObject(m_ppBoundingBox[m_nAABB++]);
 }
 
 void CDebuger::RegistToDebugRenderContainer(CGameObject * pObject){
-	object_id id = pObject->GetObjectID();
+	string name = pObject->GetName();
 
-	switch (id) {
-	case object_id::OBJECT_POINT_LIGHT:
-		m_mDebugRenderContainer[object_id::OBJECT_DEBUG_POINT_LIGHT]->AddObject(pObject);
-		break;
-	case object_id::OBJECT_CAPSULE_LIGHT:
-		m_mDebugRenderContainer[object_id::OBJECT_DEBUG_CAPSULE_LIGHT]->AddObject(pObject);
-		break;
-	case object_id::OBJECT_SPOT_LIGHT:
-		m_mDebugRenderContainer[object_id::OBJECT_DEBUG_SPOT_LIGHT]->AddObject(pObject);
-		break;
+	if (name == "pointlight") {
+		m_mDebugRenderContainer["debugpointlight"]->AddObject(pObject);
 	}
+	else if (name == "capsulelight") {
+		m_mDebugRenderContainer["debugcapsulelight"]->AddObject(pObject);
+	}
+	else if (name == "spotlight") {
+		m_mDebugRenderContainer["debugspotlight"]->AddObject(pObject);
+	}
+	
 
 }
 
@@ -147,10 +143,10 @@ void CDebuger::DebugRender(shared_ptr<CCamera> pCamera){
 	RenderLightVolume(pCamera);
 	RenderCoordinateSys(pCamera);
 
-	for (int i = object_id::OBJECT_DEBUG_AABB; i < object_id::OBJECT_DEBUG_TEXTURE; ++i) {
-		object_id id = (object_id)i;
-		m_mDebugRenderContainer[id]->ClearObjectList();
+	for (auto pRenderContaier : m_mDebugRenderContainer) {
+		pRenderContaier.second->ClearObjectList();
 	}
+
 	m_nAABB = 0;
 	m_nCoordinateSys = 0;
 	//ClearDebuger();
@@ -158,11 +154,11 @@ void CDebuger::DebugRender(shared_ptr<CCamera> pCamera){
 
 void CDebuger::RenderAABB(shared_ptr<CCamera> pCamera){
 	//render aabb
-	m_mDebugRenderContainer[object_id::OBJECT_DEBUG_AABB]->Render(pCamera);
+	m_mDebugRenderContainer["aabb"]->Render(pCamera);
 }
 void CDebuger::RenderCoordinateSys(shared_ptr<CCamera> pCamera) {
 	//render coordinatesystem
-	m_mDebugRenderContainer[object_id::OBJECT_DEBUG_COORD]->Render(pCamera);
+	m_mDebugRenderContainer["coordinatesys"]->Render(pCamera);
 }
 void CDebuger::RenderLightVolume(shared_ptr<CCamera> pCamera){
 
@@ -175,10 +171,10 @@ void CDebuger::RenderLightVolume(shared_ptr<CCamera> pCamera){
 	//m_pd3dDeviceContext->OMSetDepthStencilState(m_pLightDepthStencilState, 0);
 	GLOBALVALUEMGR->GetDeviceContext()->RSSetState(m_pLightRasterizerState);
 
-	for (int i = object_id::OBJECT_DEBUG_POINT_LIGHT; i < object_id::OBJECT_DEBUG_TEXTURE; ++i) {
-		object_id id = (object_id)i;
-		m_mDebugRenderContainer[id]->Render(pCamera);
+	for (auto RenderContainer : m_mDebugRenderContainer) {
+		RenderContainer.second->Render(pCamera);
 	}
+
 	//이전 상태로 되돌림
 	//m_pd3dDeviceContext->OMSetBlendState(m_pPreBlendState, m_pPreBlendFactor, m_PreSampleMask);
 	//m_pd3dDeviceContext->OMSetDepthStencilState(m_pPreDepthStencilState, m_PreStencilRef);
@@ -196,10 +192,13 @@ void CDebuger::ClearDebuger(){
 	while (false == m_qDebugTextureData.empty()) {
 		m_qDebugTextureData.pop();
 	}
-	for (int i = object_id::OBJECT_DEBUG_AABB; i < object_id::OBJECT_DEBUG_END; ++i) {
-		object_id id = (object_id)i;
-		m_mDebugRenderContainer[id]->ClearObjectList();
+	while (false == m_qDebugDepthTextureData.empty()) {
+		m_qDebugDepthTextureData.pop();
 	}
+	for (auto RenderContainer : m_mDebugRenderContainer) {
+		RenderContainer.second->ClearObjectList();
+	}
+	
 	m_nAABB = 0;
 	m_nCoordinateSys = 0;
 }
@@ -253,7 +252,10 @@ void CDebuger::RenderText(){
 void CDebuger::AddTexture(XMFLOAT2 lt, XMFLOAT2 rb, ID3D11ShaderResourceView* pSRV){
 	CDebugTextureData DebugTextureData(pSRV, lt, rb);
 	m_qDebugTextureData.push(DebugTextureData);
-	
+}
+void CDebuger::AddDepthTexture(XMFLOAT2 fLeftTop, XMFLOAT2 fRightBottom, ID3D11ShaderResourceView * pSRV){
+	CDebugTextureData DebugTextureData(pSRV, fLeftTop, fRightBottom);
+	m_qDebugDepthTextureData.push(DebugTextureData);
 }
 void CDebuger::RenderTexture(){
 	while (false == m_qDebugTextureData.empty()) {
@@ -261,16 +263,32 @@ void CDebuger::RenderTexture(){
 		CDebugTextureData DebugTextureData = m_qDebugTextureData.front();
 		m_qDebugTextureData.pop();
 
-		m_pDebugTexture = CTexture::CreateTexture(DebugTextureData.m_pSRV, m_pDebugTextureSampler);
+		m_pDebugTexture = CTexture::CreateTexture(DebugTextureData.m_pSRV);
 
 		m_pDebugTextureObj->SetTextureInfo(DebugTextureData.lt, DebugTextureData.rb);
 
-		m_mDebugRenderContainer[object_id::OBJECT_DEBUG_TEXTURE]->AddObject(m_pDebugTextureObj);
-		m_mDebugRenderContainer[object_id::OBJECT_DEBUG_TEXTURE]->AddTexture(m_pDebugTexture);
-		m_mDebugRenderContainer[object_id::OBJECT_DEBUG_TEXTURE]->Render(nullptr);
-		m_mDebugRenderContainer[object_id::OBJECT_DEBUG_TEXTURE]->ClearObjectList();
-		m_mDebugRenderContainer[object_id::OBJECT_DEBUG_TEXTURE]->ClearTextures();
+		m_mDebugRenderContainer["debugtexture"]->AddObject(m_pDebugTextureObj);
+		m_mDebugRenderContainer["debugtexture"]->AddTexture(m_pDebugTexture);
+		m_mDebugRenderContainer["debugtexture"]->Render(nullptr);
+		m_mDebugRenderContainer["debugtexture"]->ClearObjectList();
+		m_mDebugRenderContainer["debugtexture"]->ClearTextures();
+	}
 
+	//dpeh thexture
+	while (false == m_qDebugDepthTextureData.empty()) {
+
+		CDebugTextureData DebugTextureData = m_qDebugDepthTextureData.front();
+		m_qDebugDepthTextureData.pop();
+
+		m_pDebugTexture = CTexture::CreateTexture(DebugTextureData.m_pSRV);
+
+		m_pDebugTextureObj->SetTextureInfo(DebugTextureData.lt, DebugTextureData.rb);
+
+		m_mDebugRenderContainer["debugdepthtexture"]->AddObject(m_pDebugTextureObj);
+		m_mDebugRenderContainer["debugdepthtexture"]->AddTexture(m_pDebugTexture);
+		m_mDebugRenderContainer["debugdepthtexture"]->Render(nullptr);
+		m_mDebugRenderContainer["debugdepthtexture"]->ClearObjectList();
+		m_mDebugRenderContainer["debugdepthtexture"]->ClearTextures();
 	}
 }
 int CDebuger::DebugMessageBox(std::string _title, std::string _message)

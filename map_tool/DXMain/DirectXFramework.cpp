@@ -30,9 +30,9 @@ void CDirectXFramework::Begin(HINSTANCE hInstance, HWND hWnd)
 		// 종횡비
 		, float(GLOBALVALUEMGR->GetrcClient().right) / float(GLOBALVALUEMGR->GetrcClient().bottom)
 		// 최소 거리
-		, 0.01f
+		, 5.f
 		// 최대 거리
-		, 10000.0f);
+		, 3000.0f);
 
 	//위치 조정
 

@@ -1,9 +1,9 @@
 #include "stdafx.h"
 #include "SkyBoxMesh.h"
 
-#define WIDTH 2048
-#define HEIGHT 2048
-#define DEPTH 2048
+#define WIDTH 512
+#define HEIGHT 512
+#define DEPTH 512
 
 
 void CSkyBoxMesh::RenderExcute(UINT nInstance) {

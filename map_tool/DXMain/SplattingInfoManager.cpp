@@ -59,8 +59,8 @@ void CSplattingInfoManager::UpdateShaderState(){
 			wsprintf(ppstrBlendInfoTextureNames[index], pSplattingInfo->GetBlendInfoTexturePath());
 			wsprintf(ppstrDetailTextureNames[index++], pSplattingInfo->GetDetailTexturePath());
 		}
-		m_pBlendInfoTextures = CTexture::CreateTexture(index, ppstrBlendInfoTextureNames, RESOURCEMGR->GetSampler("DEFAULT"), 2, BIND_PS);
-		m_pDetailTextures = CTexture::CreateTexture(index, ppstrDetailTextureNames, RESOURCEMGR->GetSampler("DEFAULT"), 1, BIND_PS);;
+		m_pBlendInfoTextures = CTexture::CreateTexture(index, ppstrBlendInfoTextureNames, 2, BIND_PS);
+		m_pDetailTextures = CTexture::CreateTexture(index, ppstrDetailTextureNames, 1, BIND_PS);;
 
 		SPLATTING_INFO* pData = (SPLATTING_INFO*)m_pSplattingInfoBuffer->Map();
 		pData->nSplattingInfo = m_vSplattinfInfo.size();
@@ -139,8 +139,8 @@ void CSplattingInfoManager::CreateSplattingInfo(const WCHAR * pDetailTextureName
 		wsprintf(ppstrBlendInfoTextureNames[index], pSplattingInfo->GetBlendInfoTexturePath());
 		wsprintf(ppstrDetailTextureNames[index++], pSplattingInfo->GetDetailTexturePath());
 	}
-	m_pBlendInfoTextures = CTexture::CreateTexture(index, ppstrBlendInfoTextureNames, RESOURCEMGR->GetSampler("DEFAULT"), 2, BIND_PS);
-	m_pDetailTextures = CTexture::CreateTexture(index, ppstrDetailTextureNames, RESOURCEMGR->GetSampler("DEFAULT"), 1, BIND_PS);;
+	m_pBlendInfoTextures = CTexture::CreateTexture(index, ppstrBlendInfoTextureNames, 2, BIND_PS);
+	m_pDetailTextures = CTexture::CreateTexture(index, ppstrDetailTextureNames, 1, BIND_PS);;
 
 	SPLATTING_INFO* pData = (SPLATTING_INFO*)m_pSplattingInfoBuffer->Map();
 	pData->nSplattingInfo = m_vSplattinfInfo.size();
@@ -165,8 +165,8 @@ void CSplattingInfoManager::CreateSplattingInfo(const WCHAR * pDetailTextureName
 		wsprintf(ppstrBlendInfoTextureNames[index], pSplattingInfo->GetBlendInfoTexturePath());
 		wsprintf(ppstrDetailTextureNames[index++], pSplattingInfo->GetDetailTexturePath());
 	}
-	m_pBlendInfoTextures = CTexture::CreateTexture(index, ppstrBlendInfoTextureNames, RESOURCEMGR->GetSampler("DEFAULT"), 2, BIND_PS);
-	m_pDetailTextures = CTexture::CreateTexture(index, ppstrDetailTextureNames, RESOURCEMGR->GetSampler("DEFAULT"), 1, BIND_PS);;
+	m_pBlendInfoTextures = CTexture::CreateTexture(index, ppstrBlendInfoTextureNames, 2, BIND_PS);
+	m_pDetailTextures = CTexture::CreateTexture(index, ppstrDetailTextureNames, 1, BIND_PS);;
 
 	SPLATTING_INFO* pData = (SPLATTING_INFO*)m_pSplattingInfoBuffer->Map();
 	pData->nSplattingInfo = m_vSplattinfInfo.size();

@@ -3,271 +3,275 @@
 
 
 bool CRenderContainerSeller::Begin(){
+	string object_name;
+	//test
+	tag t = tag::TAG_DYNAMIC_OBJECT;
+	object_name = "test";
+	m_mTagRenderContainer[t][object_name] = new CRenderContainer();
+	m_mTagRenderContainer[t][object_name]->SetShader(RESOURCEMGR->GetRenderShader("DEFAULT"));
+	m_mTagRenderContainer[t][object_name]->SetMesh(RESOURCEMGR->GetMesh("Rect5", 0));
+	m_mTagRenderContainer[t][object_name]->AddMaterial(RESOURCEMGR->GetMaterial("Terrain"));
+	m_mTagRenderContainer[t][object_name]->AddInstanceBuffer(RESOURCEMGR->GetBuffer("DEFAULTIB"));
+	m_mTagRenderContainer[t][object_name]->Begin();
+	//test
+
+	object_name = "fbx";
+	m_mTagRenderContainer[t][object_name] = new CRenderContainer();
+	m_mTagRenderContainer[t][object_name]->AddMesh(RESOURCEMGR->GetMesh("Rect1", 0));
+#ifdef USE_ANIM
+	m_mTagRenderContainer[t][object_name]->SetShader(RESOURCEMGR->GetRenderShader("AnimationObject"));
+#else
+	m_mTagRenderContainer[t][object_name]->SetShader(RESOURCEMGR->GetRenderShader("Core"));
+#endif
+	m_mTagRenderContainer[t][object_name]->AddBuffer(RESOURCEMGR->GetBuffer("FBX"));
+	m_mTagRenderContainer[t][object_name]->AddMaterial(RESOURCEMGR->GetMaterial("FBX"));
+	m_mTagRenderContainer[t][object_name]->Begin();
+
+
+	object_name = "plane";
+	m_mTagRenderContainer[t][object_name] = new CRenderContainer();
+	m_mTagRenderContainer[t][object_name]->SetMesh(RESOURCEMGR->GetMesh("Plane", 0));//mesh set과 동시에 instancing buffer 생성 및 set
+	m_mTagRenderContainer[t][object_name]->SetShader(RESOURCEMGR->GetRenderShader("DEFAULT"));
+	m_mTagRenderContainer[t][object_name]->AddMaterial(RESOURCEMGR->GetMaterial("Plane"));
+	m_mTagRenderContainer[t][object_name]->AddInstanceBuffer(RESOURCEMGR->GetBuffer("ONEIB"));
+	m_mTagRenderContainer[t][object_name]->Begin();
+		
+	t = tag::TAG_LIGHT;
+	object_name = "directionallight";
+	m_mTagRenderContainer[t][object_name] = new CRenderContainer();
+	m_mTagRenderContainer[t][object_name]->SetMesh(RESOURCEMGR->GetMesh("DirectionalLight", 0));//mesh set과 동시에 instancing buffer 생성 및 se
+	m_mTagRenderContainer[t][object_name]->SetShader(RESOURCEMGR->GetRenderShader("DirectionalLight"));
+	m_mTagRenderContainer[t][object_name]->AddBuffer(RESOURCEMGR->GetBuffer("DirectionalLightCB"));
+	m_mTagRenderContainer[t][object_name]->Begin();
 	
+	object_name = "pointlight";
+	//point light
+	m_mTagRenderContainer[t][object_name] = new CRenderContainer();
+	m_mTagRenderContainer[t][object_name]->SetMesh(RESOURCEMGR->GetMesh("PointLight", 0));
+	m_mTagRenderContainer[t][object_name]->SetShader(RESOURCEMGR->GetRenderShader("PointLight"));
+	m_mTagRenderContainer[t][object_name]->AddBuffer(RESOURCEMGR->GetBuffer("PointLightCB1"));
+	m_mTagRenderContainer[t][object_name]->AddBuffer(RESOURCEMGR->GetBuffer("PointLightCB2"));
+	m_mTagRenderContainer[t][object_name]->Begin();
+		
+	object_name = "spotlight";
+	//spot light
+	m_mTagRenderContainer[t][object_name] = new CRenderContainer();
+	m_mTagRenderContainer[t][object_name]->SetMesh(RESOURCEMGR->GetMesh("SpotLight", 0));
+	m_mTagRenderContainer[t][object_name]->SetShader(RESOURCEMGR->GetRenderShader("SpotLight"));
+	m_mTagRenderContainer[t][object_name]->AddBuffer(RESOURCEMGR->GetBuffer("SpotLightCB1"));
+	m_mTagRenderContainer[t][object_name]->AddBuffer(RESOURCEMGR->GetBuffer("SpotLightCB2"));
+	m_mTagRenderContainer[t][object_name]->Begin();
+	
+	object_name = "capsulelight";
+	//point light
+	m_mTagRenderContainer[t][object_name] = new CRenderContainer();
+	m_mTagRenderContainer[t][object_name]->SetMesh(RESOURCEMGR->GetMesh("CapsuleLight", 0));
+	m_mTagRenderContainer[t][object_name]->SetShader(RESOURCEMGR->GetRenderShader("CapsuleLight"));
+	m_mTagRenderContainer[t][object_name]->AddBuffer(RESOURCEMGR->GetBuffer("CapsuleLightCB1"));
+	m_mTagRenderContainer[t][object_name]->AddBuffer(RESOURCEMGR->GetBuffer("CapsuleLightCB2"));
+	m_mTagRenderContainer[t][object_name]->Begin();
+	
+	t = tag::TAG_POSTPROCESSING;
+	object_name = "postprocessing";
+	//자기 shader set
+	m_mTagRenderContainer[t][object_name] = new CRenderContainer();
+	m_mTagRenderContainer[t][object_name]->SetShader(RESOURCEMGR->GetRenderShader("PostProcessing"));
+	m_mTagRenderContainer[t][object_name]->SetMesh(RESOURCEMGR->GetMesh("DirectionalLight", 0));
+	m_mTagRenderContainer[t][object_name]->Begin();
+	
+	t = tag::TAG_SPACE;
+	object_name = "skybox";
+	m_mTagRenderContainer[t][object_name] = new CRenderContainer();
+	m_mTagRenderContainer[t][object_name]->SetMesh(RESOURCEMGR->GetMesh("SkyBox", 0));
+	m_mTagRenderContainer[t][object_name]->SetShader(RESOURCEMGR->GetRenderShader("SkyBox"));
+	m_mTagRenderContainer[t][object_name]->AddMaterial(RESOURCEMGR->GetMaterial("SkyBox"));
+	m_mTagRenderContainer[t][object_name]->AddInstanceBuffer(RESOURCEMGR->GetBuffer("ONEIB"));
+	m_mTagRenderContainer[t][object_name]->Begin();
+	
+	object_name = "space";
+	m_mTagRenderContainer[t][object_name] = new CRenderContainer();
+	m_mTagRenderContainer[t][object_name]->SetMesh(RESOURCEMGR->GetMesh("Space", 0));//mesh set과 동시에 instancing buffer 생성 및 set
+	m_mTagRenderContainer[t][object_name]->SetShader(RESOURCEMGR->GetRenderShader("Core"));
+	m_mTagRenderContainer[t][object_name]->AddMaterial(RESOURCEMGR->GetMaterial("DEFAULT"));
+	m_mTagRenderContainer[t][object_name]->AddInstanceBuffer(RESOURCEMGR->GetBuffer("SpaceIB"));
+	m_mTagRenderContainer[t][object_name]->Begin();
+		
+	t = tag::TAG_TERRAIN;
+	object_name = "terrain";
+	m_mTagRenderContainer[t][object_name] = new CRenderContainer();
+	m_mTagRenderContainer[t][object_name]->SetShader(RESOURCEMGR->GetRenderShader("Terrain"));
+	m_mTagRenderContainer[t][object_name]->AddMaterial(RESOURCEMGR->GetMaterial("Terrain"));
+	m_mTagRenderContainer[t][object_name]->Begin();
+	
+	t = tag::TAG_SSLR;
+	object_name = "laytrace";
+	m_mTagRenderContainer[t][object_name] = new CRenderContainer();
+	m_mTagRenderContainer[t][object_name]->SetMesh(RESOURCEMGR->GetMesh("DirectionalLight", 0));//mesh set과 동시에 instancing buffer 생성 및 se
+	m_mTagRenderContainer[t][object_name]->SetShader(RESOURCEMGR->GetRenderShader("RayTrace"));
+	m_mTagRenderContainer[t][object_name]->Begin();
+	
+	object_name = "combine";
+	m_mTagRenderContainer[t][object_name] = new CRenderContainer();
+	m_mTagRenderContainer[t][object_name]->SetMesh(RESOURCEMGR->GetMesh("DirectionalLight", 0));//mesh set과 동시에 instancing buffer 생성 및 se
+	m_mTagRenderContainer[t][object_name]->SetShader(RESOURCEMGR->GetRenderShader("Combine"));
+	m_mTagRenderContainer[t][object_name]->Begin();
+	
+	t = tag::TAG_DEBUG;
+	object_name = "aabb";
+	m_mTagRenderContainer[t][object_name] = new CDebugRenderContainer();
+	m_mTagRenderContainer[t][object_name]->SetMesh(RESOURCEMGR->GetMesh("BoundingBox", 0));
+	m_mTagRenderContainer[t][object_name]->SetShader(RESOURCEMGR->GetRenderShader("BoundingBox"));
+	m_mTagRenderContainer[t][object_name]->AddMaterial(RESOURCEMGR->GetMaterial("BoundingBox"));
+	m_mTagRenderContainer[t][object_name]->AddInstanceBuffer(RESOURCEMGR->GetBuffer("BoundingBoxIB"));
+	m_mTagRenderContainer[t][object_name]->Begin();
+
+	object_name = "coordinatesys";
+	m_mTagRenderContainer[t][object_name] = new CDebugRenderContainer();
+	m_mTagRenderContainer[t][object_name]->SetMesh(RESOURCEMGR->GetMesh("CoordinateSys", 0));
+	m_mTagRenderContainer[t][object_name]->SetShader(RESOURCEMGR->GetRenderShader("CoordinateSys"));
+	m_mTagRenderContainer[t][object_name]->AddMaterial(RESOURCEMGR->GetMaterial("AABB"));
+	m_mTagRenderContainer[t][object_name]->AddInstanceBuffer(RESOURCEMGR->GetBuffer("CoordinateSysIB"));
+	m_mTagRenderContainer[t][object_name]->Begin();
+
+	object_name = "debugpointlight";
+	//point light
+	m_mTagRenderContainer[t][object_name] = new CDebugRenderContainer();
+	m_mTagRenderContainer[t][object_name]->SetMesh(RESOURCEMGR->GetMesh("PointLight", 0));
+	m_mTagRenderContainer[t][object_name]->SetShader(RESOURCEMGR->GetRenderShader("DebugPointLight"));
+	m_mTagRenderContainer[t][object_name]->AddBuffer(RESOURCEMGR->GetBuffer("PointLightCB1"));
+	m_mTagRenderContainer[t][object_name]->AddBuffer(RESOURCEMGR->GetBuffer("PointLightCB2"));
+	m_mTagRenderContainer[t][object_name]->Begin();
+
+	object_name = "debugcapsulelight";
+	//capsule light
+	m_mTagRenderContainer[t][object_name] = new CDebugRenderContainer();
+	m_mTagRenderContainer[t][object_name]->SetMesh(RESOURCEMGR->GetMesh("CapsuleLight", 0));
+	m_mTagRenderContainer[t][object_name]->SetShader(RESOURCEMGR->GetRenderShader("DebugCapsuleLight"));
+	m_mTagRenderContainer[t][object_name]->AddBuffer(RESOURCEMGR->GetBuffer("CapsuleLightCB1"));
+	m_mTagRenderContainer[t][object_name]->AddBuffer(RESOURCEMGR->GetBuffer("CapsuleLightCB2"));
+	m_mTagRenderContainer[t][object_name]->Begin();
+
+	object_name = "debugspotlight";
+	//spot light
+	m_mTagRenderContainer[t][object_name] = new CDebugRenderContainer();
+	m_mTagRenderContainer[t][object_name]->SetMesh(RESOURCEMGR->GetMesh("SpotLight", 0));
+	m_mTagRenderContainer[t][object_name]->SetShader(RESOURCEMGR->GetRenderShader("DebugSpotLight"));
+	m_mTagRenderContainer[t][object_name]->AddBuffer(RESOURCEMGR->GetBuffer("SpotLightCB1"));
+	m_mTagRenderContainer[t][object_name]->AddBuffer(RESOURCEMGR->GetBuffer("SpotLightCB2"));
+	m_mTagRenderContainer[t][object_name]->Begin();
+
+	object_name = "debugtexture";
+	m_mTagRenderContainer[t][object_name] = new CDebugRenderContainer();
+	m_mTagRenderContainer[t][object_name]->SetMesh(RESOURCEMGR->GetMesh("DebugTexture", 0));
+	m_mTagRenderContainer[t][object_name]->SetShader(RESOURCEMGR->GetRenderShader("DebugTexture"));
+	m_mTagRenderContainer[t][object_name]->AddInstanceBuffer(RESOURCEMGR->GetBuffer("DebugTextureIB"));
+	m_mTagRenderContainer[t][object_name]->Begin();
+
+	object_name = "debugdepthtexture";
+	m_mTagRenderContainer[t][object_name] = new CDebugRenderContainer();
+	m_mTagRenderContainer[t][object_name]->SetMesh(RESOURCEMGR->GetMesh("DebugTexture", 0));
+	m_mTagRenderContainer[t][object_name]->SetShader(RESOURCEMGR->GetRenderShader("DebugDepthTexture"));
+	m_mTagRenderContainer[t][object_name]->AddInstanceBuffer(RESOURCEMGR->GetBuffer("DebugTextureIB"));
+	m_mTagRenderContainer[t][object_name]->Begin();
+	//자동 rendercontainer제작!
+	CreateStempRenderContainer();
+
 	return true;
 }
 
 bool CRenderContainerSeller::End(){
-
 	//render container delete
-	for (auto RenderContainer : m_mRenderContainer) {
-		RenderContainer.second->End();
-		delete RenderContainer.second;
+	for (auto pairTagRenderContainer : m_mTagRenderContainer) {
+		for (auto pairRenderContainer : pairTagRenderContainer.second) {
+			delete pairRenderContainer.second;
+		}
+		pairTagRenderContainer.second.clear();
 	}
-	m_mRenderContainer.clear();
+	m_mTagRenderContainer.clear();
+
+	for (auto pairTagRenderContainer : m_mStempRenderContainer) {
+		for (auto pairRenderContainer : pairTagRenderContainer.second) {
+			delete pairRenderContainer.second;
+		}
+		pairTagRenderContainer.second.clear();
+	}
+	m_mStempRenderContainer.clear();
 	//render container delete
 
 	return true;
 }
 
-CRenderContainer* CRenderContainerSeller::GetRenderContainer(object_id objectid) {
-	//CRenderContainer* pContainer{ nullptr };
-	//int nMaxObjects{ 0 };
-
+CRenderContainer* CRenderContainerSeller::GetRenderContainer(string name) {
 	//있으면 바로 return
-	if (m_mRenderContainer[objectid]) return m_mRenderContainer[objectid];
-
-	//수정되면 여기 수정 + container factory 하나 더 만듬
-	switch (objectid) {
-	case object_id::OBJECT_TEST:
-		m_mRenderContainer[objectid] = new CRenderContainer();
-
-		m_mRenderContainer[objectid]->SetShader(RESOURCEMGR->GetRenderShader("DEFAULT"));
-		m_mRenderContainer[objectid]->SetMesh(RESOURCEMGR->GetMesh("Rect5"));
-		m_mRenderContainer[objectid]->AddMaterial(RESOURCEMGR->GetMaterial("Terrain"));
-		m_mRenderContainer[objectid]->AddInstanceBuffer(RESOURCEMGR->GetBuffer("DEFAULTIB"));
-		//m_mRenderContainer[objectid]->AddTexture(RESOURCEMGR->GetTexture("DEFAULT"));
-
-		m_mRenderContainer[objectid]->Begin();
-
-		//pContainer->CreateSharedBuffer(nMaxObjects, sizeof(VS_VB_INSTANCE));
-		break;
-	case object_id::OBJECT_PLANE:
-		m_mRenderContainer[objectid] = new CRenderContainer();
-
-		m_mRenderContainer[objectid]->SetMesh(RESOURCEMGR->GetMesh("Plane"));//mesh set과 동시에 instancing buffer 생성 및 set
-		m_mRenderContainer[objectid]->SetShader(RESOURCEMGR->GetRenderShader("DEFAULT"));
-		m_mRenderContainer[objectid]->AddMaterial(RESOURCEMGR->GetMaterial("Plane"));
-		m_mRenderContainer[objectid]->AddInstanceBuffer(RESOURCEMGR->GetBuffer("ONEIB"));
-		//m_mRenderContainer[objectid]->AddTexture(RESOURCEMGR->GetTexture("DEFAULT"));
-
-		m_mRenderContainer[objectid]->Begin();
-		break;
-	case object_id::OBJECT_DIRECTIONAL_LIGHT:
-		m_mRenderContainer[objectid] = new CRenderContainer();
-
-		m_mRenderContainer[objectid]->SetMesh(RESOURCEMGR->GetMesh("DirectionalLight"));//mesh set과 동시에 instancing buffer 생성 및 se
-		m_mRenderContainer[objectid]->SetShader(RESOURCEMGR->GetRenderShader("DirectionalLight"));
-		m_mRenderContainer[objectid]->AddBuffer(RESOURCEMGR->GetBuffer("DirectionalLightCB"));
-
-		m_mRenderContainer[objectid]->Begin();
-		break;
-
-	case object_id::OBJECT_POINT_LIGHT:
-		//point light
-		m_mRenderContainer[objectid] = new CRenderContainer();
-
-		m_mRenderContainer[objectid]->SetMesh(RESOURCEMGR->GetMesh("PointLight"));
-		m_mRenderContainer[objectid]->SetShader(RESOURCEMGR->GetRenderShader("PointLight"));
-		m_mRenderContainer[objectid]->AddBuffer(RESOURCEMGR->GetBuffer("PointLightCB1"));
-		m_mRenderContainer[objectid]->AddBuffer(RESOURCEMGR->GetBuffer("PointLightCB2"));
-
-		m_mRenderContainer[objectid]->Begin();
-		break;
-	case object_id::OBJECT_SPOT_LIGHT:
-		//point light
-		m_mRenderContainer[objectid] = new CRenderContainer();
-
-		m_mRenderContainer[objectid]->SetMesh(RESOURCEMGR->GetMesh("SpotLight"));
-		m_mRenderContainer[objectid]->SetShader(RESOURCEMGR->GetRenderShader("SpotLight"));
-		m_mRenderContainer[objectid]->AddBuffer(RESOURCEMGR->GetBuffer("SpotLightCB1"));
-		m_mRenderContainer[objectid]->AddBuffer(RESOURCEMGR->GetBuffer("SpotLightCB2"));
-
-		m_mRenderContainer[objectid]->Begin();
-		break;
-	case object_id::OBJECT_CAPSULE_LIGHT:
-		//point light
-		m_mRenderContainer[objectid] = new CRenderContainer();
-
-		m_mRenderContainer[objectid]->SetMesh(RESOURCEMGR->GetMesh("CapsuleLight"));
-		m_mRenderContainer[objectid]->SetShader(RESOURCEMGR->GetRenderShader("CapsuleLight"));
-		m_mRenderContainer[objectid]->AddBuffer(RESOURCEMGR->GetBuffer("CapsuleLightCB1"));
-		m_mRenderContainer[objectid]->AddBuffer(RESOURCEMGR->GetBuffer("CapsuleLightCB2"));
-
-		m_mRenderContainer[objectid]->Begin();
-		break;
-
-	case object_id::OBJECT_POSTPROCESSING:
-		//자기 shader set
-		m_mRenderContainer[objectid] = new CRenderContainer();
-
-		m_mRenderContainer[objectid]->SetShader(RESOURCEMGR->GetRenderShader("PostProcessing"));
-		m_mRenderContainer[objectid]->SetMesh(RESOURCEMGR->GetMesh("DirectionalLight"));
-		m_mRenderContainer[objectid]->Begin();
-		break;
-	case object_id::OBJECT_SKYBOX:
-		m_mRenderContainer[objectid] = new CRenderContainer();
-
-		m_mRenderContainer[objectid]->SetMesh(RESOURCEMGR->GetMesh("SkyBox"));
-		m_mRenderContainer[objectid]->SetShader(RESOURCEMGR->GetRenderShader("SkyBox"));
-		m_mRenderContainer[objectid]->AddMaterial(RESOURCEMGR->GetMaterial("SkyBox"));
-		m_mRenderContainer[objectid]->AddInstanceBuffer(RESOURCEMGR->GetBuffer("ONEIB"));
-		//m_mRenderContainer[objectid]->AddTexture(RESOURCEMGR->GetTexture("SkyBox"));
-
-		m_mRenderContainer[objectid]->Begin();
-		break;
-	case object_id::OBJECT_SPACE:
-		//adaptor
-		m_mRenderContainer[objectid] = new CRenderContainer();
-
-		m_mRenderContainer[objectid]->SetMesh(RESOURCEMGR->GetMesh("Space"));//mesh set과 동시에 instancing buffer 생성 및 set
-		m_mRenderContainer[objectid]->SetShader(RESOURCEMGR->GetRenderShader("Core"));
-		m_mRenderContainer[objectid]->AddMaterial(RESOURCEMGR->GetMaterial("DEFAULT"));
-		m_mRenderContainer[objectid]->AddInstanceBuffer(RESOURCEMGR->GetBuffer("SpaceIB"));
-
-		m_mRenderContainer[objectid]->Begin();
-		break;
-	case object_id::OBJECT_TERRAIN:
-		m_mRenderContainer[objectid] = new CRenderContainer();
-
-		//m_mRenderContainer[objectid]->SetMesh(RESOURCEMGR->GetMesh("Terrain"));
-		m_mRenderContainer[objectid]->SetShader(RESOURCEMGR->GetRenderShader("Terrain"));
-		m_mRenderContainer[objectid]->AddMaterial(RESOURCEMGR->GetMaterial("Terrain"));
-		//m_mRenderContainer[objectid]->AddInstanceBuffer(RESOURCEMGR->GetBuffer("TerrainIB"));
-		//m_mRenderContainer[objectid]->AddTexture(RESOURCEMGR->GetTexture("TerrainHeightMap"));
-		//m_mRenderContainer[objectid]->AddTexture(RESOURCEMGR->GetTexture("TerrainBase"));
-		//m_mRenderContainer[objectid]->AddTexture(RESOURCEMGR->GetTexture("TerrainDetail"));
-		//m_mRenderContainer[objectid]->AddTexture(RESOURCEMGR->GetTexture("TerrainNormalMap"));
-
-		m_mRenderContainer[objectid]->Begin();
-		break;
-	case object_id::OBJECT_DEBUG_AABB:
-		m_mRenderContainer[objectid] = new CDebugRenderContainer();
-		//m_mRenderContainer[objectid] = new CRenderContainer(m_pCamera, m_pd3dDevice, m_pd3dDeviceContext);
-
-		m_mRenderContainer[objectid]->SetMesh(RESOURCEMGR->GetMesh("BoundingBox"));
-		m_mRenderContainer[objectid]->SetShader(RESOURCEMGR->GetRenderShader("BoundingBox"));
-		m_mRenderContainer[objectid]->AddMaterial(RESOURCEMGR->GetMaterial("BoundingBox"));
-		m_mRenderContainer[objectid]->AddInstanceBuffer(RESOURCEMGR->GetBuffer("BoundingBoxIB"));
-
-		m_mRenderContainer[objectid]->Begin();
-		break;
-	case object_id::OBJECT_DEBUG_COORD:
-		m_mRenderContainer[objectid] = new CDebugRenderContainer();
-		//m_mRenderContainer[objectid] = new CRenderContainer(m_pCamera, m_pd3dDevice, m_pd3dDeviceContext);
-
-		m_mRenderContainer[objectid]->SetMesh(RESOURCEMGR->GetMesh("CoordinateSys"));
-		m_mRenderContainer[objectid]->SetShader(RESOURCEMGR->GetRenderShader("CoordinateSys"));
-		m_mRenderContainer[objectid]->AddMaterial(RESOURCEMGR->GetMaterial("AABB"));
-		m_mRenderContainer[objectid]->AddInstanceBuffer(RESOURCEMGR->GetBuffer("CoordinateSysIB"));
-
-		m_mRenderContainer[objectid]->Begin();
-		break;
-	case object_id::OBJECT_DEBUG_POINT_LIGHT:
-		//point light
-		m_mRenderContainer[objectid] = new CDebugRenderContainer();
-
-		m_mRenderContainer[objectid]->SetMesh(RESOURCEMGR->GetMesh("PointLight"));
-		m_mRenderContainer[objectid]->SetShader(RESOURCEMGR->GetRenderShader("DebugPointLight"));
-		m_mRenderContainer[objectid]->AddBuffer(RESOURCEMGR->GetBuffer("PointLightCB1"));
-		m_mRenderContainer[objectid]->AddBuffer(RESOURCEMGR->GetBuffer("PointLightCB2"));
-
-		m_mRenderContainer[objectid]->Begin();
-		break;
-	case object_id::OBJECT_DEBUG_CAPSULE_LIGHT:
-		//capsule light
-		m_mRenderContainer[objectid] = new CDebugRenderContainer();
-
-		m_mRenderContainer[objectid]->SetMesh(RESOURCEMGR->GetMesh("CapsuleLight"));
-		m_mRenderContainer[objectid]->SetShader(RESOURCEMGR->GetRenderShader("DebugCapsuleLight"));
-		m_mRenderContainer[objectid]->AddBuffer(RESOURCEMGR->GetBuffer("CapsuleLightCB1"));
-		m_mRenderContainer[objectid]->AddBuffer(RESOURCEMGR->GetBuffer("CapsuleLightCB2"));
-
-		m_mRenderContainer[objectid]->Begin();
-		break;
-	case object_id::OBJECT_DEBUG_SPOT_LIGHT:
-		//spot light
-		m_mRenderContainer[objectid] = new CDebugRenderContainer();
-
-		m_mRenderContainer[objectid]->SetMesh(RESOURCEMGR->GetMesh("SpotLight"));
-		m_mRenderContainer[objectid]->SetShader(RESOURCEMGR->GetRenderShader("DebugSpotLight"));
-		m_mRenderContainer[objectid]->AddBuffer(RESOURCEMGR->GetBuffer("SpotLightCB1"));
-		m_mRenderContainer[objectid]->AddBuffer(RESOURCEMGR->GetBuffer("SpotLightCB2"));
-
-		m_mRenderContainer[objectid]->Begin();
-		break;
-	case object_id::OBJECT_DEBUG_TEXTURE:
-		m_mRenderContainer[objectid] = new CDebugRenderContainer();
-
-		m_mRenderContainer[objectid]->SetMesh(RESOURCEMGR->GetMesh("DebugTexture"));
-		m_mRenderContainer[objectid]->SetShader(RESOURCEMGR->GetRenderShader("DebugTexture"));
-		m_mRenderContainer[objectid]->AddInstanceBuffer(RESOURCEMGR->GetBuffer("DebugTextureIB"));
-
-		m_mRenderContainer[objectid]->Begin();
-		break;
-	case object_id::OBJECT_FBX_ELF:
-		m_mRenderContainer[objectid] = new CRenderContainer();
-
-		m_mRenderContainer[objectid]->AddMesh(RESOURCEMGR->GetMesh("Rect1"));
-
-		////mesh set
-		//char pName[20];
-		//for (int i = 0; i < 10; ++i) {
-		//	sprintf(pName, "FBX_%d", i);
-		//	m_mRenderContainer[objectid]->AddMesh(RESOURCEMGR->GetMesh(pName));
-		//}
-		//mesh set
-		//m_mRenderContainer[objectid]->SetMesh(m_pTestMultiMesh);
-
-		//m_mRenderContainer[objectid]->SetShader(RESOURCEMGR->GetRenderShader("Core"));
-
-#ifdef USE_ANIM
-		m_mRenderContainer[objectid]->SetShader(RESOURCEMGR->GetRenderShader("AnimationObject"));
-#else
-		m_mRenderContainer[objectid]->SetShader(RESOURCEMGR->GetRenderShader("Core"));
-#endif
-		m_mRenderContainer[objectid]->AddBuffer(RESOURCEMGR->GetBuffer("FBX"));
-		m_mRenderContainer[objectid]->AddMaterial(RESOURCEMGR->GetMaterial("FBX"));
-		//m_mRenderContainer[objectid]->AddTexture(RESOURCEMGR->GetTexture("DEFAULT"));
-		//m_mRenderContainer[objectid]->SetAnimater(RESOURCEMGR->GetAnimater("ELF"));
-
-		m_mRenderContainer[objectid]->Begin();
-		break;
-	case object_id::OBJECT_FBX_BUNNY:
-		m_mRenderContainer[objectid] = new CRenderContainer();
-		
-		m_mRenderContainer[objectid]->AddMesh(RESOURCEMGR->GetMesh("BUNNY"));
-#ifdef USE_ANIM
-		m_mRenderContainer[objectid]->SetShader(RESOURCEMGR->GetRenderShader("AnimationObject"));
-#else
-		m_mRenderContainer[objectid]->SetShader(RESOURCEMGR->GetRenderShader("Core"));
-#endif
-		m_mRenderContainer[objectid]->AddBuffer(RESOURCEMGR->GetBuffer("FBX"));
-		m_mRenderContainer[objectid]->AddTexture(RESOURCEMGR->GetTexture("FBX"));
-		m_mRenderContainer[objectid]->AddMaterial(RESOURCEMGR->GetMaterial("BUNNY"));
-		m_mRenderContainer[objectid]->SetAnimater(RESOURCEMGR->GetAnimater("BUNNY"));
-
-		m_mRenderContainer[objectid]->Begin();
-		break;
-	case OBJECT_LAYTRACE:
-		m_mRenderContainer[objectid] = new CRenderContainer();
-
-		m_mRenderContainer[objectid]->SetMesh(RESOURCEMGR->GetMesh("DirectionalLight"));//mesh set과 동시에 instancing buffer 생성 및 se
-		m_mRenderContainer[objectid]->SetShader(RESOURCEMGR->GetRenderShader("RayTrace"));
-
-		m_mRenderContainer[objectid]->Begin();
-		break;
-	case OBJECT_COMBINE:
-		m_mRenderContainer[objectid] = new CRenderContainer();
-
-		m_mRenderContainer[objectid]->SetMesh(RESOURCEMGR->GetMesh("DirectionalLight"));//mesh set과 동시에 instancing buffer 생성 및 se
-		m_mRenderContainer[objectid]->SetShader(RESOURCEMGR->GetRenderShader("Combine"));
-
-		m_mRenderContainer[objectid]->Begin();
-		break;
+	for (auto pairTagRenderContainer : m_mTagRenderContainer) {
+		if (pairTagRenderContainer.second.end() != pairTagRenderContainer.second.find(name))
+			return pairTagRenderContainer.second[name];
 	}
+	for (auto pairTagRenderContainer : m_mStempRenderContainer) {
+		if (pairTagRenderContainer.second.end() != pairTagRenderContainer.second.find(name))
+			return pairTagRenderContainer.second[name];
+	}
+	return nullptr;
+}
 
-	return m_mRenderContainer[objectid];
+CRenderContainer * CRenderContainerSeller::GetRenderContainer(tag t, string name){
+	//있으면 바로 return
+	if (m_mTagRenderContainer.end() != m_mTagRenderContainer.find(t)) {
+		if (m_mTagRenderContainer[t].end() != m_mTagRenderContainer[t].find(name))
+			return m_mTagRenderContainer[t][name];
+	}
+	if (m_mStempRenderContainer.end() != m_mStempRenderContainer.find(t)) {
+		if (m_mStempRenderContainer[t].end() != m_mStempRenderContainer[t].find(name))
+			return m_mStempRenderContainer[t][name];
+	}
+	return nullptr;
+}
+void CRenderContainerSeller::ClearStempRenderContainer(){
+	{
+		for (auto pairTagRenderContainer : m_mStempRenderContainer) {
+			for (auto pairRenderContainer : pairTagRenderContainer.second) {
+				delete pairRenderContainer.second;
+			}
+			pairTagRenderContainer.second.clear();
+		}
+		m_mStempRenderContainer.clear();
+	}
+}
+void CRenderContainerSeller::CreateStempRenderContainer(){
+	//tag는 mesh에서 얻어와야 한다. 
+	//animation tool에서 새로운 정보로 save해줘야 한다.
+	
+	for (auto vStempMesh : RESOURCEMGR->GetAllStempMesh()) {
+		string name = vStempMesh.second[0]->GetName();
+		tag t = vStempMesh.second[0]->GetTag();
+		m_mStempRenderContainer[t][name] = new CRenderContainer;
+		shared_ptr<CAnimater> pAnimater = RESOURCEMGR->GetAnimater(name);
+		//animation
+		if (pAnimater) {
+			m_mStempRenderContainer[t][name]->SetShader(RESOURCEMGR->GetRenderShader("AnimationObject"));
+			m_mStempRenderContainer[t][name]->SetAnimater(RESOURCEMGR->GetAnimater(name));
+		}
+		else {
+			m_mStempRenderContainer[t][name]->SetShader(RESOURCEMGR->GetRenderShader("DEFAULT"));
+		}
+		//animation
+		//mesh
+		for (auto pStempMesh : vStempMesh.second) {
+			m_mStempRenderContainer[t][name]->AddMesh(pStempMesh);
+		}//mesh가 1개 이상이면 mesh material, texture를 사용한다.
+		if (vStempMesh.second.size() == 1) {
+			//mesh가 1개라면 
+			//mseh의 resource를 rc로 옮기고 
+			m_mStempRenderContainer[t][name]->AddMaterial(vStempMesh.second[0]->GetMeshMaterial());
+			for (auto pTexture : vStempMesh.second[0]->GetvMeshTexture()) {
+				m_mStempRenderContainer[t][name]->AddTexture(pTexture);
+			}
+			//자신이 가진 resource는 지워준다.
+			vStempMesh.second[0]->ClearMeshResources();
+		}
+		//mesh
+		m_mStempRenderContainer[t][name]->AddInstanceBuffer(RESOURCEMGR->GetBuffer("DEFAULTIB"));
+	}
 }
 //
 //void CRenderContainerSeller::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam){

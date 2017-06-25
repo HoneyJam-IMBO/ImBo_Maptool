@@ -90,6 +90,7 @@ public:
 	bool MouseLeftDown();
 	bool MouseLeftOnlyDown();
 	bool MouseRightDown();
+	bool MouseRightOnlyDown();
 	bool MouseLeftUp();
 	bool MouseRightUp();
 	void SetMouseLeft(bool click) { m_bLeftCheck = click; }
@@ -131,10 +132,10 @@ private:
 	POINT								pt;
 
 	bool								m_bCapture{ false };
-	bool								m_bLeftCheck{ false };
+	bool						m_bLeftCheck{ false };
 	bool m_bLeftOnlyCheck{ false };
-	bool								m_bRightCheck{ false };
-
+	bool						m_bRightCheck{ false };
+	bool m_bRightOnlyCheck{ false };
 	POINT							m_ptOldCursorPos;
 	float m_cxDelta{ 0.f }, m_cyDelta{ 0.f };
 

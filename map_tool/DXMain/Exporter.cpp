@@ -374,3 +374,18 @@ void CExporter::MakeBitmap32(const WCHAR * fileName, Pixel32 * pData, UINT nWidt
 
 	delete rgbTemp;
 }
+
+void CExporter::MakeSRVTexture(ID3D11ShaderResourceView* pSRV, wstring wFileName){
+	//dsv의 texture를 인자로 넣어서 srv를 제작하는 함수를 제작한다.
+	ID3D11Resource* pRsc;
+	ScratchImage image;
+
+	pSRV->GetResource(&pRsc);
+	HRESULT hr = DirectX::CaptureTexture(GLOBALVALUEMGR->GetDevice(), GLOBALVALUEMGR->GetDeviceContext(), pRsc, image);
+	size_t nimg = image.GetImageCount();
+	const Image* img = image.GetImages();
+	TexMetadata info = image.GetMetadata();
+
+	hr = SaveToDDSFile(img, nimg, info, DDS_FLAGS_NONE, wFileName.c_str());
+	if (FAILED(hr)) DEBUGER->DebugGMessageBox(L"message", L"fail_save");
+}

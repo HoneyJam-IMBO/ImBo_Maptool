@@ -3,7 +3,7 @@
 
 bool CPlane::Begin() {
 	//object_id set
-	m_objectID = object_id::OBJECT_PLANE;
+//	m_objectID = object_id::OBJECT_PLANE;
 	CGameObject::Begin();
 	//새로운 객체가 생겨나면 Begin에서 Component들을 set해준다. 
 	//CComponent* pComponent = new CRotateComponent;

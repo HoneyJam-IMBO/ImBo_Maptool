@@ -4,7 +4,7 @@
 bool CTestCube::Begin() {
 	//object_id set
 	//m_objectID = object_id::OBJECT_FBX_ELF;
-	m_objectID = object_id::OBJECT_TEST;
+//	m_objectID = object_id::OBJECT_TEST;
 
 	//Rotate(-90.f, 0.f, 0.f);
 	//새로운 객체가 생겨나면 Begin에서 Component들을 set해준다. 
@@ -34,7 +34,7 @@ void CTestCube::SetPosition(XMVECTOR pos) {
 
 }
 
-CTestCube::CTestCube() : CGameObject("testcube", tag::TAG_DYNAMIC_OBJECT) {
+CTestCube::CTestCube() : CGameObject("test", tag::TAG_DYNAMIC_OBJECT) {
 
 }
 CTestCube::~CTestCube() {

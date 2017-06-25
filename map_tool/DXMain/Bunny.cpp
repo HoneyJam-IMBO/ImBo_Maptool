@@ -15,7 +15,7 @@
 //}
 bool CBunny::Begin() {
 	//object_id set
-	m_objectID = object_id::OBJECT_FBX_BUNNY;
+//	m_objectID = object_id::OBJECT_FBX_BUNNY;
 	//m_objectID = object_id::OBJECT_TEST;
 
 	CGameObject::Begin();
@@ -50,7 +50,7 @@ void CBunny::SetPosition(XMVECTOR pos) {
 	if (m_pTerrainContainer) m_xmf4x4World._42 = GetTerrainHeight();
 }
 
-CBunny::CBunny() : CGameObject("testobject", tag::TAG_DYNAMIC_OBJECT) {
+CBunny::CBunny() : CGameObject("fbx", tag::TAG_DYNAMIC_OBJECT) {
 
 }
 CBunny::~CBunny() {

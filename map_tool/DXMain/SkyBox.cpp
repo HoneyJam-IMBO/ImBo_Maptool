@@ -3,7 +3,7 @@
 
 bool CSkyBox::Begin() {
 	//object_id set 
-	m_objectID = object_id::OBJECT_SKYBOX;
+	//m_objectID = object_id::OBJECT_SKYBOX;
 	CGameObject::Begin();
 	return true;
 }
@@ -21,7 +21,7 @@ void CSkyBox::SetCamera(shared_ptr<CCamera> pCamera){
 	m_pCamera = pCamera;
 }
 
-CSkyBox::CSkyBox() : CGameObject("skybox", tag::TAG_STATIC_OBJECT) {
+CSkyBox::CSkyBox() : CGameObject("skybox", tag::TAG_SPACE) {
 
 }
 CSkyBox::~CSkyBox() {

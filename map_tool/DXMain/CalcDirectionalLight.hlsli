@@ -20,14 +20,14 @@ cbuffer Dir_AmbLightConstants : register(b2) {
 cbuffer gMaterialInfo : register(b3) {
 	float4 gMaterialColor : packoffset(c0);
 	float gSpecExp : packoffset(c1.x);
-	float gSpecIntensity : packoffset(c1.y);
+	float3 gSpecIntensity : packoffset(c1.y);
 }
 
 struct Material {
 	float3 normal;
 	float4 diffuseColor;
 	float specExp;
-	float specIntensity;
+	float3 specIntensity;
 };
 
 //directional

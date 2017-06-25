@@ -6,6 +6,11 @@
 
 #include "BoundingBox.h"
 
+enum mesh_tag {
+	MESH_TAG_DEFAULT,
+	MESH_TAG_MAKE,
+	MESH_TAG_END
+};
 // 꼭짓점별 데이터를 꼭짓점 셰이더로 보내는 데 사용됩니다.
 struct VertexPositionColor
 {
@@ -40,6 +45,7 @@ public:
 	BoundingOrientedBox& GetOBB(UINT index = 0) { return m_vOBB[index].GetOBB(); }
 	CBoundingBox& GetAABBObject(){ return m_AABB; }
 	CBoundingBox& GetOBBObject(UINT index = 0) { return m_vOBB[index]; }
+	vector<CBoundingBox>& GetvOBBObject() { return m_vOBB; }
 
 	void CMesh::CalculateVertexNormal(XMVECTOR *pxmvNormals);
 	void CMesh::SetTriAngleListVertexNormal(XMVECTOR *pxmvNormals);
@@ -77,13 +83,14 @@ public:
 	void SetnIndexOffset(UINT nIndexOffset) { m_nIndexOffset = nIndexOffset; }
 	//---------------------------------index buffer-------------------------
 
+	void ClearMeshResources();
 	void AddMeshTexture(shared_ptr<CTexture>);
 	void SetMeshTexture(UINT index, shared_ptr<CTexture>);
 	vector<shared_ptr<CTexture>>& GetvMeshTexture() { return m_vMeshTexture; }
 	//setter
 	//animater mesh 선택을 표시하기 위한 함수
 	void SetMeshMaterial(shared_ptr<CMaterial> pMaterial);
-
+	shared_ptr<CMaterial> GetMeshMaterial() { return m_pMeshMaterial; };
 	//mesh data 를 export하기위한 함수 
 	UINT GetVertexCnt() { return m_nVertices; }
 	UINT GetIndexCnt() { return m_nIndices; }

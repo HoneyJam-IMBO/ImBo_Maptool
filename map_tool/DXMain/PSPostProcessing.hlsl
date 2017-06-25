@@ -9,7 +9,10 @@ cbuffer FinalPassConstants : register(b0) {
 	float BloomScale : packoffset(c0.z);
 }
 
-SamplerState        gssSamplerState		: register(s0);
+SamplerState gssWRAP_LINEAR : register(s0);
+SamplerState gssWRAP_POINT : register(s1);
+SamplerState gssCLAMP_LINEAR : register(s2);
+SamplerState gssCLAMP_POINT : register(s3);
 
 Texture2D           gtxtLightedTexture	: register(t0);
 StructuredBuffer<float> AvgLum			: register(t1);
@@ -34,8 +37,8 @@ float4 main(VS_TEXTURED_OUTPUT input) : SV_Target{
 
 	//return float4(AvgLum[0],AvgLum[0],AvgLum[0],1.0);
 	
-	float3 cColor = gtxtLightedTexture.Sample(gssSamplerState, input.texCoord).xyz;
-	cColor += BloomScale * BloomTexture.Sample(gssSamplerState, input.texCoord).xyz;
+	float3 cColor = gtxtLightedTexture.Sample(gssWRAP_LINEAR, input.texCoord).xyz;
+	cColor += BloomScale * BloomTexture.Sample(gssWRAP_LINEAR, input.texCoord).xyz;
 	//bloom분포 추가
 
 	return(float4(ToneMapping(cColor), 1.0));

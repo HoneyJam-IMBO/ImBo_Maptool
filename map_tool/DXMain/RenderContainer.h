@@ -26,6 +26,7 @@ public:
 	//---------------------------dxobject---------------------------------
 
 	//--------------------------container---------------------------------
+	void ClearVolatileResources();
 private:
 	virtual void RenderExcute();
 	void RenderExcuteWithOutObject();
@@ -70,7 +71,6 @@ public:
 protected:
 	//--------------------------관리 대상------------------------------
 	//컨테이너의 객체들은 동적으로 변할 것이다. 그러므로 리스트로 관리하는 것이 맞다
-	int m_nInstance{ 0 };
 	list<CGameObject*> m_lpObjects;
 
 	vector<shared_ptr<CMesh>> m_vpMesh;
@@ -95,8 +95,10 @@ public:
 
 };
 
-typedef map<object_id, CRenderContainer*> mapRenderContainer;
-typedef pair<object_id, CRenderContainer*> pairRenderContainer;
+typedef map<string, CRenderContainer*> mapRenderContainer;
+typedef map<tag, mapRenderContainer> mapTagRenderContainer;
+typedef pair<string, CRenderContainer*> pairRenderContainer;
+typedef pair<tag, pairRenderContainer> pairTagRenderContainer;
 
 
 /*

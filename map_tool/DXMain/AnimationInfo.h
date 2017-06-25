@@ -23,6 +23,7 @@ public:
 	void SetAnimationIndex(UINT index) { m_AnimationIndex = index; }
 	void SetAnimater(shared_ptr<CAnimater> pAnimater) { m_pAnimater = pAnimater; }
 	void SetAnimationData(CAnimationData* pAnimationData) { m_pAnimationData = pAnimationData; }
+
 	//utill 
 	void Reset();
 
@@ -40,6 +41,7 @@ public:
 	void CreateActiveOBBUI();
 	void CreateAnimationInfoUI();
 
+	vector<BoundingOrientedBox> GetvActiveOBBs() { return m_vActiveBoundingBox; }
 	vector<CBoundingBox>& GetTempOBB() { return m_vTempBoundingBox; }
 	list<CBoundingBox*>& GetActiveOBB() { return m_lActiveBoundingBox; }
 
@@ -51,6 +53,7 @@ public:
 
 	void SetAnimationSpd(float spd) { m_fAnimationSpd = spd; }
 private:
+	vector<BoundingOrientedBox> m_vActiveBoundingBox;
 	vector<CBoundingBox> m_vTempBoundingBox;
 	list<CBoundingBox*> m_lActiveBoundingBox;
 	float m_fAnimationSpd{ 1.0f };

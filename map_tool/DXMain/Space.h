@@ -12,7 +12,8 @@ public:
 	virtual bool End();
 
 	virtual void Animate(float fTimeElapsed);
-	virtual void PrepareRender(shared_ptr<CCamera> pCamera);
+	virtual void PrepareRender(UINT renderFlag);
+	virtual void PrepareRender(shared_ptr<CCamera> pCamera, UINT renderFlag);
 	void SetObejcts(int n, CGameObject** ppObjects);
 	void AddObject(CGameObject* pObject);
 	void RemoveObject(CGameObject* pObject);
@@ -22,6 +23,7 @@ public:
 	bool GetbRender() { return m_bRender; }
 	//virtual void SetGlobalBufferInfo(void** ppMappedResources);
 
+	virtual void GetMainBoundingBox(BoundingBox& out);
 	//해당 space안의 lay 충돌 검사된 객체 중 가장 가장 가까운 객체
 	CGameObject* PickObject(XMVECTOR xmvWorldCameraStartPos, XMVECTOR xmvRayDir, float& distance);
 	map<tag, list<CGameObject*>>& GetmlpObject() { return m_mlpObject; }

@@ -10,9 +10,9 @@ public:
 	virtual bool End();
 	//----------------------------dxobject-----------------------------
 
-	static shared_ptr<CFileBasedMesh> CreateMesh(wstring path, UINT index, bool bHasAnimation = true);
-	static shared_ptr<CFileBasedMesh> CreateMeshFromFBXFile(UINT index, bool bHasAnimation = true);
-	static shared_ptr<CFileBasedMesh> CreateMeshFromGJMFile(UINT index, bool bHasAnimation = true);
+	static shared_ptr<CFileBasedMesh> CreateMesh(wstring path, string name, UINT index, bool bHasAnimation = true);
+	static shared_ptr<CFileBasedMesh> CreateMeshFromFBXFile(string name, UINT index, bool bHasAnimation = true);
+	static shared_ptr<CFileBasedMesh> CreateMeshFromGJMFile(string name, UINT index, bool bHasAnimation = true);
 	//---------------------------mesh----------------------------------
 	//begin func
 	virtual bool CreateVertexBuffer();

@@ -84,7 +84,7 @@ public:
 
 	void ChangeSpaceData();
 
-	void SetActive(bool b) { m_bActive = b; }
+	void SetActive(bool b);
 	bool GetActive() { return m_bActive; }
 private:
 	bool m_bIsTool{ false };

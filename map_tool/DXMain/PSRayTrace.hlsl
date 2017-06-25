@@ -8,7 +8,10 @@ cbuffer RayTraceConstants : register(b0)
 }
 
 Texture2D<float> OcclusionTex : register(t0);
-SamplerState LinearSampler : register(s0);
+SamplerState gssWRAP_LINEAR : register(s0);
+SamplerState gssWRAP_POINT : register(s1);
+SamplerState gssCLAMP_LINEAR : register(s2);
+SamplerState gssCLAMP_POINT : register(s3);
 
 struct VS_OUTPUT {
 	float4 position : SV_POSITION;
@@ -40,7 +43,7 @@ float4 main(VS_OUTPUT In) : SV_TARGET
 	for (int i = 0; i < NUM_STEPS; i++){
 		// Sample at the current location
 		float2 sampPos = In.UV + rayOffset;
-		float fCurIntensity = OcclusionTex.Sample(LinearSampler, sampPos);
+		float fCurIntensity = OcclusionTex.Sample(gssWRAP_LINEAR, sampPos);
 		//±¤¼± °­Á¶°ª
 		rayIntensity += fCurIntensity * decay;
 		rayOffset += rayDelta;
